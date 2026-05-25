@@ -1,7 +1,7 @@
 # World Cup Predictor V1 Design
 
 **Spec:** `.specs/features/world-cup-predictor/spec.md`
-**Status:** Draft for approval
+**Status:** Implemented; live integration verification pending
 **Approach:** One simple Next.js App Router application, one PostgreSQL database, and one existing Keycloak realm.
 
 ## Deliverable Map

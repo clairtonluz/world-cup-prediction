@@ -1,6 +1,6 @@
 # Roadmap
 
-**Current Milestone:** Specification and foundation planning
+**Current Milestone:** Environment integration verification
 **Status:** IN PROGRESS
 
 ## M0: Complete Specification
@@ -10,7 +10,7 @@
 
 ### Features
 
-**World Cup Predictor Specification** - IN PROGRESS
+**World Cup Predictor Specification** - COMPLETE
 
 - Define authentication, authorization, match, prediction, score, ranking, statistics, and administration behavior.
 - Define the Prisma model, application modules, UI pages, and implementation sequence.
@@ -22,13 +22,14 @@
 
 ### Features
 
-**Database and UI Tooling** - PLANNED
+**Database and UI Tooling** - COMPLETE
 
 - Prisma/PostgreSQL setup, migration, generated client, Zod, and shadcn/ui.
 
-**Keycloak Authentication and Roles** - PLANNED
+**Keycloak Authentication and Roles** - IN PROGRESS
 
-- Realm/client configuration, Auth.js sign-in, user synchronization, and server-side role guards.
+- Auth.js sign-in, user synchronization, and server-side role guards are implemented.
+- Realm/client configuration and live sign-in verification require environment credentials.
 
 ## M2: Prediction Loop
 
@@ -36,11 +37,11 @@
 
 ### Features
 
-**Matches and Predictions** - PLANNED
+**Matches and Predictions** - COMPLETE
 
 - Match pages, one-prediction constraint, cutoff enforcement, and visibility rule.
 
-**Scoring and Result Processing** - PLANNED
+**Scoring and Result Processing** - COMPLETE
 
 - Deterministic score function and automatic recalculation on finished/corrected results.
 
@@ -50,11 +51,11 @@
 
 ### Features
 
-**Ranking and Personal Statistics** - PLANNED
+**Ranking and Personal Statistics** - COMPLETE
 
 - Ranking table, tie-breakers, current-user highlighting, dashboard statistics, and favorite team preference.
 
-**Administration** - PLANNED
+**Administration** - COMPLETE
 
 - Admin match forms, status/result changes, and safe result correction workflow.
 

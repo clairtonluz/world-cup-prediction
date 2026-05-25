@@ -1,6 +1,6 @@
 # World Cup Predictor V1 Specification
 
-**Status:** Draft for approval
+**Status:** Implemented; live integration verification pending
 **Scope:** Large feature / complete v1 application
 **Project:** `.specs/project/PROJECT.md`
 

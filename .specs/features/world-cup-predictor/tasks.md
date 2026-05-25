@@ -1,7 +1,7 @@
 # World Cup Predictor V1 Tasks
 
 **Design:** `.specs/features/world-cup-predictor/design.md`
-**Status:** Planned; implementation has not started
+**Status:** Implemented; external integration and browser smoke verification pending
 **Execution note:** Before executing tasks, confirm the production URL, Keycloak host/admin access, local PostgreSQL availability, and whether commits should be made per task.
 
 ## Implementation Sequence

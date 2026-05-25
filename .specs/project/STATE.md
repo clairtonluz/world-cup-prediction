@@ -1,7 +1,7 @@
 # State
 
 **Last Updated:** 2026-05-25
-**Current Work:** World Cup Predictor - complete v1 specification
+**Current Work:** World Cup Predictor - implementation completed, integration verification pending
 
 ## Recent Decisions
 
@@ -28,7 +28,19 @@
 
 ## Active Blockers
 
-None. Keycloak deployment details and the production application URL must be supplied during environment setup.
+### B-001: Live authentication and database flows are not configured
+
+**Discovered:** 2026-05-25
+**Impact:** The implementation builds and pure rules are tested, but sign-in, database migration, protected routes, and end-to-end participant/admin workflows cannot be exercised without PostgreSQL and Keycloak environment values.
+**Workaround:** Use `.env.example` and the Keycloak instructions in `README.md` to configure a local environment.
+**Resolution:** Configure the realm/client/database, run the migration, then execute USER and ADMIN workflow verification.
+
+### B-002: In-app browser blocks local loopback smoke-test URLs
+
+**Discovered:** 2026-05-25
+**Impact:** Rendered UI smoke verification could not be captured through the required browser surface.
+**Workaround:** The Next.js production build verifies route compilation.
+**Resolution:** Retry visual smoke tests when local browser navigation is permitted.
 
 ## Deferred Ideas
 
@@ -38,7 +50,7 @@ None. Keycloak deployment details and the production application URL must be sup
 
 ## Todos
 
-- [ ] Review and approve the specification before starting M1 implementation.
+- [ ] Configure PostgreSQL and Keycloak locally and run the documented end-to-end verification.
 
 ## Preferences
 
