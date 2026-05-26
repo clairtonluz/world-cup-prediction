@@ -42,7 +42,7 @@ export default async function MatchDetailPage({
       <MessageAlert {...messages} />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader className="flex flex-row justify-between gap-4">
+          <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
               <CardTitle>
                 <MatchTeams

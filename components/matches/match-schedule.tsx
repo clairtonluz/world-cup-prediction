@@ -62,7 +62,7 @@ export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
                         />
                       </Link>
                       {!match.participantsConfirmed && (match.teamA || match.teamB) ? (
-                        <span className="ml-2 rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-800">
+                        <span className="ml-2 inline-flex items-center justify-center rounded-full bg-violet-100 px-2 py-0.5 text-xs text-violet-800">
                           Confronto projetado
                         </span>
                       ) : null}

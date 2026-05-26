@@ -82,7 +82,7 @@ export default function ScoringPage() {
                     <p className="font-medium text-slate-950">{rule.label}</p>
                     <p className="text-sm text-slate-600">{rule.description}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">
+                  <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">
                     {rule.percentage}
                   </span>
                 </div>

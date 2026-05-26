@@ -38,7 +38,7 @@ export default async function GroupsPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle>Grupo {groupCode}</CardTitle>
                   {provisional ? (
-                    <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
+                    <span className="inline-flex items-center justify-center rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
                       Classificação provisória
                     </span>
                   ) : null}
