@@ -45,6 +45,8 @@ Docker Compose builds the standalone production Next.js server and PostgreSQL. K
 
 ### Local Container Run
 
+For local runs, Docker Compose automatically merges `compose.override.yaml`, which publishes the application and PostgreSQL on loopback addresses and persists database data in a Docker volume.
+
 1. Create `.env` from `.env.example` and replace the database password, `AUTH_SECRET`, and Keycloak client values. Keep `POSTGRES_PASSWORD` URL-safe because it is used in the PostgreSQL connection URL.
 
 2. Configure Keycloak redirect and logout URLs for `http://localhost:3000`, as described below.
@@ -61,7 +63,7 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
 
 ### Production Deployment
 
-`compose.production.yaml` adds the production-only configuration used on a single server behind Traefik: TLS routing through the external `proxy` network, no published application or database ports, a persistent database directory, a container health check, and resource limits. This repository does not currently publish a runtime image, so production builds the checked-out application revision on the server. The override requires Docker Compose 2.24.4 or newer because it uses `!override`; it uses `!reset` to remove local port bindings.
+`compose.production.yaml` adds the production-only configuration used on a single server behind Traefik: TLS routing through the external `proxy` network, no published application or database ports, a persistent database directory, a container health check, and resource limits. This repository does not currently publish a runtime image, so production builds the checked-out application revision on the server. Use the explicit `-f` command below so the local-only `compose.override.yaml` is not loaded in production.
 
 1. Create an untracked `.env.prod` from `.env.example`. Replace every placeholder secret and set production values, including:
 

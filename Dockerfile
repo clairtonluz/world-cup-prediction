@@ -29,7 +29,7 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY package.json prisma.config.ts ./
 COPY prisma ./prisma
 
-CMD ["pnpm", "db:deploy"]
+CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
 
 FROM node:22-bookworm-slim AS runner
 

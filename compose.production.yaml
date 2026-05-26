@@ -1,9 +1,8 @@
 services:
   database:
-    ports: !reset []
     environment:
       TZ: ${TZ:-America/Fortaleza}
-    volumes: !override
+    volumes:
       - "${POSTGRES_DATA_PATH:-./data}:/var/lib/postgresql/data"
     networks:
       - internal
@@ -34,7 +33,6 @@ services:
     environment:
       AUTH_URL: ${AUTH_URL:?Set AUTH_URL in the production environment}
       TZ: ${TZ:-America/Fortaleza}
-    ports: !reset []
     healthcheck:
       test: ["CMD", "node", "-e", "const net=require('node:net');const socket=net.connect(3000,'127.0.0.1');socket.on('connect',()=>{socket.end();process.exit(0)});socket.on('error',()=>process.exit(1))"]
       interval: 30s
