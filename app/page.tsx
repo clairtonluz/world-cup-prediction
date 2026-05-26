@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const session = await auth();
 
-  if (session?.user && !session.error && isUser(session.user)) {
+  if (session?.user && isUser(session.user)) {
     redirect("/matches");
   }
 

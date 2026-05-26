@@ -9,7 +9,7 @@ import { getDb } from "@/lib/db";
 export const requireUser = cache(async () => {
   const session = await auth();
 
-  if (!session?.user || session.error) {
+  if (!session?.user) {
     redirect("/login?error=session");
   }
 

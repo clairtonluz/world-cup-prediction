@@ -6,7 +6,6 @@ import type { AppRole } from "@/lib/authorization";
 
 declare module "next-auth" {
   interface Session {
-    error?: "AccessTokenExpired";
     user: {
       id: string;
       roles: AppRole[];
@@ -18,9 +17,7 @@ declare module "next-auth" {
 type AppToken = {
   userId?: string;
   roles?: AppRole[];
-  accessTokenExpires?: number;
   keycloakIdToken?: string;
-  error?: "AccessTokenExpired";
 };
 
 export function requiredAuthSetting(name: string) {
@@ -93,15 +90,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const appToken = token as typeof token & AppToken;
 
       if (account) {
-        if (!account.access_token || !account.expires_at) {
-          throw new Error("Keycloak did not supply an expiring access token");
+        if (!account.access_token) {
+          throw new Error("Keycloak did not supply an access token");
         }
 
         const identity = await verifiedIdentity(account.access_token);
         appToken.roles = identity.roles;
-        appToken.accessTokenExpires = account.expires_at * 1000;
         appToken.keycloakIdToken = account.id_token;
-        appToken.error = undefined;
 
         const name =
           typeof profile?.name === "string"
@@ -127,13 +122,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         appToken.userId = user.id;
       }
 
-      if (
-        typeof appToken.accessTokenExpires === "number" &&
-        Date.now() >= appToken.accessTokenExpires
-      ) {
-        appToken.error = "AccessTokenExpired";
-      }
-
       return appToken;
     },
     async session({ session, token }) {
@@ -145,7 +133,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           roles: appToken.roles ?? [],
           name: session.user.name,
         } as typeof session.user;
-        session.error = appToken.error;
       }
       return session;
     },

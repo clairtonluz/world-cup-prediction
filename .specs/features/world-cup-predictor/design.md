@@ -372,7 +372,6 @@ export type AppRole = "USER" | "ADMIN";
 
 declare module "next-auth" {
   interface Session {
-    error?: "AccessTokenExpired";
     user: {
       keycloakId: string;
       roles: AppRole[];
@@ -384,8 +383,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     keycloakId?: string;
     roles?: AppRole[];
-    accessTokenExpires?: number;
-    error?: "AccessTokenExpired";
   }
 }
 
@@ -450,16 +447,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const identity = await verifyAccessToken(account.access_token);
         token.keycloakId = identity.keycloakId;
         token.roles = identity.roles;
-        token.accessTokenExpires = account.expires_at * 1000;
-        token.error = undefined;
-
-        const preferredName =
-          typeof profile?.name === "string"
-            ? profile.name
-            : typeof profile?.preferred_username === "string"
-              ? profile.preferred_username
-              : "Participant";
-
         await db.user.upsert({
           where: { keycloakId: identity.keycloakId },
           update: {
@@ -476,20 +463,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
       }
 
-      if (
-        typeof token.accessTokenExpires === "number" &&
-        Date.now() >= token.accessTokenExpires
-      ) {
-        token.error = "AccessTokenExpired";
-      }
-
       return token;
     },
     async session({ session, token }) {
       if (session.user && typeof token.keycloakId === "string") {
         session.user.keycloakId = token.keycloakId;
         session.user.roles = token.roles ?? [];
-        session.error = token.error;
       }
 
       return session;
@@ -498,7 +477,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 });
 ```
 
-The one-hour session is intentionally simple: once the Keycloak access token expires, protected server helpers deny use and the user signs in again. This bounds stale `ADMIN` access if roles change. Token refresh can be introduced later if reauthentication becomes annoying.
+The application uses its own session maxAge (set to 1 hour) as the authoritative duration. Once signed in, the session remains valid until it expires locally, regardless of the Keycloak access token expiration state. This keeps the authorization flow simple.
 
 File: `app/api/auth/[...nextauth]/route.ts`
 
@@ -560,7 +539,7 @@ export class AccessDeniedError extends Error {
 export async function requireUser() {
   const session = await auth();
 
-  if (!session?.user || session.error || !isUser(session.user)) {
+  if (!session?.user || !isUser(session.user)) {
     throw new AccessDeniedError();
   }
 

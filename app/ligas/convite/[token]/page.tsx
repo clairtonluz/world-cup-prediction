@@ -26,7 +26,7 @@ export default async function LeagueInvitePage({
     return <InvalidInvite />;
   }
 
-  if (!session?.user || session.error || !isUser(session.user)) {
+  if (!session?.user || !isUser(session.user)) {
     return (
       <TournamentPublicPage>
         <Card className="mx-auto w-full max-w-md">
