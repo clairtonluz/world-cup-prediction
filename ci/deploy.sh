@@ -12,9 +12,17 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
-docker compose \
-  -f compose.yaml \
-  -f compose.production.yaml \
-  --env-file .env \
-  up -d --build --remove-orphans
+compose() {
+  docker compose \
+    -f compose.yaml \
+    -f compose.production.yaml \
+    --env-file .env \
+    "$@"
+}
+
+if ! compose up -d --build --remove-orphans; then
+  printf '\nMigration service logs after failed deployment:\n' >&2
+  compose logs --no-color migrate >&2 || true
+  exit 1
+fi
 REMOTE_COMMANDS

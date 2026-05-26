@@ -1,12 +1,14 @@
 name: world-cup-predictor
 
+x-postgres-credentials: &postgres-credentials
+  POSTGRES_DB: ${POSTGRES_DB:-world_cup_predictor}
+  POSTGRES_USER: ${POSTGRES_USER:-world_cup}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+
 services:
   database:
     image: postgres:17-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-world_cup_predictor}
-      POSTGRES_USER: ${POSTGRES_USER:-world_cup}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    environment: *postgres-credentials
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -19,7 +21,9 @@ services:
       context: .
       target: migrate
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-world_cup}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@database:5432/${POSTGRES_DB:-world_cup_predictor}?schema=public
+      <<: *postgres-credentials
+      POSTGRES_HOST: database
+      POSTGRES_PORT: "5432"
     depends_on:
       database:
         condition: service_healthy
@@ -30,7 +34,9 @@ services:
       context: .
       target: runner
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-world_cup}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@database:5432/${POSTGRES_DB:-world_cup_predictor}?schema=public
+      <<: *postgres-credentials
+      POSTGRES_HOST: database
+      POSTGRES_PORT: "5432"
       AUTH_URL: ${AUTH_URL:-http://localhost:3000}
       AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env}
       AUTH_KEYCLOAK_ID: ${AUTH_KEYCLOAK_ID:?Set AUTH_KEYCLOAK_ID in .env}

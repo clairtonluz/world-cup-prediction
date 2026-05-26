@@ -2,21 +2,16 @@ import "server-only";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
+import { resolveDatabaseUrl } from "@/lib/database-url";
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;
 };
 
 export function getDb() {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is required");
-  }
-
   if (!globalForPrisma.prisma) {
     globalForPrisma.prisma = new PrismaClient({
-      adapter: new PrismaPg(connectionString),
+      adapter: new PrismaPg(resolveDatabaseUrl()),
     });
   }
 

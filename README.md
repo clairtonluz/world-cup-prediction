@@ -20,7 +20,7 @@ Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, co
    pnpm install
    ```
 
-2. Create `.env` from `.env.example` and set the PostgreSQL and Keycloak values.
+2. Create `.env` from `.env.example` and set the PostgreSQL and Keycloak values. The application and Prisma automatically derive their PostgreSQL connection URL from `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_PORT`; passwords may contain reserved URL characters. When running Next.js directly with `pnpm dev`, escape a literal `$` in `.env` as `\$`, following Next.js environment-variable expansion rules.
 
 3. Create the PostgreSQL database, then generate and migrate Prisma:
 
@@ -47,7 +47,7 @@ Docker Compose builds the standalone production Next.js server and PostgreSQL. K
 
 For local runs, Docker Compose automatically merges `compose.override.yaml`, which publishes the application and PostgreSQL on loopback addresses and persists database data in a Docker volume.
 
-1. Create `.env` from `.env.example` and replace the database password, `AUTH_SECRET`, and Keycloak client values. Keep `POSTGRES_PASSWORD` URL-safe because it is used in the PostgreSQL connection URL.
+1. Create `.env` from `.env.example` and replace the database password, `AUTH_SECRET`, and Keycloak client values. The containers derive their internal connection URL from the `POSTGRES_*` values and safely encode reserved characters in the password. Keep secrets single-quoted in `.env` so a `$` remains literal when Docker Compose reads it.
 
 2. Configure Keycloak redirect and logout URLs for `http://localhost:3000`, as described below.
 
@@ -73,6 +73,8 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
    POSTGRES_DATA_PATH="./data"
    TZ="America/Fortaleza"
    ```
+
+   No connection URL needs to be stored for the Docker deployment. The application and migration containers use the `database` service internally and build their URL from `POSTGRES_*`.
 
 2. On the production server, ensure Traefik is already running on the shared `proxy` network, and create the database data directory:
 
@@ -127,8 +129,10 @@ pnpm test
 pnpm lint
 pnpm build
 pnpm db:deploy
-DATABASE_URL="postgresql://..." pnpm exec prisma validate
+pnpm exec prisma validate
 ```
+
+`DATABASE_URL` remains supported as an optional override for an external or managed PostgreSQL endpoint.
 
 ## Important Rules
 

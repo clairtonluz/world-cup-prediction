@@ -27,6 +27,7 @@ FROM base AS migrate
 
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY package.json prisma.config.ts ./
+COPY lib/database-url.ts ./lib/database-url.ts
 COPY prisma ./prisma
 
 CMD ["./node_modules/.bin/prisma", "migrate", "deploy"]
