@@ -1,7 +1,7 @@
 # State
 
 **Last Updated:** 2026-05-25
-**Current Work:** World Cup Predictor - implementation completed, integration verification pending
+**Current Work:** World Cup Predictor - official 2026 schedule/bracket implemented, integration verification pending
 
 ## Recent Decisions
 
@@ -26,6 +26,20 @@
 **Trade-off:** Adds one small profile mutation not explicitly listed in the initial data fields.
 **Impact:** The statistics page can display a meaningful favorite team without a Team table.
 
+### AD-004: Persist the official FIFA 2026 schedule statically (2026-05-25)
+
+**Decision:** Seed the 104 official fixtures in an additive migration, including fixed kickoff/location and bracket-slot data.
+**Reason:** The app should display the complete official tournament without any runtime dependency on the FIFA website.
+**Trade-off:** The migration intentionally requires a new database with no existing match records.
+**Impact:** Administrators manage results only; fixed official fixture metadata is not editable in the UI.
+
+### AD-005: Propagate bracket participants inside result updates (2026-05-25)
+
+**Decision:** Live/final score updates recalculate points and update only future scheduled participant assignments in the same serializable transaction.
+**Reason:** The friend group needs immediate projected standings without queues, sockets, or synchronization services.
+**Trade-off:** A downstream match already started or past its kickoff is reported but never automatically overwritten.
+**Impact:** Changed future participant assignments delete obsolete predictions and surface a request to bet again.
+
 ## Active Blockers
 
 ### B-001: Live authentication and database flows are not configured
@@ -45,12 +59,11 @@
 ## Deferred Ideas
 
 - [ ] Token refresh and immediate role-change propagation if sessions need to last beyond a short access-token lifetime.
-- [ ] Import match fixtures from an external source if manual admin entry becomes inconvenient.
 - [ ] Support more than one tournament only after reuse is requested.
 
 ## Todos
 
-- [ ] Configure PostgreSQL and Keycloak locally and run the documented end-to-end verification.
+- [ ] Apply the official migration to clean PostgreSQL, configure Keycloak locally, and run the documented end-to-end verification.
 
 ## Preferences
 

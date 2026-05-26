@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MatchTeams } from "@/components/shared/match-teams";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { formatMatchDate, formatStage, formatStatus, scoreText } from "@/lib/display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,8 +8,10 @@ import { StatusBadge } from "@/components/ui/badge";
 type MatchCardProps = {
   match: {
     id: string;
-    teamA: string;
-    teamB: string;
+    teamA: string | null;
+    teamB: string | null;
+    teamASlot: string | null;
+    teamBSlot: string | null;
     stage: string;
     startsAt: Date;
     status: string;
@@ -25,7 +28,12 @@ export function MatchCard({ match }: MatchCardProps) {
       <CardHeader className="flex flex-row items-start justify-between gap-3">
         <div>
           <CardTitle>
-            {match.teamA} <span className="text-slate-400">x</span> {match.teamB}
+            <MatchTeams
+              teamA={match.teamA}
+              teamB={match.teamB}
+              teamASlot={match.teamASlot}
+              teamBSlot={match.teamBSlot}
+            />
           </CardTitle>
           <p className="mt-1 text-sm text-slate-600">
             {formatStage(match.stage as MatchStageValue)} - {formatMatchDate(match.startsAt)}
@@ -37,18 +45,18 @@ export function MatchCard({ match }: MatchCardProps) {
       </CardHeader>
       <CardContent className="flex flex-wrap items-center justify-between gap-4">
         <div className="text-sm text-slate-600">
-          <p>Final score: <strong className="text-slate-900">{scoreText(match.teamAScore, match.teamBScore)}</strong></p>
+          <p>Placar: <strong className="text-slate-900">{scoreText(match.teamAScore, match.teamBScore)}</strong></p>
           {prediction ? (
             <p>
-              Your prediction: <strong className="text-slate-900">{prediction.teamAScore} x {prediction.teamBScore}</strong>
-              {match.status === "FINISHED" ? ` (${prediction.points} pts)` : ""}
+              Sua aposta: <strong className="text-slate-900">{prediction.teamAScore} x {prediction.teamBScore}</strong>
+              {match.status !== "SCHEDULED" ? ` (${prediction.points} pts)` : ""}
             </p>
           ) : (
-            <p>No prediction submitted</p>
+            <p>Nenhuma aposta enviada</p>
           )}
         </div>
         <Link href={`/matches/${match.id}`} className="text-sm font-medium text-emerald-700 hover:underline">
-          View match
+          Ver jogo
         </Link>
       </CardContent>
     </Card>

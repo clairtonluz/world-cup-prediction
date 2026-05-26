@@ -7,13 +7,24 @@ import { hasEffectivelyStarted } from "@/lib/match-rules";
 
 const matchSelect = {
   id: true,
+  matchNumber: true,
+  fifaMatchId: true,
   teamA: true,
   teamB: true,
+  teamASlot: true,
+  teamBSlot: true,
+  participantsConfirmed: true,
   stage: true,
+  groupCode: true,
+  groupRound: true,
   startsAt: true,
+  venue: true,
+  hostCity: true,
   status: true,
   teamAScore: true,
   teamBScore: true,
+  advancingTeam: true,
+  predictionsResetAt: true,
 } as const;
 
 export async function listMatches() {
@@ -28,6 +39,15 @@ export async function listMatches() {
       },
     },
     orderBy: { startsAt: "asc" },
+  });
+}
+
+export async function listGroupMatches() {
+  await requireUser();
+  return getDb().match.findMany({
+    where: { stage: "GROUP_STAGE" },
+    select: matchSelect,
+    orderBy: [{ groupCode: "asc" }, { groupRound: "asc" }, { startsAt: "asc" }],
   });
 }
 

@@ -39,11 +39,11 @@
 
 **Matches and Predictions** - COMPLETE
 
-- Match pages, one-prediction constraint, cutoff enforcement, and visibility rule.
+- Static official 104-game schedule, match pages, one-prediction constraint, cutoff/confirmation enforcement, and visibility rule.
 
 **Scoring and Result Processing** - COMPLETE
 
-- Deterministic score function and automatic recalculation on finished/corrected results.
+- Deterministic score function with provisional live scoring and automatic recalculation on updated results.
 
 ## M3: Competition Experience
 
@@ -57,10 +57,13 @@
 
 **Administration** - COMPLETE
 
-- Admin match forms, status/result changes, and safe result correction workflow.
+- Result-only admin forms, future-only bracket propagation, and safe result correction workflow.
+
+**Groups And Official Bracket** - COMPLETE
+
+- Portuguese group tables, full agenda, official best-third allocation and automatic future participant assignment.
 
 ## Future Considerations
 
 - Tournament/season selection if the app is reused for later competitions.
-- Optional CSV import/export or a match-data provider after manual administration proves burdensome.
 - Optional token refresh or near-real-time result display only if the friend group needs it.

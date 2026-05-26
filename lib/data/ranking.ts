@@ -24,7 +24,18 @@ export async function getRanking() {
       name: true,
       image: true,
       predictions: {
-        where: { match: { status: "FINISHED" } },
+        where: {
+          match: {
+            OR: [
+              { status: "FINISHED" },
+              {
+                status: "STARTED",
+                teamAScore: { not: null },
+                teamBScore: { not: null },
+              },
+            ],
+          },
+        },
         select: {
           teamAScore: true,
           teamBScore: true,
@@ -32,6 +43,7 @@ export async function getRanking() {
           match: {
             select: {
               stage: true,
+              status: true,
               teamAScore: true,
               teamBScore: true,
             },
@@ -102,5 +114,8 @@ export async function getRanking() {
   return {
     rows,
     currentUser: rows.find((row) => row.isCurrentUser) ?? null,
+    provisional: users.some((user) =>
+      user.predictions.some((prediction) => prediction.match.status === "STARTED"),
+    ),
   };
 }

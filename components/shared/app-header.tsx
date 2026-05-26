@@ -17,21 +17,24 @@ export function AppHeader({
       <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Link href="/matches" className="flex items-center gap-2 font-semibold text-slate-950">
           <Trophy className="size-5 text-emerald-700" />
-          World Cup Predictor
+          Bolão da Copa
         </Link>
-        <nav className="flex items-center gap-1 text-sm" aria-label="Main navigation">
+        <nav className="flex items-center gap-1 text-sm" aria-label="Navegação principal">
           <Link className="rounded-md px-3 py-2 hover:bg-slate-100" href="/matches">
-            Matches
+            Jogos
+          </Link>
+          <Link className="rounded-md px-3 py-2 hover:bg-slate-100" href="/grupos">
+            Grupos
           </Link>
           <Link className="rounded-md px-3 py-2 hover:bg-slate-100" href="/ranking">
             Ranking
           </Link>
           <Link className="rounded-md px-3 py-2 hover:bg-slate-100" href="/me">
-            My stats
+            Minhas estatísticas
           </Link>
           {isAdmin({ roles }) ? (
             <Link className="rounded-md px-3 py-2 hover:bg-slate-100" href="/admin/matches">
-              Admin
+              Administração
             </Link>
           ) : null}
         </nav>
@@ -44,7 +47,7 @@ export function AppHeader({
             }}
           >
             <Button type="submit" variant="outline" size="sm">
-              Sign out
+              Sair
             </Button>
           </form>
         </div>

@@ -23,6 +23,21 @@ enum MatchStatus {
   FINISHED
 }
 
+enum GroupCode {
+  A
+  B
+  C
+  D
+  E
+  F
+  G
+  H
+  I
+  J
+  K
+  L
+}
+
 model User {
   id           String       @id @default(cuid())
   keycloakId   String       @unique
@@ -36,20 +51,32 @@ model User {
 }
 
 model Match {
-  id          String       @id @default(cuid())
-  teamA       String
-  teamB       String
-  stage       MatchStage
-  startsAt    DateTime     @db.Timestamptz(3)
-  status      MatchStatus  @default(SCHEDULED)
-  teamAScore  Int?
-  teamBScore  Int?
-  predictions Prediction[]
-  createdAt   DateTime     @default(now()) @db.Timestamptz(3)
-  updatedAt   DateTime     @updatedAt @db.Timestamptz(3)
+  id                    String       @id @default(cuid())
+  matchNumber           Int          @unique
+  fifaMatchId           String       @unique
+  teamA                 String?
+  teamB                 String?
+  teamASlot             String?
+  teamBSlot             String?
+  participantsConfirmed Boolean      @default(false)
+  stage                 MatchStage
+  groupCode             GroupCode?
+  groupRound            Int?
+  startsAt              DateTime     @db.Timestamptz(3)
+  venue                 String
+  hostCity              String
+  status                MatchStatus  @default(SCHEDULED)
+  teamAScore            Int?
+  teamBScore            Int?
+  advancingTeam         String?
+  predictionsResetAt    DateTime?    @db.Timestamptz(3)
+  predictions           Prediction[]
+  createdAt             DateTime     @default(now()) @db.Timestamptz(3)
+  updatedAt             DateTime     @updatedAt @db.Timestamptz(3)
 
   @@index([status, startsAt])
   @@index([stage])
+  @@index([groupCode, groupRound])
 }
 
 model Prediction {

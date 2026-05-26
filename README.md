@@ -1,6 +1,15 @@
-# World Cup Predictor
+# Bolão da Copa do Mundo 2026
 
-A simple private World Cup score prediction app built with Next.js App Router, PostgreSQL, Prisma, Keycloak, Tailwind CSS, and shadcn/ui-style components.
+Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, construída com Next.js App Router, PostgreSQL, Prisma, Keycloak, Tailwind CSS e componentes no estilo shadcn/ui.
+
+## Funcionalidades
+
+- Agenda oficial fixa com os 104 jogos publicados pela FIFA, horários de Brasília, estádios e cidades.
+- Página de grupos com classificação projetada durante jogos ao vivo.
+- Chaveamento automático: resultados atualizam somente participantes de jogos futuros ainda não iniciados.
+- Pontuação provisória durante jogos ao vivo e definitiva ao encerrar o jogo.
+- Ranking e estatísticas pessoais em português do Brasil.
+- Administração restrita a status, placares e classificado em empate eliminatório.
 
 ## Local Setup
 
@@ -18,6 +27,10 @@ A simple private World Cup score prediction app built with Next.js App Router, P
    pnpm db:generate
    pnpm db:migrate
    ```
+
+   A migração da agenda oficial exige a tabela `Match` vazia, conforme a premissa
+   de um banco novo para o torneio. Ela insere exatamente os 104 jogos oficiais;
+   não busca dados da FIFA em tempo de execução.
 
 4. Start the app:
 
@@ -85,6 +98,8 @@ DATABASE_URL="postgresql://..." pnpm exec prisma validate
 ## Important Rules
 
 - Users can submit one score prediction per match and revise it only before kickoff.
+- Knockout predictions open only after both teams are confirmed.
 - Other users' predictions remain hidden until kickoff.
-- An administrator sets results and any correction automatically recalculates points.
-- Final-score scoring rules and rounding are covered by unit tests in `tests/`.
+- An administrator updates live/final scores; any correction recalculates points and future bracket participants transactionally.
+- Automatic propagation never changes an already started/past match or the official schedule/location.
+- Scoring, group standings, official third-place allocation and bracket rules are covered by unit tests in `tests/`.

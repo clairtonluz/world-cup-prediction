@@ -5,7 +5,7 @@ describe("feedbackText", () => {
   it("renders known action results", () => {
     expect(feedbackText({ success: "prediction_saved" })).toEqual({
       kind: "success",
-      text: "Prediction saved.",
+      text: "Aposta salva.",
     });
   });
 

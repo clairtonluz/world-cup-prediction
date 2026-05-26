@@ -11,17 +11,20 @@ export default async function RankingPage() {
     <AppShell>
       <section>
         <h1 className="text-3xl font-semibold text-slate-950">Ranking</h1>
-        <p className="mt-1 text-slate-600">Standings use points, exact scores, correct winners, then name.</p>
+        <p className="mt-1 text-slate-600">
+          {ranking.provisional ? "Classificação provisória com jogos ao vivo. " : ""}
+          Desempates por pontos, placares exatos, vencedores corretos e nome.
+        </p>
       </section>
       {ranking.currentUser ? (
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">Current Position</p><p className="text-3xl font-semibold">#{ranking.currentUser.position}</p></CardContent></Card>
-          <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">Total Points</p><p className="text-3xl font-semibold">{ranking.currentUser.totalPoints}</p></CardContent></Card>
-          <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">Exact Predictions</p><p className="text-3xl font-semibold">{ranking.currentUser.exactPredictions}</p></CardContent></Card>
+          <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">Minha posição</p><p className="text-3xl font-semibold">#{ranking.currentUser.position}</p></CardContent></Card>
+          <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">{ranking.provisional ? "Pontos provisórios" : "Total de pontos"}</p><p className="text-3xl font-semibold">{ranking.currentUser.totalPoints}</p></CardContent></Card>
+          <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">Placares exatos</p><p className="text-3xl font-semibold">{ranking.currentUser.exactPredictions}</p></CardContent></Card>
         </div>
       ) : null}
       <Card>
-        <CardHeader><CardTitle>All participants</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Todos os participantes</CardTitle></CardHeader>
         <CardContent><RankingTable rows={ranking.rows} /></CardContent>
       </Card>
     </AppShell>

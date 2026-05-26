@@ -27,11 +27,20 @@ export async function savePredictionAction(formData: FormData) {
     error = await runSerializableTransaction(async (tx) => {
       const match = await tx.match.findUnique({
         where: { id: input.matchId },
-        select: { id: true, startsAt: true, status: true },
+        select: {
+          id: true,
+          startsAt: true,
+          status: true,
+          participantsConfirmed: true,
+        },
       });
 
       if (!match) {
         return "match_not_found";
+      }
+
+      if (!match.participantsConfirmed) {
+        return "participants_pending";
       }
 
       if (!mayEditPrediction(match)) {

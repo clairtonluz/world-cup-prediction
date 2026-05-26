@@ -1,12 +1,39 @@
 # World Cup Predictor V1 Specification
 
-**Status:** Implemented; live integration verification pending
+**Status:** Official 2026 schedule and bracket implementation completed; integration verification pending
 **Scope:** Large feature / complete v1 application
 **Project:** `.specs/project/PROJECT.md`
 
 ## Problem Statement
 
-A small group of friends needs one reliable place to submit World Cup score predictions and compare results. The application must prevent late changes, score every prediction consistently, and let a trusted administrator maintain the fixture/results list without building a complex competition platform.
+A small group of friends needs one reliable place to submit World Cup score predictions and compare results. The application must prevent late changes, score every prediction consistently, display the official 2026 tournament schedule, and let a trusted administrator update results without building a complex competition platform.
+
+## Official 2026 Tournament Amendment
+
+This section supersedes any earlier wording below that describes manually created
+fixtures or scoring only after `FINISHED`.
+
+- The committed migration imports the 104 official FIFA fixtures as a static,
+  fixed schedule: `72 / 16 / 8 / 4 / 2 / 1 / 1` by stage.
+- `Match` stores official match number/FIFA ID, venue/city, optional current
+  participants, fixed bracket slots, group/round metadata, confirmed-participant
+  state, classified knockout team, and an optional prediction-reset marker.
+- No FIFA retrieval occurs at runtime. Dates, kickoff times, stage, venue, city,
+  official number and slots are never changed automatically.
+- Admin mutations set only status, live/final score and, for a tied completed
+  knockout match, the classified team.
+- A scored `STARTED` match awards provisional points and influences provisional
+  group/ranking views. `FINISHED` makes those values definitive.
+- Pure rule modules calculate group tables, rank the eight best third-placed
+  teams, apply FIFA Regulations Annexe C allocation, and resolve winner/runner-up
+  bracket slots.
+- Result updates propagate participant changes only to future `SCHEDULED`
+  fixtures. Changed participants invalidate existing bets for that future
+  fixture and show that a new bet is required.
+- Betting is available only before kickoff and only when both fixture
+  participants are confirmed.
+- Visible application text and match dates operate in `pt-BR` and
+  `America/Sao_Paulo`; `/grupos` shows groups, standings and match rounds.
 
 ## Goals
 

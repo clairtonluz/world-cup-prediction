@@ -1,44 +1,55 @@
 import { z } from "zod";
-import { MATCH_STAGES, MATCH_STATUSES } from "@/lib/constants";
+import { MATCH_STATUSES } from "@/lib/constants";
 
 const score = z.preprocess(
   (value) => (value === "" || value === null ? undefined : value),
   z.coerce.number().int().min(0).max(99),
 );
 
+export const matchIdSchema = z.cuid();
+
 export const predictionSchema = z.object({
-  matchId: z.cuid(),
+  matchId: matchIdSchema,
   teamAScore: score,
   teamBScore: score,
 });
 
-export const matchCoreSchema = z
-  .object({
-    teamA: z.string().trim().min(1).max(80),
-    teamB: z.string().trim().min(1).max(80),
-    stage: z.enum(MATCH_STAGES),
-    startsAt: z.iso.datetime({ offset: true }).transform((value) => new Date(value)),
-  })
-  .refine(
-    ({ teamA, teamB }) =>
-      teamA.toLocaleLowerCase() !== teamB.toLocaleLowerCase(),
-    { message: "Teams must be different", path: ["teamB"] },
-  );
+const nullableScore = z.preprocess(
+  (value) => (value === "" || value === null ? null : value),
+  z.coerce.number().int().min(0).max(99).nullable(),
+);
 
-export const matchStatusSchema = z.discriminatedUnion("status", [
+const advancingTeam = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() !== "" ? value : null),
+  z.string().trim().min(1).max(80).nullable(),
+);
+
+export const matchResultSchema = z.discriminatedUnion("status", [
   z.object({
-    status: z.enum([MATCH_STATUSES[0], MATCH_STATUSES[1]]),
+    status: z.literal(MATCH_STATUSES[0]),
     teamAScore: z.null(),
     teamBScore: z.null(),
+    advancingTeam: z.null(),
   }),
+  z
+    .object({
+      status: z.literal(MATCH_STATUSES[1]),
+      teamAScore: nullableScore,
+      teamBScore: nullableScore,
+      advancingTeam: z.null(),
+    })
+    .refine(
+      ({ teamAScore, teamBScore }) =>
+        (teamAScore === null) === (teamBScore === null),
+      { message: "O placar parcial deve informar os dois lados." },
+    ),
   z.object({
     status: z.literal(MATCH_STATUSES[2]),
     teamAScore: score,
     teamBScore: score,
+    advancingTeam,
   }),
 ]);
-
-export const matchInputSchema = matchCoreSchema.and(matchStatusSchema);
 
 export const favoriteTeamSchema = z.object({
   favoriteTeam: z.preprocess(

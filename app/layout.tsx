@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "World Cup Predictor",
-  description: "Predict World Cup scores and compare results with friends.",
+  title: "Bolão da Copa do Mundo",
+  description: "Aposte nos placares da Copa e dispute o ranking com amigos.",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col">{children}</body>

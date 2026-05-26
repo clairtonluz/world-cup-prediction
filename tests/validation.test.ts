@@ -2,11 +2,19 @@ import { describe, expect, it } from "vitest";
 import { hasEffectivelyStarted, mayEditPrediction } from "@/lib/match-rules";
 import {
   favoriteTeamSchema,
-  matchInputSchema,
+  matchIdSchema,
+  matchResultSchema,
   predictionSchema,
 } from "@/lib/validation";
 
 const matchId = "cmatch000000000000000000001";
+
+describe("matchIdSchema", () => {
+  it("accepts fixture ids and rejects non-identifiers", () => {
+    expect(matchIdSchema.parse(matchId)).toBe(matchId);
+    expect(() => matchIdSchema.parse("../admin?success=match_updated")).toThrow();
+  });
+});
 
 describe("predictionSchema", () => {
   it("accepts valid score inputs from a form", () => {
@@ -33,46 +41,49 @@ describe("predictionSchema", () => {
   );
 });
 
-describe("matchInputSchema", () => {
-  const core = {
-    teamA: "Brazil",
-    teamB: "Belgium",
-    stage: "GROUP_STAGE",
-    startsAt: "2026-06-15T19:00:00Z",
-  };
-
-  it("accepts a scheduled fixture without result scores", () => {
+describe("matchResultSchema", () => {
+  it("accepts a scheduled fixture without scores", () => {
     expect(
-      matchInputSchema.parse({
-        ...core,
+      matchResultSchema.parse({
         status: "SCHEDULED",
         teamAScore: null,
         teamBScore: null,
+        advancingTeam: null,
       }).status,
     ).toBe("SCHEDULED");
   });
 
-  it("requires a result when a match is finished", () => {
+  it("accepts paired partial live scores", () => {
+    expect(
+      matchResultSchema.parse({
+        status: "STARTED",
+        teamAScore: "1",
+        teamBScore: "0",
+        advancingTeam: null,
+      }),
+    ).toMatchObject({ status: "STARTED", teamAScore: 1, teamBScore: 0 });
+  });
+
+  it("rejects an incomplete partial live score", () => {
     expect(() =>
-      matchInputSchema.parse({
-        ...core,
-        status: "FINISHED",
-        teamAScore: null,
+      matchResultSchema.parse({
+        status: "STARTED",
+        teamAScore: "1",
         teamBScore: null,
+        advancingTeam: null,
       }),
     ).toThrow();
   });
 
-  it("rejects a match between identical teams", () => {
+  it("requires a result when a match is finished", () => {
     expect(() =>
-      matchInputSchema.parse({
-        ...core,
-        teamB: " brazil ",
-        status: "SCHEDULED",
+      matchResultSchema.parse({
+        status: "FINISHED",
         teamAScore: null,
         teamBScore: null,
+        advancingTeam: null,
       }),
-    ).toThrow("Teams must be different");
+    ).toThrow();
   });
 });
 
@@ -105,5 +116,15 @@ describe("match timing", () => {
     expect(mayEditPrediction(match, new Date("2026-06-15T18:00:00Z"))).toBe(
       false,
     );
+  });
+
+  it("does not allow predictions while future participants are projected", () => {
+    expect(
+      mayEditPrediction({
+        startsAt: new Date("2026-06-15T19:00:00Z"),
+        status: "SCHEDULED",
+        participantsConfirmed: false,
+      }),
+    ).toBe(false);
   });
 });

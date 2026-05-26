@@ -1,7 +1,7 @@
 # World Cup Predictor V1 Tasks
 
 **Design:** `.specs/features/world-cup-predictor/design.md`
-**Status:** Implemented; external integration and browser smoke verification pending
+**Status:** Official schedule/bracket implementation complete; database and browser verification pending
 **Execution note:** Before executing tasks, confirm the production URL, Keycloak host/admin access, local PostgreSQL availability, and whether commits should be made per task.
 
 ## Implementation Sequence
@@ -422,3 +422,27 @@ git diff --check
 - Keep each commit focused on one task where practical. Tool-generated shadcn files and a migration belong with the task that creates them.
 - Do not add caching, job processing, match providers, or generalized abstraction while completing these tasks.
 - External Keycloak setup is required for integration tests but does not justify storing realm exports or secrets in the repository.
+
+## Phase 7: Official Copa 2026 Schedule And Automatic Bracket
+
+### T16: Import Official Static Schedule
+
+- [x] Add additive schema migration with official fixture metadata and database invariants.
+- [x] Seed exactly 104 FIFA fixtures with Brazilian displayed kickoffs and bracket slots.
+- [x] Keep runtime independent of the FIFA site.
+- [ ] Apply migration against a clean PostgreSQL database and verify fixture counts.
+
+### T17: Implement Live Classification And Propagation
+
+- [x] Add group standings with live projected results.
+- [x] Embed and apply the official Annexe C best-third allocation table.
+- [x] Propagate confirmed/projected participants only into future scheduled fixtures.
+- [x] Award provisional live points and invalidate bets when future teams change.
+- [x] Add focused unit tests for standings and bracket progression.
+
+### T18: Deliver Portuguese Tournament Experience
+
+- [x] Translate visible product surfaces to `pt-BR` and format Brasília dates/times.
+- [x] Add `/grupos` and replace long match cards with compact official schedule.
+- [x] Limit admin pages to fixed-schedule result administration.
+- [ ] Verify signed-in user/admin workflows in a configured browser environment.

@@ -3,89 +3,81 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth-guards";
-import { newMatchError, updatedMatchError } from "@/lib/admin-match-policy";
-import { getDb } from "@/lib/db";
+import { updatedMatchError } from "@/lib/admin-match-policy";
+import { propagateFutureParticipants } from "@/lib/bracket-propagation";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
-import { calculatePredictionPoints } from "@/lib/scoring";
+import { recalculateMatchPredictions } from "@/lib/match-results";
 import { isTransactionConflict, runSerializableTransaction } from "@/lib/transactions";
-import { matchInputSchema } from "@/lib/validation";
-import type { MatchStageValue } from "@/lib/constants";
+import { matchIdSchema, matchResultSchema } from "@/lib/validation";
 
-function parseMatchForm(formData: FormData) {
+function parseResultForm(formData: FormData) {
   const status = formData.get("status") ?? "SCHEDULED";
-  return matchInputSchema.safeParse({
-    teamA: formData.get("teamA"),
-    teamB: formData.get("teamB"),
-    stage: formData.get("stage"),
-    startsAt: formData.get("startsAt"),
+  return matchResultSchema.safeParse({
     status,
-    teamAScore: status === "FINISHED" ? formData.get("teamAScore") : null,
-    teamBScore: status === "FINISHED" ? formData.get("teamBScore") : null,
+    teamAScore: status === "SCHEDULED" ? null : formData.get("teamAScore"),
+    teamBScore: status === "SCHEDULED" ? null : formData.get("teamBScore"),
+    advancingTeam: status === "FINISHED" ? formData.get("advancingTeam") : null,
   });
-}
-
-export async function createMatchAction(formData: FormData) {
-  await requireAdmin();
-  const parsed = parseMatchForm(formData);
-  if (!parsed.success) {
-    redirect(feedbackUrl("/admin/matches/new", { error: "invalid_match" }));
-  }
-
-  const policyError = newMatchError(parsed.data);
-  if (policyError) {
-    redirect(feedbackUrl("/admin/matches/new", { error: policyError }));
-  }
-
-  const match = await getDb().match.create({ data: parsed.data });
-  revalidatePath("/admin/matches");
-  revalidatePath("/matches");
-  redirect(feedbackUrl(`/admin/matches/${match.id}/edit`, { success: "match_created" }));
 }
 
 export async function updateMatchAction(id: string, formData: FormData) {
   await requireAdmin();
-  const parsed = parseMatchForm(formData);
+  const parsedId = matchIdSchema.safeParse(id);
+  if (!parsedId.success) {
+    redirect(feedbackUrl("/admin/matches", { error: "match_not_found" }));
+  }
+  const matchId = parsedId.data;
+  const parsed = parseResultForm(formData);
   if (!parsed.success) {
-    redirect(feedbackUrl(`/admin/matches/${id}/edit`, { error: "invalid_match" }));
+    redirect(feedbackUrl(`/admin/matches/${matchId}/edit`, { error: "invalid_result" }));
   }
 
-  let error: ErrorFeedbackCode | null;
+  let error: ErrorFeedbackCode | null = null;
+  let feedback: "match_updated" | "match_updated_predictions_reset" | "match_updated_propagation_blocked" =
+    "match_updated";
 
   try {
-    error = await runSerializableTransaction(async (tx) => {
-      const existing = await tx.match.findUnique({ where: { id } });
+    const result = await runSerializableTransaction(async (tx) => {
+      const existing = await tx.match.findUnique({ where: { id: matchId } });
       if (!existing) {
-        return "match_not_found";
+        return { error: "match_not_found" as const, propagation: null };
       }
 
       const policyError = updatedMatchError(existing, parsed.data);
       if (policyError) {
-        return policyError;
+        return { error: policyError, propagation: null };
       }
 
-      const match = await tx.match.update({ where: { id }, data: parsed.data });
-
-      if (
-        match.status === "FINISHED" &&
-        match.teamAScore !== null &&
-        match.teamBScore !== null
-      ) {
-        const predictions = await tx.prediction.findMany({ where: { matchId: id } });
-        for (const prediction of predictions) {
-          const result = calculatePredictionPoints(prediction, {
-            stage: match.stage as MatchStageValue,
-            teamAScore: match.teamAScore,
-            teamBScore: match.teamBScore,
-          });
-          await tx.prediction.update({
-            where: { id: prediction.id },
-            data: { points: result.points },
-          });
-        }
+      if (parsed.data.status !== "SCHEDULED" && !existing.participantsConfirmed) {
+        return { error: "participants_pending" as const, propagation: null };
       }
 
-      return null;
+      const advancingTeam = advancingTeamForResult(existing, parsed.data);
+      if (advancingTeam.error) {
+        return { error: advancingTeam.error, propagation: null };
+      }
+
+      const match = await tx.match.update({
+        where: { id: matchId },
+        data: {
+          status: parsed.data.status,
+          teamAScore: parsed.data.teamAScore,
+          teamBScore: parsed.data.teamBScore,
+          advancingTeam: advancingTeam.value,
+        },
+      });
+
+      await recalculateMatchPredictions(tx, match);
+      const propagation = await propagateFutureParticipants(tx);
+      return { error: null, propagation };
     });
+
+    error = result.error;
+    if (!error && result.propagation?.blockedMatches) {
+      feedback = "match_updated_propagation_blocked";
+    } else if (!error && result.propagation?.invalidatedPredictions) {
+      feedback = "match_updated_predictions_reset";
+    }
   } catch (transactionError) {
     if (!isTransactionConflict(transactionError)) {
       throw transactionError;
@@ -94,14 +86,53 @@ export async function updateMatchAction(id: string, formData: FormData) {
   }
 
   if (error) {
-    const pathname = error === "match_not_found" ? "/admin/matches" : `/admin/matches/${id}/edit`;
+    const pathname =
+      error === "match_not_found" ? "/admin/matches" : `/admin/matches/${matchId}/edit`;
     redirect(feedbackUrl(pathname, { error }));
   }
 
   revalidatePath("/admin/matches");
   revalidatePath("/matches");
-  revalidatePath(`/matches/${id}`);
+  revalidatePath(`/matches/${matchId}`);
+  revalidatePath("/grupos");
   revalidatePath("/ranking");
   revalidatePath("/me");
-  redirect(feedbackUrl(`/admin/matches/${id}/edit`, { success: "match_updated" }));
+  redirect(feedbackUrl(`/admin/matches/${matchId}/edit`, { success: feedback }));
+}
+
+function advancingTeamForResult(
+  match: {
+    stage: string;
+    teamA: string | null;
+    teamB: string | null;
+  },
+  result: {
+    status: string;
+    teamAScore: number | null;
+    teamBScore: number | null;
+    advancingTeam: string | null;
+  },
+): { value: string | null; error: ErrorFeedbackCode | null } {
+  if (result.status !== "FINISHED" || match.stage === "GROUP_STAGE") {
+    return { value: null, error: null };
+  }
+
+  if (!match.teamA || !match.teamB) {
+    return { value: null, error: "unresolved_match" };
+  }
+
+  if (result.teamAScore === result.teamBScore) {
+    if (
+      result.advancingTeam !== match.teamA &&
+      result.advancingTeam !== match.teamB
+    ) {
+      return { value: null, error: "knockout_qualifier_required" };
+    }
+    return { value: result.advancingTeam, error: null };
+  }
+
+  return {
+    value: result.teamAScore! > result.teamBScore! ? match.teamA : match.teamB,
+    error: null,
+  };
 }

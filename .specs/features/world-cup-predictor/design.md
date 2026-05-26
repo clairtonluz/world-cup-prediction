@@ -1,8 +1,22 @@
 # World Cup Predictor V1 Design
 
 **Spec:** `.specs/features/world-cup-predictor/spec.md`
-**Status:** Implemented; live integration verification pending
+**Status:** Official 2026 schedule and bracket implementation completed; live integration verification pending
 **Approach:** One simple Next.js App Router application, one PostgreSQL database, and one existing Keycloak realm.
+
+## Official Tournament Implementation Amendment
+
+This amendment replaces the former manually entered fixture and final-only
+scoring assumptions in illustrative sections below.
+
+| Area | Implemented decision |
+| --- | --- |
+| Official data | Additive migration `20260526000000_official_2026_schedule` statically inserts the 104 FIFA fixtures; migration requires a new/empty `Match` table. |
+| Match model | Official match number/FIFA ID, nullable participants, fixed slots, confirmation flag, group/round, venue/city, classified team and prediction reset timestamp are stored on `Match`. |
+| Rules | `lib/group-standings.ts` and `lib/bracket.ts` are pure functions; the bracket module embeds FIFA Annexe C's official 495 allocation combinations. |
+| Mutations | `updateMatchAction` accepts only result state, validates `ADMIN`, scores live/final predictions and calls future-only propagation inside one serializable transaction. |
+| Safety | `lib/bracket-propagation.ts` never updates started/past fixtures or official metadata, and deletes bets only if participants in a future fixture change. |
+| Pages | The interface is `pt-BR`; `/grupos` presents group standings/rounds and `/matches` presents a compact full schedule with projected/live indications. |
 
 ## Deliverable Map
 

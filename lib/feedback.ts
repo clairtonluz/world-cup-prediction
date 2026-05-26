@@ -1,27 +1,31 @@
 export const ERROR_MESSAGES = {
-  session: "Your session expired. Sign in again to continue.",
-  forbidden: "Your Keycloak account does not have access to this pool.",
-  account: "Your participant profile could not be found. Sign in again.",
-  admin: "Administrator access is required.",
-  invalid_prediction: "Enter valid scores between 0 and 99.",
-  match_not_found: "Match not found.",
-  predictions_closed: "Predictions are closed for this match.",
-  invalid_favorite_team: "Favorite team must be 80 characters or fewer.",
-  invalid_match: "Check teams, kickoff, status, and final scores.",
-  new_match_must_be_scheduled: "A new match must begin as scheduled.",
-  fixture_locked: "Teams, stage, and kickoff cannot change after predictions close.",
-  finished_match_locked: "Finished matches cannot be reopened.",
-  started_match_locked: "Started matches cannot return to scheduled.",
-  update_conflict: "Another update happened at the same time. Try again.",
-  Configuration: "Authentication is not configured on this environment.",
-  AccessDenied: "Your Keycloak role does not allow access to this application.",
+  session: "Sua sessão expirou. Entre novamente para continuar.",
+  forbidden: "Sua conta do Keycloak não tem acesso a este bolão.",
+  account: "Seu perfil não foi encontrado. Entre novamente.",
+  admin: "É necessário acesso de administrador.",
+  invalid_prediction: "Informe placares válidos entre 0 e 99.",
+  match_not_found: "Jogo não encontrado.",
+  predictions_closed: "As apostas deste jogo já estão encerradas.",
+  participants_pending: "A aposta será liberada quando as duas equipes estiverem confirmadas.",
+  invalid_favorite_team: "O time favorito deve ter até 80 caracteres.",
+  invalid_result: "Confira o status, o placar e a equipe classificada.",
+  unresolved_match: "Este confronto ainda não tem duas equipes definidas.",
+  knockout_qualifier_required: "Selecione a equipe classificada após um empate eliminatório.",
+  finished_match_locked: "Um jogo encerrado não pode voltar a um status anterior.",
+  started_match_locked: "Um jogo ao vivo não pode voltar para agendado.",
+  update_conflict: "Outra atualização ocorreu ao mesmo tempo. Tente novamente.",
+  Configuration: "A autenticação não está configurada neste ambiente.",
+  AccessDenied: "Seu papel no Keycloak não permite acesso a esta aplicação.",
 } as const;
 
 export const SUCCESS_MESSAGES = {
-  prediction_saved: "Prediction saved.",
-  favorite_team_updated: "Favorite team updated.",
-  match_created: "Match created.",
-  match_updated: "Match updated.",
+  prediction_saved: "Aposta salva.",
+  favorite_team_updated: "Time favorito atualizado.",
+  match_updated: "Resultado atualizado.",
+  match_updated_predictions_reset:
+    "Resultado atualizado. Apostas de confrontos futuros alterados foram removidas e devem ser refeitas.",
+  match_updated_propagation_blocked:
+    "Resultado atualizado. Um confronto dependente já começou ou passou do horário e não foi alterado automaticamente.",
 } as const;
 
 export type ErrorFeedbackCode = keyof typeof ERROR_MESSAGES;

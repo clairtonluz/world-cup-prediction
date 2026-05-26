@@ -15,9 +15,9 @@ export default async function LoginPage({
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
           <Trophy className="mb-2 size-11 text-emerald-700" />
-          <CardTitle className="text-2xl">World Cup Predictor</CardTitle>
+          <CardTitle className="text-2xl">Bolão da Copa do Mundo</CardTitle>
           <p className="text-sm text-slate-600">
-            Predict matches, earn points, and compete with friends.
+            Aposte nos placares, faça pontos e dispute com seus amigos.
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -29,11 +29,11 @@ export default async function LoginPage({
             }}
           >
             <Button className="w-full" type="submit">
-              Sign in with Keycloak
+              Entrar com Keycloak
             </Button>
           </form>
           <p className="text-center text-xs text-slate-500">
-            Participants must have a USER or ADMIN realm role.
+            Participantes precisam ter o papel USER ou ADMIN no Keycloak.
           </p>
         </CardContent>
       </Card>

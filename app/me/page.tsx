@@ -19,40 +19,43 @@ export default async function MePage({
   const [messages, stats] = await Promise.all([searchParams, getPersonalStatistics()]);
   return (
     <AppShell>
-      <h1 className="text-3xl font-semibold text-slate-950">My statistics</h1>
+      <h1 className="text-3xl font-semibold text-slate-950">Minhas estatísticas</h1>
       <MessageAlert {...messages} />
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total Points" value={stats.totalPoints} />
-        <StatCard label="Exact Predictions" value={stats.exactPredictions} />
-        <StatCard label="Correct Winners" value={stats.correctWinners} />
-        <StatCard label="Matches Predicted" value={stats.totalPredictions} />
+        <StatCard label={stats.provisional ? "Pontos provisórios" : "Total de pontos"} value={stats.totalPoints} />
+        <StatCard label="Placares exatos" value={stats.exactPredictions} />
+        <StatCard label="Vencedores corretos" value={stats.correctWinners} />
+        <StatCard label="Jogos apostados" value={stats.totalPredictions} />
       </section>
       <section className="grid gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>Accuracy</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Precisão</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             <p className="text-3xl font-semibold">{stats.accuracy}%</p>
             <Progress value={stats.accuracy} />
-            <p className="text-sm text-slate-600">Based on {stats.scoredPredictions} scored predictions.</p>
+            <p className="text-sm text-slate-600">
+              Baseada em {stats.scoredPredictions} apostas pontuadas
+              {stats.provisional ? ", incluindo placares ao vivo." : "."}
+            </p>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Highlights</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Destaques</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <p>Favorite team: <strong>{stats.favoriteTeam ?? "Not selected"}</strong></p>
-            <p>Best stage: <strong>{stats.bestStage ? `${stats.bestStage.label} (${stats.bestStage.points} pts)` : "No scored predictions yet"}</strong></p>
+            <p>Time favorito: <strong>{stats.favoriteTeam ?? "Não selecionado"}</strong></p>
+            <p>Melhor fase: <strong>{stats.bestStage ? `${stats.bestStage.label} (${stats.bestStage.points} pts)` : "Nenhuma aposta pontuada"}</strong></p>
           </CardContent>
         </Card>
       </section>
       <Card className="max-w-lg">
-        <CardHeader><CardTitle>Favorite team</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Time favorito</CardTitle></CardHeader>
         <CardContent>
           <form action={updateFavoriteTeamAction} className="space-y-4">
             <div>
-              <Label htmlFor="favoriteTeam">Team name</Label>
-              <Input id="favoriteTeam" name="favoriteTeam" defaultValue={stats.favoriteTeam ?? ""} placeholder="Brazil" maxLength={80} />
+              <Label htmlFor="favoriteTeam">Nome da equipe</Label>
+              <Input id="favoriteTeam" name="favoriteTeam" defaultValue={stats.favoriteTeam ?? ""} placeholder="Brasil" maxLength={80} />
             </div>
-            <Button type="submit">Save preference</Button>
+            <Button type="submit">Salvar preferência</Button>
           </form>
         </CardContent>
       </Card>

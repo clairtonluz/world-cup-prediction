@@ -41,7 +41,7 @@ export async function getPersonalStatistics() {
 
   const scored = participant.predictions.filter(
     (prediction) =>
-      prediction.match.status === "FINISHED" &&
+      prediction.match.status !== "SCHEDULED" &&
       prediction.match.teamAScore !== null &&
       prediction.match.teamBScore !== null,
   );
@@ -105,5 +105,6 @@ export async function getPersonalStatistics() {
           points: bestStage[1].points,
         }
       : null,
+    provisional: scored.some((prediction) => prediction.match.status === "STARTED"),
   };
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/shared/app-shell";
-import { MatchCard } from "@/components/matches/match-card";
+import { MatchSchedule } from "@/components/matches/match-schedule";
+import { MatchTeams } from "@/components/shared/match-teams";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { StatCard } from "@/components/stats/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,7 +22,6 @@ export default async function MatchesPage({
     getRanking(),
     getPersonalStatistics(),
   ]);
-  const upcoming = matches.filter((match) => match.status !== "FINISHED");
   const recent = matches
     .filter((match) => match.predictions.length > 0)
     .slice(-3)
@@ -31,29 +31,33 @@ export default async function MatchesPage({
     <AppShell>
       <MessageAlert {...messages} />
       <section>
-        <h1 className="text-3xl font-semibold text-slate-950">Matches</h1>
-        <p className="mt-1 text-slate-600">Submit predictions before kickoff and track the pool.</p>
+        <h1 className="text-3xl font-semibold text-slate-950">Jogos da Copa do Mundo 2026</h1>
+        <p className="mt-1 text-slate-600">
+          Agenda oficial completa em horário de Brasília. Aposte antes do início dos jogos.
+        </p>
       </section>
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="My Position" value={ranking.currentUser ? `#${ranking.currentUser.position}` : "-"} />
-        <StatCard label="Total Points" value={statistics.totalPoints} />
-        <StatCard label="Prediction Accuracy" value={`${statistics.accuracy}%`} />
+        <StatCard label="Minha posição" value={ranking.currentUser ? `#${ranking.currentUser.position}` : "-"} />
+        <StatCard label={statistics.provisional ? "Pontos provisórios" : "Total de pontos"} value={statistics.totalPoints} />
+        <StatCard label="Precisão das apostas" value={`${statistics.accuracy}%`} />
       </section>
       <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Upcoming matches</h2>
-            <Link href="/ranking" className="text-sm font-medium text-emerald-700 hover:underline">Full ranking</Link>
+            <h2 className="text-xl font-semibold">Agenda oficial - 104 jogos</h2>
+            <Link href="/grupos" className="text-sm font-medium text-emerald-700 hover:underline">Ver grupos</Link>
           </div>
-          {upcoming.length ? (
-            upcoming.map((match) => <MatchCard key={match.id} match={match} />)
+          {matches.length ? (
+            <MatchSchedule matches={matches} />
           ) : (
-            <Card><CardContent className="pt-5 text-sm text-slate-600">No upcoming matches.</CardContent></Card>
+            <Card><CardContent className="pt-5 text-sm text-slate-600">Nenhum jogo disponível.</CardContent></Card>
           )}
         </div>
         <div className="space-y-5">
           <Card>
-            <CardHeader><CardTitle>Ranking preview</CardTitle></CardHeader>
+            <CardHeader>
+              <CardTitle>{ranking.provisional ? "Classificação provisória" : "Prévia do ranking"}</CardTitle>
+            </CardHeader>
             <CardContent className="space-y-3">
               {ranking.rows.slice(0, 5).map((row) => (
                 <div key={row.id} className="flex justify-between text-sm">
@@ -61,18 +65,29 @@ export default async function MatchesPage({
                   <strong>{row.totalPoints} pts</strong>
                 </div>
               ))}
-              {ranking.rows.length === 0 ? <p className="text-sm text-slate-600">No ranked players yet.</p> : null}
+              {ranking.rows.length === 0 ? <p className="text-sm text-slate-600">Nenhum participante no ranking.</p> : null}
+              <Link href="/ranking" className="block text-sm font-medium text-emerald-700 hover:underline">
+                Ver ranking completo
+              </Link>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader><CardTitle>Recent predictions</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Apostas recentes</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {recent.map((match) => (
                 <Link key={match.id} href={`/matches/${match.id}`} className="block text-sm hover:text-emerald-700">
-                  {match.teamA} x {match.teamB}: {match.predictions[0].teamAScore} x {match.predictions[0].teamBScore}
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    <MatchTeams
+                      teamA={match.teamA}
+                      teamB={match.teamB}
+                      teamASlot={match.teamASlot}
+                      teamBSlot={match.teamBSlot}
+                    />
+                    <span>: {match.predictions[0].teamAScore} x {match.predictions[0].teamBScore}</span>
+                  </span>
                 </Link>
               ))}
-              {recent.length === 0 ? <p className="text-sm text-slate-600">No predictions yet.</p> : null}
+              {recent.length === 0 ? <p className="text-sm text-slate-600">Nenhuma aposta enviada.</p> : null}
             </CardContent>
           </Card>
         </div>
