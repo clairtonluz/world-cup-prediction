@@ -3,8 +3,8 @@ import { cn } from "@/lib/utils";
 
 const statusColors: Record<MatchStatusValue, string> = {
   SCHEDULED: "bg-slate-100 text-slate-700",
-  STARTED: "bg-amber-100 text-amber-900",
-  FINISHED: "bg-emerald-100 text-emerald-900",
+  STARTED: "bg-blue-100 text-[#0756ac]",
+  FINISHED: "bg-emerald-100 text-[#087543]",
 };
 
 export function StatusBadge({
@@ -17,7 +17,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+        "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold tracking-wide",
         statusColors[status],
       )}
     >

@@ -3,8 +3,9 @@ import { signIn, auth } from "@/auth";
 import { joinLeagueAction } from "@/actions/league-actions";
 import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { TournamentAccentBars, TournamentPublicPage } from "@/components/shared/tournament-theme";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { isUser } from "@/lib/authorization";
 import { getInvitePreview } from "@/lib/data/leagues";
 import { inviteTokenSchema } from "@/lib/validation";
@@ -27,10 +28,13 @@ export default async function LeagueInvitePage({
 
   if (!session?.user || session.error || !isUser(session.user)) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-        <Card className="w-full max-w-md">
+      <TournamentPublicPage>
+        <Card className="mx-auto w-full max-w-md">
           <CardHeader>
-            <CardTitle>Convite para liga</CardTitle>
+            <TournamentAccentBars className="mb-5" />
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+              Convite para liga
+            </h1>
             <p className="text-sm text-slate-600">
               Entre para visualizar e aceitar este convite privado.
             </p>
@@ -48,7 +52,7 @@ export default async function LeagueInvitePage({
             </form>
           </CardContent>
         </Card>
-      </main>
+      </TournamentPublicPage>
     );
   }
 
@@ -67,7 +71,9 @@ export default async function LeagueInvitePage({
       <MessageAlert {...messages} />
       <Card className="mx-auto max-w-lg">
         <CardHeader>
-          <CardTitle>Convite para {league.name}</CardTitle>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Convite para {league.name}
+          </h1>
           <p className="text-sm text-slate-600">
             Liga privada criada por {league.ownerName}.
           </p>
@@ -98,16 +104,21 @@ export default async function LeagueInvitePage({
 
 function InvalidInvite() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
+    <TournamentPublicPage>
       <InvalidInviteCard />
-    </main>
+    </TournamentPublicPage>
   );
 }
 
 function InvalidInviteCard() {
   return (
     <Card className="mx-auto w-full max-w-md">
-      <CardHeader><CardTitle>Convite indisponível</CardTitle></CardHeader>
+      <CardHeader>
+        <TournamentAccentBars className="mb-5" />
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+          Convite indisponível
+        </h1>
+      </CardHeader>
       <CardContent className="space-y-3 text-sm text-slate-600">
         <p>Este convite não existe mais ou foi desativado.</p>
         <Link href="/ligas" className="font-medium text-emerald-700 hover:underline">

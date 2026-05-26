@@ -1,13 +1,24 @@
 import Link from "next/link";
+import { TournamentAccentBars, TournamentPublicPage } from "@/components/shared/tournament-theme";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 p-4">
-      <h1 className="text-3xl font-semibold text-slate-950">Jogo não encontrado</h1>
-      <p className="text-slate-600">O jogo solicitado não existe.</p>
-      <Link href="/matches" className="font-medium text-emerald-700 hover:underline">
-        Voltar para jogos
-      </Link>
-    </main>
+    <TournamentPublicPage>
+      <Card className="mx-auto w-full max-w-md">
+        <CardHeader>
+          <TournamentAccentBars className="mb-5" />
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Jogo não encontrado
+          </h1>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-slate-600">O jogo solicitado não existe.</p>
+          <Link href="/matches" className="font-medium text-[#0756ac] hover:underline">
+            Voltar para jogos
+          </Link>
+        </CardContent>
+      </Card>
+    </TournamentPublicPage>
   );
 }

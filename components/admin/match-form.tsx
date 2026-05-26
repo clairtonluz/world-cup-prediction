@@ -69,7 +69,7 @@ export function MatchForm({
           id="status"
           name="status"
           defaultValue={match.status}
-          className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+          className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-[#0e74e1] focus:ring-2 focus:ring-blue-100"
         >
           {MATCH_STATUSES.map((status) => (
             <option key={status} value={status}>
@@ -120,7 +120,7 @@ export function MatchForm({
             id="advancingTeam"
             name="advancingTeam"
             defaultValue={match.advancingTeam ?? ""}
-            className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-[#0e74e1] focus:ring-2 focus:ring-blue-100"
           >
             <option value="">Selecione somente se houver empate</option>
             <option value={match.teamA}>{match.teamA}</option>

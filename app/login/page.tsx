@@ -7,6 +7,7 @@ import {
   UsersRound,
 } from "lucide-react";
 import { signIn } from "@/auth";
+import { TournamentAccentBars, TournamentBackdrop } from "@/components/shared/tournament-theme";
 import { Button } from "@/components/ui/button";
 import { MessageAlert } from "@/components/shared/message-alert";
 
@@ -36,14 +37,7 @@ export default async function LoginPage({
 
   return (
     <main className="relative flex min-h-screen items-center overflow-hidden bg-[#080b12] px-4 py-6 sm:px-6 lg:px-8">
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(14,116,225,0.28),transparent_34%),radial-gradient(circle_at_20%_82%,rgba(9,157,87,0.26),transparent_31%),radial-gradient(circle_at_87%_12%,rgba(229,44,63,0.18),transparent_28%)]"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(rgba(255,255,255,0.35)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.35)_1px,transparent_1px)] [background-size:44px_44px]"
-      />
+      <TournamentBackdrop />
       <div className="relative mx-auto grid w-full max-w-6xl overflow-hidden rounded-3xl border border-white/10 bg-white shadow-2xl shadow-black/50 lg:grid-cols-[1.05fr_0.95fr]">
         <section className="relative hidden flex-col justify-between overflow-hidden bg-[#0b1018] p-12 text-white lg:flex">
           <div
@@ -113,11 +107,7 @@ export default async function LoginPage({
             </span>
             <span className="uppercase tracking-wide">Bolão da Copa 2026</span>
           </div>
-          <div aria-hidden="true" className="mb-7 flex gap-1.5">
-            <span className="h-1 w-12 rounded-full bg-[#e52c3f]" />
-            <span className="h-1 w-12 rounded-full bg-[#0e74e1]" />
-            <span className="h-1 w-12 rounded-full bg-[#099d57]" />
-          </div>
+          <TournamentAccentBars className="mb-7" />
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-slate-500">Bem-vindo</p>
           <h1
             id="login-title"

@@ -6,7 +6,7 @@ export function Progress({ value }: { value: number }) {
       aria-label={`Precisão ${safeValue}%`}
     >
       <div
-        className="h-full rounded-full bg-emerald-700"
+        className="h-full rounded-full bg-gradient-to-r from-[#0e74e1] to-[#099d57]"
         style={{ width: `${safeValue}%` }}
       />
     </div>
