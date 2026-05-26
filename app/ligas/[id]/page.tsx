@@ -50,7 +50,7 @@ export default async function LeagueDetailPage({
         <CardHeader><CardTitle>Ranking da liga</CardTitle></CardHeader>
         <CardContent><RankingTable rows={league.ranking.rows} /></CardContent>
       </Card>
-      {league.isOwner ? (
+      {league.canManage ? (
         <section className="grid gap-6 lg:grid-cols-2">
           <Card>
             <CardHeader><CardTitle>Convidar amigos</CardTitle></CardHeader>
@@ -82,7 +82,8 @@ export default async function LeagueDetailPage({
             </CardContent>
           </Card>
         </section>
-      ) : (
+      ) : null}
+      {league.isMember && !league.isOwner ? (
         <Card className="max-w-md">
           <CardHeader><CardTitle>Participação</CardTitle></CardHeader>
           <CardContent>
@@ -91,7 +92,7 @@ export default async function LeagueDetailPage({
             </form>
           </CardContent>
         </Card>
-      )}
+      ) : null}
     </AppShell>
   );
 }

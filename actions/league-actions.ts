@@ -125,6 +125,7 @@ export async function removeLeagueMemberAction(
     redirect(feedbackUrl(`/ligas/${parsedLeagueId.data}`, { error }));
   }
 
+  revalidatePath("/ligas");
   revalidatePath(`/ligas/${parsedLeagueId.data}`);
   redirect(feedbackUrl(`/ligas/${parsedLeagueId.data}`, { success: "league_member_removed" }));
 }

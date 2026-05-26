@@ -1,7 +1,8 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth-guards";
+import { isAdmin } from "@/lib/authorization";
+import { requireAdmin, requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
 import { createInviteToken, hashInviteToken } from "@/lib/league-invitations";
@@ -39,17 +40,44 @@ export async function listMyLeagues() {
   }));
 }
 
+export async function listAdminLeagues() {
+  const { user } = await requireAdmin();
+  const leagues = await getDb().league.findMany({
+    where: {
+      ownerId: { not: user.id },
+      members: { none: { userId: user.id } },
+    },
+    select: {
+      id: true,
+      name: true,
+      ownerId: true,
+      owner: { select: { name: true } },
+      _count: { select: { members: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return leagues.map((league) => ({
+    id: league.id,
+    name: league.name,
+    ownerName: league.owner.name,
+    memberCount: league._count.members,
+    isOwner: false,
+  }));
+}
+
 export async function getLeagueDetail(id: string) {
-  const { user } = await requireUser();
+  const { session, user } = await requireUser();
   const parsedId = leagueIdSchema.safeParse(id);
   if (!parsedId.success) {
     redirect(feedbackUrl("/ligas", { error: "league_not_found" }));
   }
+  const canManageAnyLeague = isAdmin(session.user);
 
   const league = await getDb().league.findFirst({
     where: {
       id: parsedId.data,
-      members: { some: { userId: user.id } },
+      ...(canManageAnyLeague ? {} : { members: { some: { userId: user.id } } }),
     },
     select: {
       id: true,
@@ -71,11 +99,16 @@ export async function getLeagueDetail(id: string) {
     redirect(feedbackUrl("/ligas", { error: "league_not_found" }));
   }
 
+  const isOwner = league.ownerId === user.id;
+  const isMember = league.members.some((member) => member.user.id === user.id);
+
   return {
     id: league.id,
     name: league.name,
     ownerName: league.owner.name,
-    isOwner: league.ownerId === user.id,
+    isOwner,
+    isMember,
+    canManage: isOwner || canManageAnyLeague,
     invitationEnabled: league.inviteTokenHash !== null,
     members: league.members.map((member) => ({
       id: member.user.id,
@@ -138,10 +171,10 @@ export async function createLeague(name: string) {
 }
 
 export async function rotateLeagueInvite(id: string) {
-  const { user } = await requireUser();
+  const { session, user } = await requireUser();
   const token = createInviteToken();
   const update = await getDb().league.updateMany({
-    where: { id, ownerId: user.id },
+    where: leagueManagementWhere(id, user.id, isAdmin(session.user)),
     data: { inviteTokenHash: hashInviteToken(token) },
   });
 
@@ -149,9 +182,9 @@ export async function rotateLeagueInvite(id: string) {
 }
 
 export async function disableLeagueInvite(id: string) {
-  const { user } = await requireUser();
+  const { session, user } = await requireUser();
   const update = await getDb().league.updateMany({
-    where: { id, ownerId: user.id },
+    where: leagueManagementWhere(id, user.id, isAdmin(session.user)),
     data: { inviteTokenHash: null },
   });
 
@@ -179,10 +212,10 @@ export async function joinLeagueWithInvite(token: string) {
 }
 
 export async function removeLeagueMember(leagueId: string, memberId: string) {
-  const { user } = await requireUser();
+  const { session, user } = await requireUser();
   return runSerializableTransaction(async (tx) => {
     const league = await tx.league.findFirst({
-      where: { id: leagueId, ownerId: user.id },
+      where: leagueManagementWhere(leagueId, user.id, isAdmin(session.user)),
       select: { ownerId: true },
     });
     if (!league) {
@@ -232,9 +265,17 @@ export async function leaveLeague(id: string) {
 }
 
 export async function deleteLeague(id: string) {
-  const { user } = await requireUser();
+  const { session, user } = await requireUser();
   const deleted = await getDb().league.deleteMany({
-    where: { id, ownerId: user.id },
+    where: leagueManagementWhere(id, user.id, isAdmin(session.user)),
   });
   return deleted.count === 1;
+}
+
+function leagueManagementWhere(
+  leagueId: string,
+  userId: string,
+  canManageAnyLeague: boolean,
+) {
+  return canManageAnyLeague ? { id: leagueId } : { id: leagueId, ownerId: userId };
 }

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { signOut } from "@/auth";
+import { signOutFromKeycloak } from "@/app/actions/auth";
 import { isAdmin } from "@/lib/authorization";
 import type { AppRole } from "@/lib/authorization";
 import { TournamentBrand } from "@/components/shared/tournament-theme";
@@ -51,12 +51,7 @@ export function AppHeader({
         </nav>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-slate-300 sm:inline">{name}</span>
-          <form
-            action={async () => {
-              "use server";
-              await signOut({ redirectTo: "/login" });
-            }}
-          >
+          <form action={signOutFromKeycloak}>
             <Button
               className="border-white/20 bg-white/[0.06] text-white hover:bg-white/10"
               type="submit"

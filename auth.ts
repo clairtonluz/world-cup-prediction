@@ -19,10 +19,11 @@ type AppToken = {
   userId?: string;
   roles?: AppRole[];
   accessTokenExpires?: number;
+  keycloakIdToken?: string;
   error?: "AccessTokenExpired";
 };
 
-function requiredAuthSetting(name: string) {
+export function requiredAuthSetting(name: string) {
   const value = process.env[name];
   if (!value) {
     throw new Error(`${name} is required for Keycloak authentication`);
@@ -99,6 +100,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const identity = await verifiedIdentity(account.access_token);
         appToken.roles = identity.roles;
         appToken.accessTokenExpires = account.expires_at * 1000;
+        appToken.keycloakIdToken = account.id_token;
         appToken.error = undefined;
 
         const name =

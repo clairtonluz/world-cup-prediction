@@ -116,9 +116,12 @@ Configure the existing Keycloak server before signing in:
    {{production-url}}
    ```
 
-8. Ensure access tokens expose `sub`, `name`, `email`, `preferred_username`, and `realm_access.roles`.
-9. Add an audience mapper so access tokens include `world-cup-predictor-web` in `aud`.
-10. Copy the client secret and realm issuer into `.env`.
+8. Keep the standard OpenID Connect ID token enabled. Logout uses it as Keycloak's
+   `id_token_hint` so clicking `Sair` closes the Keycloak SSO session without a
+   confirmation prompt.
+9. Ensure access tokens expose `sub`, `name`, `email`, `preferred_username`, and `realm_access.roles`.
+10. Add an audience mapper so access tokens include `world-cup-predictor-web` in `aud`.
+11. Copy the client secret and realm issuer into `.env`.
 
 Roles are validated from the verified Keycloak access token and are never stored as local application permissions.
 
@@ -139,9 +142,9 @@ pnpm exec prisma validate
 - Users can submit one score prediction per match and revise it only before kickoff.
 - Knockout predictions open only after both teams are confirmed.
 - Other users' predictions remain hidden until kickoff.
-- Qualquer participante pode criar ligas privadas; somente membros visualizam o ranking da liga.
+- Qualquer participante pode criar ligas privadas; membros e administradores autorizados visualizam o ranking da liga.
 - O ranking da liga usa os pontos totais atuais dos seus membros, inclusive pontos obtidos antes da entrada.
-- O criador gerencia convites e membros; remover um membro desativa o convite compartilhado anteriormente.
+- O criador ou um administrador gerencia convites e membros; remover um membro desativa o convite compartilhado anteriormente.
 - An administrator updates live/final scores; any correction recalculates points and future bracket participants transactionally.
 - Automatic propagation never changes an already started/past match or the official schedule/location.
 - Scoring, group standings, official third-place allocation and bracket rules are covered by unit tests in `tests/`.
