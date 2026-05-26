@@ -41,7 +41,9 @@ Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, co
 
 ## Docker Compose
 
-Docker Compose runs the production Next.js build and PostgreSQL. Keycloak remains an external dependency. When Keycloak is hosted locally, set `AUTH_KEYCLOAK_ISSUER` to a hostname that is reachable from both the browser and the application container, rather than a container-local `localhost` address.
+Docker Compose builds the standalone production Next.js server and PostgreSQL. Keycloak remains an external dependency. When Keycloak is hosted locally, set `AUTH_KEYCLOAK_ISSUER` to a hostname that is reachable from both the browser and the application container, rather than a container-local `localhost` address.
+
+### Local Container Run
 
 1. Create `.env` from `.env.example` and replace the database password, `AUTH_SECRET`, and Keycloak client values. Keep `POSTGRES_PASSWORD` URL-safe because it is used in the PostgreSQL connection URL.
 
@@ -56,6 +58,36 @@ Docker Compose runs the production Next.js build and PostgreSQL. Keycloak remain
 The app is available at [http://localhost:3000](http://localhost:3000). PostgreSQL is bound to `127.0.0.1:5432` for local administration and is not published on external interfaces. On startup, the `migrate` service applies committed Prisma migrations before the app starts.
 
 Use local `pnpm dev` for day-to-day development; the Docker app runs an optimized production build.
+
+### Production Deployment
+
+`compose.production.yaml` adds the production-only configuration used on a single server behind Traefik: TLS routing through the external `proxy` network, no published application or database ports, a persistent database directory, a container health check, and resource limits. This repository does not currently publish a runtime image, so production builds the checked-out application revision on the server. The override requires Docker Compose 2.24.4 or newer because it uses `!override`; it uses `!reset` to remove local port bindings.
+
+1. Create an untracked `.env.prod` from `.env.example`. Replace every placeholder secret and set production values, including:
+
+   ```dotenv
+   WORLD_CUP_HOST="copa.example.com"
+   AUTH_URL="https://copa.example.com"
+   POSTGRES_DATA_PATH="./data"
+   TZ="America/Fortaleza"
+   ```
+
+2. On the production server, ensure Traefik is already running on the shared `proxy` network, and create the database data directory:
+
+   ```bash
+   docker network create proxy
+   mkdir -p ./data
+   ```
+
+   Create the `proxy` network only once; omit that command when the network already exists.
+
+3. Deploy the application with the production overlay:
+
+   ```bash
+   docker compose -f compose.yaml -f compose.production.yaml --env-file .env.prod up -d --build
+   ```
+
+Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
 
 ## Keycloak Setup
 

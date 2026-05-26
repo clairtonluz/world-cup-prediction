@@ -1,0 +1,68 @@
+services:
+  database:
+    ports: !reset []
+    environment:
+      TZ: ${TZ:-America/Fortaleza}
+    volumes: !override
+      - "${POSTGRES_DATA_PATH:-./data}:/var/lib/postgresql/data"
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+  migrate:
+    environment:
+      TZ: ${TZ:-America/Fortaleza}
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+
+  app:
+    environment:
+      AUTH_URL: ${AUTH_URL:?Set AUTH_URL in the production environment}
+      TZ: ${TZ:-America/Fortaleza}
+    ports: !reset []
+    healthcheck:
+      test: ["CMD", "node", "-e", "const net=require('node:net');const socket=net.connect(3000,'127.0.0.1');socket.on('connect',()=>{socket.end();process.exit(0)});socket.on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.world-cup-predictor.rule=Host(`${WORLD_CUP_HOST:?Set WORLD_CUP_HOST in the production environment}`)
+      - traefik.http.routers.world-cup-predictor.entrypoints=websecure
+      - traefik.http.routers.world-cup-predictor.tls=true
+      - traefik.http.routers.world-cup-predictor.tls.certresolver=letsencrypt
+      - traefik.http.services.world-cup-predictor.loadbalancer.server.port=3000
+    networks:
+      - proxy
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+
+networks:
+  proxy:
+    external: true
+  internal:
+    driver: bridge
