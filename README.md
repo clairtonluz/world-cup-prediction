@@ -86,10 +86,16 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
 3. Deploy the application with the production overlay:
 
    ```bash
-   docker compose -f compose.yaml -f compose.production.yaml --env-file .env.prod up -d --build
+   ./ci/deploy.sh
    ```
 
-Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
+   To deploy with a differently named untracked environment file:
+
+   ```bash
+   ENV_FILE=/path/to/production.env ./ci/deploy.sh
+   ```
+
+The script runs `docker compose -f compose.yaml -f compose.production.yaml --env-file .env.prod up -d --build --remove-orphans` by default. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
 
 ## Keycloak Setup
 
