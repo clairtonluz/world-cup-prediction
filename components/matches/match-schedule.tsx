@@ -1,13 +1,12 @@
 import Link from "next/link";
 import { MatchTeams } from "@/components/shared/match-teams";
-import { StatusBadge } from "@/components/ui/badge";
+import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import {
   BRAZIL_TIME_ZONE,
   formatMatchDay,
   formatMatchTime,
   formatStage,
-  formatStatus,
   scoreText,
 } from "@/lib/display";
 
@@ -73,9 +72,10 @@ export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
                       <span className="text-xs">{match.venue}, {match.hostCity}</span>
                     </td>
                     <td className="p-3">
-                      <StatusBadge status={match.status as MatchStatusValue}>
-                        {formatStatus(match.status as MatchStatusValue)}
-                      </StatusBadge>
+                      <MatchStatusIndicator
+                        status={match.status as MatchStatusValue}
+                        startsAt={match.startsAt}
+                      />
                     </td>
                     <td className="p-3 text-right font-medium">
                       {scoreText(match.teamAScore, match.teamBScore)}

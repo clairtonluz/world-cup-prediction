@@ -4,11 +4,11 @@ import { MessageAlert } from "@/components/shared/message-alert";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { PredictionsTable } from "@/components/matches/predictions-table";
-import { StatusBadge } from "@/components/ui/badge";
+import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getMatchDetail } from "@/lib/data/matches";
-import { formatMatchDate, formatStage, formatStatus, scoreText } from "@/lib/display";
+import { formatMatchDate, formatStage, scoreText } from "@/lib/display";
 import { hasEffectivelyStarted } from "@/lib/match-rules";
 
 export const dynamic = "force-dynamic";
@@ -56,9 +56,10 @@ export default async function MatchDetailPage({
                 {formatStage(match.stage as MatchStageValue)} - {formatMatchDate(match.startsAt)}
               </p>
             </div>
-            <StatusBadge status={match.status as MatchStatusValue}>
-              {formatStatus(match.status as MatchStatusValue)}
-            </StatusBadge>
+            <MatchStatusIndicator
+              status={match.status as MatchStatusValue}
+              startsAt={match.startsAt}
+            />
           </CardHeader>
           <CardContent>
             <p className="text-sm text-slate-600">

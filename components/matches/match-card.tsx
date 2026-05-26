@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { MatchTeams } from "@/components/shared/match-teams";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
-import { formatMatchDate, formatStage, formatStatus, scoreText } from "@/lib/display";
+import { formatMatchDate, formatStage, scoreText } from "@/lib/display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/badge";
+import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 
 type MatchCardProps = {
   match: {
@@ -39,9 +39,10 @@ export function MatchCard({ match }: MatchCardProps) {
             {formatStage(match.stage as MatchStageValue)} - {formatMatchDate(match.startsAt)}
           </p>
         </div>
-        <StatusBadge status={match.status as MatchStatusValue}>
-          {formatStatus(match.status as MatchStatusValue)}
-        </StatusBadge>
+        <MatchStatusIndicator
+          status={match.status as MatchStatusValue}
+          startsAt={match.startsAt}
+        />
       </CardHeader>
       <CardContent className="flex flex-wrap items-center justify-between gap-4">
         <div className="text-sm text-slate-600">

@@ -2,11 +2,11 @@ import Link from "next/link";
 import { AppShell } from "@/components/shared/app-shell";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { TeamLabel } from "@/components/shared/team-label";
-import { StatusBadge } from "@/components/ui/badge";
+import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MatchStatusValue } from "@/lib/constants";
 import { listGroupMatches } from "@/lib/data/matches";
-import { formatMatchDate, formatStatus, scoreText } from "@/lib/display";
+import { formatMatchDate, scoreText } from "@/lib/display";
 import {
   GROUP_CODES,
   calculateGroupStandings,
@@ -95,9 +95,10 @@ export default async function GroupsPage() {
                                 teamB={match.teamB}
                                 className="font-medium"
                               />
-                              <StatusBadge status={match.status as MatchStatusValue}>
-                                {formatStatus(match.status as MatchStatusValue)}
-                              </StatusBadge>
+                              <MatchStatusIndicator
+                                status={match.status as MatchStatusValue}
+                                startsAt={match.startsAt}
+                              />
                             </div>
                             <div className="mt-1 flex justify-between text-xs text-slate-600">
                               <span>{formatMatchDate(match.startsAt)}</span>
