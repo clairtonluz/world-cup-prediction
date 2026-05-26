@@ -39,15 +39,17 @@ enum GroupCode {
 }
 
 model User {
-  id           String       @id @default(cuid())
-  keycloakId   String       @unique
-  name         String
-  email        String?      @unique
-  image        String?
-  favoriteTeam String?
-  predictions  Prediction[]
-  createdAt    DateTime     @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime     @updatedAt @db.Timestamptz(3)
+  id                String         @id @default(cuid())
+  keycloakId        String         @unique
+  name              String
+  email             String?        @unique
+  image             String?
+  favoriteTeam      String?
+  predictions       Prediction[]
+  ownedLeagues      League[]       @relation("LeagueOwner")
+  leagueMemberships LeagueMember[]
+  createdAt         DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime       @updatedAt @db.Timestamptz(3)
 }
 
 model Match {
@@ -93,5 +95,29 @@ model Prediction {
 
   @@unique([userId, matchId])
   @@index([matchId])
+  @@index([userId])
+}
+
+model League {
+  id              String         @id @default(cuid())
+  name            String
+  ownerId         String
+  inviteTokenHash String?        @unique
+  owner           User           @relation("LeagueOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members         LeagueMember[]
+  createdAt       DateTime       @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @db.Timestamptz(3)
+
+  @@index([ownerId])
+}
+
+model LeagueMember {
+  leagueId String
+  userId   String
+  joinedAt DateTime @default(now()) @db.Timestamptz(3)
+  league   League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([leagueId, userId])
   @@index([userId])
 }

@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { RankingRow } from "@/lib/data/ranking";
+import type { RankingRow } from "@/lib/ranking";
 import Image from "next/image";
 
 export function RankingTable({ rows }: { rows: RankingRow[] }) {

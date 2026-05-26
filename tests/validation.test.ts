@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { hasEffectivelyStarted, mayEditPrediction } from "@/lib/match-rules";
 import {
   favoriteTeamSchema,
+  inviteTokenSchema,
+  leagueSchema,
   matchIdSchema,
   matchResultSchema,
   predictionSchema,
@@ -92,6 +94,19 @@ describe("favoriteTeamSchema", () => {
     expect(favoriteTeamSchema.parse({ favoriteTeam: " " })).toEqual({
       favoriteTeam: null,
     });
+  });
+});
+
+describe("league schemas", () => {
+  it("normalizes a readable league name", () => {
+    expect(leagueSchema.parse({ name: "  Amigos da Copa  " })).toEqual({
+      name: "Amigos da Copa",
+    });
+  });
+
+  it("rejects invalid invite tokens and overlong names", () => {
+    expect(() => inviteTokenSchema.parse("../admin")).toThrow();
+    expect(() => leagueSchema.parse({ name: "a".repeat(81) })).toThrow();
   });
 });
 

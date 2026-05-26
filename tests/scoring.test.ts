@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculatePredictionPoints,
   isCorrectWinner,
+  pointsForScoringCategory,
   predictionAchievements,
   STAGE_POINTS,
 } from "@/lib/scoring";
@@ -90,6 +91,23 @@ describe("calculatePredictionPoints", () => {
       THIRD_PLACE_MATCH: 40,
       FINAL: 100,
     });
+  });
+
+  it("calculates the displayed category points using the scoring rounding rule", () => {
+    expect(pointsForScoringCategory("ROUND_OF_32", "EXACT_SCORE")).toBe(15);
+    expect(
+      pointsForScoringCategory(
+        "ROUND_OF_32",
+        "CORRECT_WINNER_EXACT_WINNER_SCORE",
+      ),
+    ).toBe(11);
+    expect(
+      pointsForScoringCategory(
+        "ROUND_OF_32",
+        "CORRECT_WINNER_EXACT_LOSER_SCORE",
+      ),
+    ).toBe(8);
+    expect(pointsForScoringCategory("ROUND_OF_32", "CORRECT_DRAW_ONLY")).toBe(5);
   });
 });
 

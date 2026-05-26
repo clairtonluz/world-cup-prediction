@@ -10,7 +10,7 @@ export default async function RankingPage() {
   return (
     <AppShell>
       <section>
-        <h1 className="text-3xl font-semibold text-slate-950">Ranking</h1>
+        <h1 className="text-3xl font-semibold text-slate-950">Ranking global</h1>
         <p className="mt-1 text-slate-600">
           {ranking.provisional ? "Classificação provisória com jogos ao vivo. " : ""}
           Desempates por pontos, placares exatos, vencedores corretos e nome.

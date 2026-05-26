@@ -37,7 +37,7 @@ export default async function MatchesPage({
         </p>
       </section>
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Minha posição" value={ranking.currentUser ? `#${ranking.currentUser.position}` : "-"} />
+        <StatCard label="Minha posição global" value={ranking.currentUser ? `#${ranking.currentUser.position}` : "-"} />
         <StatCard label={statistics.provisional ? "Pontos provisórios" : "Total de pontos"} value={statistics.totalPoints} />
         <StatCard label="Precisão das apostas" value={`${statistics.accuracy}%`} />
       </section>
@@ -56,7 +56,7 @@ export default async function MatchesPage({
         <div className="space-y-5">
           <Card>
             <CardHeader>
-              <CardTitle>{ranking.provisional ? "Classificação provisória" : "Prévia do ranking"}</CardTitle>
+              <CardTitle>{ranking.provisional ? "Ranking global provisório" : "Prévia do ranking global"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {ranking.rows.slice(0, 5).map((row) => (
@@ -67,7 +67,7 @@ export default async function MatchesPage({
               ))}
               {ranking.rows.length === 0 ? <p className="text-sm text-slate-600">Nenhum participante no ranking.</p> : null}
               <Link href="/ranking" className="block text-sm font-medium text-emerald-700 hover:underline">
-                Ver ranking completo
+                Ver ranking global completo
               </Link>
             </CardContent>
           </Card>
