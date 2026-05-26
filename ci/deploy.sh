@@ -2,19 +2,19 @@
 
 set -eu
 
-SCRIPT_DIRECTORY=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-PROJECT_DIRECTORY=$(CDPATH= cd -- "$SCRIPT_DIRECTORY/.." && pwd)
-ENV_FILE=${ENV_FILE:-"$PROJECT_DIRECTORY/.env.prod"}
+exec ssh oracle-luz 'sh -eu' <<'REMOTE_COMMANDS'
+cd /home/opc/world-cup-prediction
 
-if [ ! -f "$ENV_FILE" ]; then
-  printf 'Production environment file not found: %s\n' "$ENV_FILE" >&2
+git pull --ff-only
+
+if [ ! -f .env ]; then
+  printf 'Production environment file not found: %s\n' /home/opc/world-cup-prediction/.env >&2
   exit 1
 fi
 
-cd "$PROJECT_DIRECTORY"
-
-exec docker compose \
+docker compose \
   -f compose.yaml \
   -f compose.production.yaml \
-  --env-file "$ENV_FILE" \
+  --env-file .env \
   up -d --build --remove-orphans
+REMOTE_COMMANDS

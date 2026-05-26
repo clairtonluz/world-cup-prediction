@@ -65,7 +65,7 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
 
 `compose.production.yaml` adds the production-only configuration used on a single server behind Traefik: TLS routing through the external `proxy` network, no published application or database ports, a persistent database directory, a container health check, and resource limits. This repository does not currently publish a runtime image, so production builds the checked-out application revision on the server. Use the explicit `-f` command below so the local-only `compose.override.yaml` is not loaded in production.
 
-1. Create an untracked `.env.prod` from `.env.example`. Replace every placeholder secret and set production values, including:
+1. In `/home/opc/world-cup-prediction` on the production server, create an untracked `.env` from `.env.example`. Replace every placeholder secret and set production values, including:
 
    ```dotenv
    WORLD_CUP_HOST="copa.example.com"
@@ -83,19 +83,13 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
 
    Create the `proxy` network only once; omit that command when the network already exists.
 
-3. Deploy the application with the production overlay:
+3. From a machine configured with the `oracle-luz` SSH host, deploy the application:
 
    ```bash
    ./ci/deploy.sh
    ```
 
-   To deploy with a differently named untracked environment file:
-
-   ```bash
-   ENV_FILE=/path/to/production.env ./ci/deploy.sh
-   ```
-
-The script runs `docker compose -f compose.yaml -f compose.production.yaml --env-file .env.prod up -d --build --remove-orphans` by default. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
+The script connects with `ssh oracle-luz`, enters `/home/opc/world-cup-prediction`, runs `git pull --ff-only`, and executes `docker compose -f compose.yaml -f compose.production.yaml --env-file .env up -d --build --remove-orphans` on the server. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
 
 ## Keycloak Setup
 
