@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { listAdminMatches } from "@/lib/data/matches";
 import { formatMatchDate, formatStage, formatStatus, scoreText } from "@/lib/display";
+import { AdminTabs } from "@/components/admin/admin-tabs";
 
 export const dynamic = "force-dynamic";
 
@@ -20,13 +21,14 @@ export default async function AdminMatchesPage({
     <AppShell>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Administração dos jogos</h1>
+          <h1 className="text-3xl font-semibold">Administração</h1>
           <p className="mt-1 text-slate-600">
-            Registre placares ao vivo e resultados na agenda oficial fixa.
+            Gerencie jogos, usuários e o funcionamento do bolão.
           </p>
         </div>
       </div>
       <MessageAlert {...messages} />
+      <AdminTabs />
       <Card>
         <CardHeader><CardTitle>Agenda oficial</CardTitle></CardHeader>
         <CardContent>

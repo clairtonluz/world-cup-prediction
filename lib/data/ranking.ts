@@ -43,6 +43,7 @@ export const rankingParticipantSelect = {
 export async function getRanking() {
   const { user: currentUser } = await requireUser();
   const users = await getDb().user.findMany({
+    where: { hiddenFromGlobalRanking: false },
     select: rankingParticipantSelect,
   });
 
