@@ -91,7 +91,7 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
    ./ci/deploy.sh
    ```
 
-The script connects with `ssh oracle-luz`, enters `/home/opc/world-cup-prediction`, runs `git pull --ff-only`, and executes `docker compose -f compose.yaml -f compose.production.yaml --env-file .env up -d --build --remove-orphans` on the server. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
+The script connects with `ssh oracle-luz`, enters `/home/opc/world-cup-prediction`, refuses non-ignored local changes, fast-forwards the production checkout to `origin/main`, and executes `docker compose -f compose.yaml -f compose.production.yaml --env-file .env up -d --build --remove-orphans` on the server. Ignored production files such as `.env` and `data/` remain available. It prints the deployed Git revision and application container status so the running release can be checked from the deploy log. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
 
 ## Keycloak Setup
 
