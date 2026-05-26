@@ -23,7 +23,7 @@ const features = [
   },
   {
     icon: UsersRound,
-    title: "Ligas entre amigos",
+    title: "Grupos de Amigos",
     description: "Compare palpites e dispute o topo.",
   },
 ];

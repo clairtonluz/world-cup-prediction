@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { signIn, auth } from "@/auth";
-import { joinLeagueAction } from "@/actions/league-actions";
+import { joinFriendGroupAction } from "@/actions/friend-group-actions";
 import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { TournamentAccentBars, TournamentPublicPage } from "@/components/shared/tournament-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { isUser } from "@/lib/authorization";
-import { getInvitePreview } from "@/lib/data/leagues";
+import { getInvitePreview } from "@/lib/data/friend-groups";
 import { inviteTokenSchema } from "@/lib/validation";
 
 export const dynamic = "force-dynamic";
 
-export default async function LeagueInvitePage({
+export default async function FriendGroupInvitePage({
   params,
   searchParams,
 }: {
@@ -33,7 +33,7 @@ export default async function LeagueInvitePage({
           <CardHeader>
             <TournamentAccentBars className="mb-5" />
             <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-              Convite para liga
+              Convite para Grupo de Amigos
             </h1>
             <p className="text-sm text-slate-600">
               Entre para visualizar e aceitar este convite privado.
@@ -44,7 +44,7 @@ export default async function LeagueInvitePage({
               action={async () => {
                 "use server";
                 await signIn("keycloak", {
-                  redirectTo: `/ligas/convite/${parsedToken.data}`,
+                  redirectTo: `/grupos-de-amigos/convite/${parsedToken.data}`,
                 });
               }}
             >
@@ -56,8 +56,8 @@ export default async function LeagueInvitePage({
     );
   }
 
-  const league = await getInvitePreview(parsedToken.data);
-  if (!league) {
+  const friendGroup = await getInvitePreview(parsedToken.data);
+  if (!friendGroup) {
     return (
       <AppShell>
         <MessageAlert {...messages} />
@@ -72,27 +72,27 @@ export default async function LeagueInvitePage({
       <Card className="mx-auto max-w-lg">
         <CardHeader>
           <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Convite para {league.name}
+            Convite para {friendGroup.name}
           </h1>
           <p className="text-sm text-slate-600">
-            Liga privada criada por {league.ownerName}.
+            Grupo de Amigos privado criado por {friendGroup.ownerName}.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
-          {league.isMember ? (
+          {friendGroup.isMember ? (
             <>
-              <p className="text-sm text-slate-600">Você já participa desta liga.</p>
-              <Link href={`/ligas/${league.id}`} className="text-sm font-medium text-emerald-700 hover:underline">
-                Abrir ranking da liga
+              <p className="text-sm text-slate-600">Você já participa deste Grupo de Amigos.</p>
+              <Link href={`/grupos-de-amigos/${friendGroup.id}`} className="text-sm font-medium text-emerald-700 hover:underline">
+                Abrir ranking do Grupo de Amigos
               </Link>
             </>
           ) : (
             <>
               <p className="text-sm text-slate-600">
-                Ao aceitar, seu total de pontos no torneio entrará no ranking desta liga.
+                Ao aceitar, seu total de pontos no torneio entrará no ranking deste Grupo de Amigos.
               </p>
-              <form action={joinLeagueAction.bind(null, parsedToken.data)}>
-                <Button type="submit">Entrar na liga</Button>
+              <form action={joinFriendGroupAction.bind(null, parsedToken.data)}>
+                <Button type="submit">Entrar no Grupo de Amigos</Button>
               </form>
             </>
           )}
@@ -121,8 +121,8 @@ function InvalidInviteCard() {
       </CardHeader>
       <CardContent className="space-y-3 text-sm text-slate-600">
         <p>Este convite não existe mais ou foi desativado.</p>
-        <Link href="/ligas" className="font-medium text-emerald-700 hover:underline">
-          Voltar para ligas
+        <Link href="/grupos-de-amigos" className="font-medium text-emerald-700 hover:underline">
+          Voltar para Grupos de Amigos
         </Link>
       </CardContent>
     </Card>

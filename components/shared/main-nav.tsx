@@ -11,7 +11,7 @@ const navigationItems = [
   { href: "/matches", label: "Jogos" },
   { href: "/grupos", label: "Grupos" },
   { href: "/ranking", label: "Ranking" },
-  { href: "/ligas", label: "Ligas" },
+  { href: "/grupos-de-amigos", label: "Grupos de Amigos" },
   { href: "/pontuacao", label: "Pontuação" },
   { href: "/me", label: "Minhas estatísticas" },
 ];

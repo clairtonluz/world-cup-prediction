@@ -9,10 +9,10 @@ describe("feedbackText", () => {
     });
   });
 
-  it("renders league action results without accepting arbitrary text", () => {
-    expect(feedbackText({ success: "league_joined" })).toEqual({
+  it("renders friend group action results without accepting arbitrary text", () => {
+    expect(feedbackText({ success: "friend_group_joined" })).toEqual({
       kind: "success",
-      text: "Você entrou na liga.",
+      text: "Você entrou no Grupo de Amigos.",
     });
     expect(feedbackText({ error: "invite_invalid" })).toEqual({
       kind: "error",

@@ -8,8 +8,8 @@ Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, co
 - Página de grupos com classificação projetada durante jogos ao vivo.
 - Chaveamento automático: resultados atualizam somente participantes de jogos futuros ainda não iniciados.
 - Pontuação provisória durante jogos ao vivo e definitiva ao encerrar o jogo.
-- Ranking global, ligas privadas entre amigos e estatísticas pessoais em português do Brasil.
-- Convites de ligas por link privado reutilizável; somente o hash do convite é armazenado.
+- Ranking global, Grupos de Amigos privados e estatísticas pessoais em português do Brasil.
+- Convites de Grupos de Amigos por link privado reutilizável; somente o hash do convite é armazenado.
 - Administração restrita a status, placares e classificado em empate eliminatório.
 
 ## Local Setup
@@ -142,8 +142,8 @@ pnpm exec prisma validate
 - Users can submit one score prediction per match and revise it only before kickoff.
 - Knockout predictions open only after both teams are confirmed.
 - Other users' predictions remain hidden until kickoff.
-- Qualquer participante pode criar ligas privadas; membros e administradores autorizados visualizam o ranking da liga.
-- O ranking da liga usa os pontos totais atuais dos seus membros, inclusive pontos obtidos antes da entrada.
+- Qualquer participante pode criar Grupos de Amigos privados; membros e administradores autorizados visualizam o ranking do Grupo de Amigos.
+- O ranking do Grupo de Amigos usa os pontos totais atuais dos seus membros, inclusive pontos obtidos antes da entrada.
 - O criador ou um administrador gerencia convites e membros; remover um membro desativa o convite compartilhado anteriormente.
 - An administrator updates live/final scores; any correction recalculates points and future bracket participants transactionally.
 - Automatic propagation never changes an already started/past match or the official schedule/location.

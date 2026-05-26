@@ -43,7 +43,7 @@
 - Registration/password management inside the application; Keycloak owns identities.
 - Local permission or role administration.
 - Live match data feeds, WebSockets, push notifications, queues, Redis, and caching infrastructure.
-- Private leagues, multiple tournaments, prizes, social comments, or prediction types beyond final score.
+- Private friend groups, multiple tournaments, prizes, social comments, or prediction types beyond final score.
 - Clean Architecture, DDD, microservices, event-driven workflows, or generalized framework abstractions.
 
 ## Constraints And Decisions

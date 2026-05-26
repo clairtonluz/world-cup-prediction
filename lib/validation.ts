@@ -7,12 +7,12 @@ const score = z.preprocess(
 );
 
 export const matchIdSchema = z.cuid();
-export const leagueIdSchema = z.cuid();
+export const friendGroupIdSchema = z.cuid();
 export const userIdSchema = z.cuid();
 
 export const inviteTokenSchema = z.string().regex(/^[A-Za-z0-9_-]{43}$/);
 
-export const leagueSchema = z.object({
+export const friendGroupSchema = z.object({
   name: z.string().trim().min(1).max(80),
 });
 

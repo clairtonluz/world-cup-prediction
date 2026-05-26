@@ -2,22 +2,22 @@
 
 import { useActionState } from "react";
 import {
-  rotateLeagueInviteAction,
-  type LeagueInviteState,
-} from "@/actions/league-actions";
-import { InviteLinkResult } from "@/components/leagues/invite-link-result";
+  rotateFriendGroupInviteAction,
+  type FriendGroupInviteState,
+} from "@/actions/friend-group-actions";
+import { InviteLinkResult } from "@/components/friend-groups/invite-link-result";
 import { Button } from "@/components/ui/button";
 import { ERROR_MESSAGES } from "@/lib/feedback";
 
 export function InviteControls({
-  leagueId,
+  friendGroupId,
   invitationEnabled,
 }: {
-  leagueId: string;
+  friendGroupId: string;
   invitationEnabled: boolean;
 }) {
-  const rotateAction = rotateLeagueInviteAction.bind(null, leagueId);
-  const [state, action, pending] = useActionState<LeagueInviteState, FormData>(
+  const rotateAction = rotateFriendGroupInviteAction.bind(null, friendGroupId);
+  const [state, action, pending] = useActionState<FriendGroupInviteState, FormData>(
     rotateAction,
     {},
   );

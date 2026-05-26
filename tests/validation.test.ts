@@ -3,7 +3,7 @@ import { hasEffectivelyStarted, mayEditPrediction } from "@/lib/match-rules";
 import {
   favoriteTeamSchema,
   inviteTokenSchema,
-  leagueSchema,
+  friendGroupSchema,
   matchIdSchema,
   matchResultSchema,
   predictionSchema,
@@ -97,16 +97,16 @@ describe("favoriteTeamSchema", () => {
   });
 });
 
-describe("league schemas", () => {
-  it("normalizes a readable league name", () => {
-    expect(leagueSchema.parse({ name: "  Amigos da Copa  " })).toEqual({
+describe("friend group schemas", () => {
+  it("normalizes a readable friend group name", () => {
+    expect(friendGroupSchema.parse({ name: "  Amigos da Copa  " })).toEqual({
       name: "Amigos da Copa",
     });
   });
 
   it("rejects invalid invite tokens and overlong names", () => {
     expect(() => inviteTokenSchema.parse("../admin")).toThrow();
-    expect(() => leagueSchema.parse({ name: "a".repeat(81) })).toThrow();
+    expect(() => friendGroupSchema.parse({ name: "a".repeat(81) })).toThrow();
   });
 });
 

@@ -2,25 +2,25 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { createLeagueAction, type LeagueInviteState } from "@/actions/league-actions";
-import { InviteLinkResult } from "@/components/leagues/invite-link-result";
+import { createFriendGroupAction, type FriendGroupInviteState } from "@/actions/friend-group-actions";
+import { InviteLinkResult } from "@/components/friend-groups/invite-link-result";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "@/lib/feedback";
 
-const initialState: LeagueInviteState = {};
+const initialState: FriendGroupInviteState = {};
 
-export function LeagueCreationForm() {
-  const [state, action, pending] = useActionState(createLeagueAction, initialState);
+export function FriendGroupCreationForm() {
+  const [state, action, pending] = useActionState(createFriendGroupAction, initialState);
 
   return (
     <div className="space-y-5">
       <form action={action} className="space-y-4">
         <div>
-          <Label htmlFor="leagueName">Nome da liga</Label>
+          <Label htmlFor="friendGroupName">Nome do Grupo de Amigos</Label>
           <Input
-            id="leagueName"
+            id="friendGroupName"
             name="name"
             placeholder="Amigos da Copa"
             maxLength={80}
@@ -28,7 +28,7 @@ export function LeagueCreationForm() {
           />
         </div>
         <Button type="submit" disabled={pending}>
-          {pending ? "Criando..." : "Criar liga"}
+          {pending ? "Criando..." : "Criar Grupo de Amigos"}
         </Button>
       </form>
       {state.error ? (
@@ -36,14 +36,14 @@ export function LeagueCreationForm() {
           {ERROR_MESSAGES[state.error]}
         </p>
       ) : null}
-      {state.success && state.invitePath && state.leagueId ? (
+      {state.success && state.invitePath && state.friendGroupId ? (
         <div className="space-y-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4">
           <p role="status" className="text-sm font-medium text-emerald-900">
             {SUCCESS_MESSAGES[state.success]} Compartilhe o convite abaixo.
           </p>
           <InviteLinkResult path={state.invitePath} />
-          <Link href={`/ligas/${state.leagueId}`} className="block text-sm font-medium text-emerald-800 hover:underline">
-            Abrir ranking da liga
+          <Link href={`/grupos-de-amigos/${state.friendGroupId}`} className="block text-sm font-medium text-emerald-800 hover:underline">
+            Abrir ranking do Grupo de Amigos
           </Link>
         </div>
       ) : null}

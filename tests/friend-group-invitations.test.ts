@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createInviteToken, hashInviteToken } from "@/lib/league-invitations";
+import { createInviteToken, hashInviteToken } from "@/lib/friend-group-invitations";
 import { inviteTokenSchema } from "@/lib/validation";
 
-describe("league invitations", () => {
+describe("friend group invitations", () => {
   it("creates URL-safe invitation tokens accepted at the input boundary", () => {
     const token = createInviteToken();
 

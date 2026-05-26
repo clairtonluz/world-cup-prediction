@@ -47,7 +47,7 @@ fixtures or scoring only after `FINISHED`.
 | Feature | Reason |
 | --- | --- |
 | Registration, password reset, or local roles | Keycloak owns identity and realm roles. |
-| Leagues, invitations, multiple tournaments, or prizes | Not needed for the initial friend group. |
+| Friend groups, invitations, multiple tournaments, or prizes | Not needed for the initial friend group. |
 | Live feeds, Redis, queues, WebSockets, notifications | Manual administration and page refresh are sufficient for v1. |
 | Alternative prediction modes, knockout bracket predictions, penalty shootout guesses | One final-score prediction is intentionally simple. |
 | Clean Architecture, DDD, microservices, or event workflows | They add cost without improving this application. |

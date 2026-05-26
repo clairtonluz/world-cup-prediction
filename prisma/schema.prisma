@@ -46,8 +46,8 @@ model User {
   image             String?
   favoriteTeam      String?
   predictions       Prediction[]
-  ownedLeagues      League[]       @relation("LeagueOwner")
-  leagueMemberships LeagueMember[]
+  ownedFriendGroups       FriendGroup[]       @relation("FriendGroupOwner")
+  friendGroupMemberships  FriendGroupMember[]
   createdAt         DateTime       @default(now()) @db.Timestamptz(3)
   updatedAt         DateTime       @updatedAt @db.Timestamptz(3)
   hiddenFromGlobalRanking Boolean @default(false)
@@ -99,26 +99,26 @@ model Prediction {
   @@index([userId])
 }
 
-model League {
+model FriendGroup {
   id              String         @id @default(cuid())
   name            String
   ownerId         String
   inviteTokenHash String?        @unique
-  owner           User           @relation("LeagueOwner", fields: [ownerId], references: [id], onDelete: Cascade)
-  members         LeagueMember[]
+  owner           User                @relation("FriendGroupOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members         FriendGroupMember[]
   createdAt       DateTime       @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime       @updatedAt @db.Timestamptz(3)
 
   @@index([ownerId])
 }
 
-model LeagueMember {
-  leagueId String
-  userId   String
-  joinedAt DateTime @default(now()) @db.Timestamptz(3)
-  league   League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model FriendGroupMember {
+  friendGroupId String
+  userId        String
+  joinedAt      DateTime    @default(now()) @db.Timestamptz(3)
+  friendGroup   FriendGroup @relation(fields: [friendGroupId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([leagueId, userId])
+  @@id([friendGroupId, userId])
   @@index([userId])
 }
