@@ -1,7 +1,9 @@
 import NextAuth from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import { Prisma } from "@/generated/prisma/client";
 import { getDb } from "@/lib/db";
+import { syncUser } from "@/lib/user-sync";
 import type { AppRole } from "@/lib/authorization";
 
 declare module "next-auth" {
@@ -105,20 +107,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               ? profile.preferred_username
               : "Participant";
 
-        const user = await getDb().user.upsert({
-          where: { keycloakId: identity.keycloakId },
-          update: {
-            name,
-            email: typeof profile?.email === "string" ? profile.email : null,
-            image: typeof profile?.picture === "string" ? profile.picture : null,
-          },
-          create: {
-            keycloakId: identity.keycloakId,
-            name,
-            email: typeof profile?.email === "string" ? profile.email : null,
-            image: typeof profile?.picture === "string" ? profile.picture : null,
-          },
+        const user = await syncUser(identity, {
+          keycloakId: identity.keycloakId,
+          name,
+          email: typeof profile?.email === "string" ? profile.email : null,
+          image: typeof profile?.picture === "string" ? profile.picture : null,
         });
+
         appToken.userId = user.id;
       }
 
@@ -138,3 +133,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
