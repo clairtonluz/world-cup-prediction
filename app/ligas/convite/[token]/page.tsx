@@ -44,7 +44,7 @@ export default async function LeagueInvitePage({
                 });
               }}
             >
-              <Button className="w-full" type="submit">Entrar com Keycloak</Button>
+              <Button className="w-full" type="submit">Entrar</Button>
             </form>
           </CardContent>
         </Card>

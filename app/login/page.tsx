@@ -29,12 +29,9 @@ export default async function LoginPage({
             }}
           >
             <Button className="w-full" type="submit">
-              Entrar com Keycloak
+              Entrar
             </Button>
           </form>
-          <p className="text-center text-xs text-slate-500">
-            Participantes precisam ter o papel USER ou ADMIN no Keycloak.
-          </p>
         </CardContent>
       </Card>
     </main>
