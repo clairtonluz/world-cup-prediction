@@ -8,6 +8,7 @@ import {
 import { InviteControls } from "@/components/leagues/invite-controls";
 import { RankingTable } from "@/components/ranking/ranking-table";
 import { AppShell } from "@/components/shared/app-shell";
+import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,15 +71,32 @@ export default async function LeagueDetailPage({
                 <div key={member.id} className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm">
                   <span>{member.name}{member.isOwner ? " (criador)" : ""}</span>
                   {!member.isOwner ? (
-                    <form action={removeLeagueMemberAction.bind(null, league.id, member.id)}>
-                      <Button type="submit" variant="ghost" size="sm">Remover</Button>
-                    </form>
+                    <ConfirmationForm
+                      action={removeLeagueMemberAction.bind(null, league.id, member.id)}
+                      confirmation={{
+                        title: "Remover participante?",
+                        description: `${member.name} será removido da liga e o convite atual será desativado.`,
+                        confirmLabel: "Remover",
+                        intent: "danger",
+                      }}
+                    >
+                      <Button type="submit" variant="destructive" size="sm">Remover</Button>
+                    </ConfirmationForm>
                   ) : null}
                 </div>
               ))}
-              <form action={deleteLeagueAction.bind(null, league.id)} className="pt-3">
-                <Button type="submit" variant="outline">Excluir liga</Button>
-              </form>
+              <ConfirmationForm
+                action={deleteLeagueAction.bind(null, league.id)}
+                confirmation={{
+                  title: "Excluir liga?",
+                  description: `A liga "${league.name}" será excluída permanentemente. Esta ação não pode ser desfeita.`,
+                  confirmLabel: "Excluir liga",
+                  intent: "danger",
+                }}
+                className="pt-3"
+              >
+                <Button type="submit" variant="destructive">Excluir liga</Button>
+              </ConfirmationForm>
             </CardContent>
           </Card>
         </section>
@@ -87,9 +105,17 @@ export default async function LeagueDetailPage({
         <Card className="max-w-md">
           <CardHeader><CardTitle>Participação</CardTitle></CardHeader>
           <CardContent>
-            <form action={leaveLeagueAction.bind(null, league.id)}>
-              <Button type="submit" variant="outline">Sair da liga</Button>
-            </form>
+            <ConfirmationForm
+              action={leaveLeagueAction.bind(null, league.id)}
+              confirmation={{
+                title: "Sair da liga?",
+                description: `Você sairá da liga "${league.name}" e precisará de um novo convite para voltar.`,
+                confirmLabel: "Sair da liga",
+                intent: "danger",
+              }}
+            >
+              <Button type="submit" variant="destructive">Sair da liga</Button>
+            </ConfirmationForm>
           </CardContent>
         </Card>
       ) : null}
