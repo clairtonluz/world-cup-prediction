@@ -82,6 +82,7 @@ export default async function MatchesPage({
                       teamB={match.teamB}
                       teamASlot={match.teamASlot}
                       teamBSlot={match.teamBSlot}
+                      className="flex-nowrap whitespace-nowrap"
                     />
                     <span>: {match.predictions[0].teamAScore} x {match.predictions[0].teamBScore}</span>
                   </span>
