@@ -4,8 +4,9 @@
 --   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
 --     -f scripts/local/simulate-group-stage-finished.sql
 --
--- The script intentionally requires an untouched group stage and round of 32.
--- It must not be used to overwrite real match results.
+-- The script intentionally requires an untouched group stage. It may replace
+-- participants in still-scheduled round-of-32 fixtures and deletes predictions
+-- only when those participants change. Do not use it with real match results.
 
 BEGIN;
 
@@ -190,16 +191,24 @@ BEGIN
     SELECT 1
     FROM "Match"
     WHERE "stage" = 'ROUND_OF_32'
-      AND (
-        "status" <> 'SCHEDULED'
-        OR "teamA" IS NOT NULL
-        OR "teamB" IS NOT NULL
-        OR "participantsConfirmed" = true
-      )
+      AND "status" <> 'SCHEDULED'
   ) THEN
-    RAISE EXCEPTION 'Simulation refused: at least one round-of-32 fixture is already populated or started.';
+    RAISE EXCEPTION 'Simulation refused: at least one round-of-32 fixture has already started or finished.';
   END IF;
 END $$;
+
+-- Match the application rule: stale predictions must not remain attached to a
+-- scheduled knockout match when its simulated participants change.
+DELETE FROM "Prediction" AS prediction
+USING "Match" AS fixture, simulated_round_of_32 AS simulation
+WHERE prediction."matchId" = fixture."id"
+  AND fixture."matchNumber" = simulation.match_number
+  AND fixture."stage" = 'ROUND_OF_32'
+  AND fixture."status" = 'SCHEDULED'
+  AND (
+    fixture."teamA" IS DISTINCT FROM simulation.team_a
+    OR fixture."teamB" IS DISTINCT FROM simulation.team_b
+  );
 
 UPDATE "Match" AS fixture
 SET
