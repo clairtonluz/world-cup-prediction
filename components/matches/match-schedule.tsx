@@ -89,7 +89,7 @@ function MatchScoreboard({ match }: { match: ScheduleMatch }) {
       <TeamLabel
         team={match.teamA}
         slot={match.teamASlot}
-        className="min-w-0 justify-end text-right"
+        className="min-w-0 flex-row-reverse justify-start text-right"
       />
       <span className="inline-flex items-center gap-2 font-semibold tabular-nums">
         {hasScore ? <span>{match.teamAScore}</span> : null}
