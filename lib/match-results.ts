@@ -12,6 +12,14 @@ type ScoredMatch = {
   advancingTeam: string | null;
 };
 
+const scoredMatchSelect = {
+  id: true,
+  stage: true,
+  teamAScore: true,
+  teamBScore: true,
+  advancingTeam: true,
+} as const;
+
 export async function recalculateMatchPredictions(
   tx: Prisma.TransactionClient,
   match: ScoredMatch,
@@ -33,5 +41,16 @@ export async function recalculateMatchPredictions(
       where: { id: prediction.id },
       data: { points: result.points },
     });
+  }
+}
+
+export async function recalculateAllMatchPredictions(tx: Prisma.TransactionClient) {
+  const matches = await tx.match.findMany({
+    select: scoredMatchSelect,
+    orderBy: [{ startsAt: "asc" }, { matchNumber: "asc" }],
+  });
+
+  for (const match of matches) {
+    await recalculateMatchPredictions(tx, match);
   }
 }

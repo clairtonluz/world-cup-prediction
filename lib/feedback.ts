@@ -43,6 +43,7 @@ export const SUCCESS_MESSAGES = {
     "Resultado atualizado. Apostas de confrontos futuros alterados foram removidas e devem ser refeitas.",
   match_updated_propagation_blocked:
     "Resultado atualizado. Um confronto dependente já começou ou passou do horário e não foi alterado automaticamente.",
+  points_recalculated: "Pontuação recalculada para todos os jogos.",
 } as const;
 
 export type ErrorFeedbackCode = keyof typeof ERROR_MESSAGES;

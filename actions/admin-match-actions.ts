@@ -6,7 +6,10 @@ import { requireAdmin } from "@/lib/auth-guards";
 import { updatedMatchError } from "@/lib/admin-match-policy";
 import { propagateFutureParticipants } from "@/lib/bracket-propagation";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
-import { recalculateMatchPredictions } from "@/lib/match-results";
+import {
+  recalculateAllMatchPredictions,
+  recalculateMatchPredictions,
+} from "@/lib/match-results";
 import { isTransactionConflict, runSerializableTransaction } from "@/lib/transactions";
 import { matchIdSchema, matchResultSchema } from "@/lib/validation";
 
@@ -18,6 +21,36 @@ function parseResultForm(formData: FormData) {
     teamBScore: status === "SCHEDULED" ? null : formData.get("teamBScore"),
     advancingTeam: status === "FINISHED" ? formData.get("advancingTeam") : null,
   });
+}
+
+export async function recalculateAllPointsAction() {
+  await requireAdmin();
+
+  let error: ErrorFeedbackCode | null = null;
+  try {
+    await runSerializableTransaction(recalculateAllMatchPredictions);
+  } catch (transactionError) {
+    if (!isTransactionConflict(transactionError)) {
+      throw transactionError;
+    }
+    error = "update_conflict";
+  }
+
+  if (error) {
+    redirect(feedbackUrl("/admin/matches", { error }));
+  }
+
+  revalidatePath("/admin/matches");
+  revalidatePath("/admin/matches/[id]/edit", "page");
+  revalidatePath("/matches");
+  revalidatePath("/matches/[id]", "page");
+  revalidatePath("/apostas");
+  revalidatePath("/grupos");
+  revalidatePath("/grupos-de-amigos");
+  revalidatePath("/grupos-de-amigos/[id]", "page");
+  revalidatePath("/ranking");
+  revalidatePath("/me");
+  redirect(feedbackUrl("/admin/matches", { success: "points_recalculated" }));
 }
 
 export async function updateMatchAction(id: string, formData: FormData) {

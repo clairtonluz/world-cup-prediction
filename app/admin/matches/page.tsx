@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { RefreshCw } from "lucide-react";
+import { recalculateAllPointsAction } from "@/actions/admin-match-actions";
 import { AppShell } from "@/components/shared/app-shell";
 import { MatchTeams } from "@/components/shared/match-teams";
+import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
@@ -29,6 +33,31 @@ export default async function AdminMatchesPage({
       </div>
       <MessageAlert {...messages} />
       <AdminTabs />
+      <Card>
+        <CardHeader>
+          <CardTitle>Manutenção da pontuação</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="max-w-2xl text-sm leading-6 text-slate-600">
+            Recalcule os pontos de todas as apostas usando os placares atuais.
+            Jogos sem placar terão suas apostas zeradas.
+          </p>
+          <ConfirmationForm
+            action={recalculateAllPointsAction}
+            confirmation={{
+              title: "Recalcular todos os pontos?",
+              description:
+                "Todas as apostas serão recalculadas com os placares atuais. Jogos sem placar ficarão com 0 pontos.",
+              confirmLabel: "Recalcular pontos",
+            }}
+          >
+            <Button type="submit" className="w-full gap-2 sm:w-auto">
+              <RefreshCw className="size-4" aria-hidden="true" />
+              Recalcular pontos
+            </Button>
+          </ConfirmationForm>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader><CardTitle>Agenda oficial</CardTitle></CardHeader>
         <CardContent>
