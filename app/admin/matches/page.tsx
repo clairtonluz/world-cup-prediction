@@ -40,14 +40,15 @@ export default async function AdminMatchesPage({
         <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl text-sm leading-6 text-slate-600">
             Recalcule os pontos de todas as apostas usando os placares atuais.
-            Jogos sem placar terão suas apostas zeradas.
+            Nenhum palpite será apagado; jogos ainda sem resultado continuarão
+            com 0 pontos.
           </p>
           <ConfirmationForm
             action={recalculateAllPointsAction}
             confirmation={{
               title: "Recalcular todos os pontos?",
               description:
-                "Todas as apostas serão recalculadas com os placares atuais. Jogos sem placar ficarão com 0 pontos.",
+                "Todas as apostas serão recalculadas com os placares atuais. Nenhum palpite será apagado; jogos ainda sem resultado continuarão com 0 pontos.",
               confirmLabel: "Recalcular pontos",
             }}
           >
