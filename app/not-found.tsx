@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 export default function NotFound() {
   return (
     <TournamentPublicPage>
+      <span data-analytics-not-found="true" hidden />
       <Card className="mx-auto w-full max-w-md">
         <CardHeader>
           <TournamentAccentBars className="mb-5" />

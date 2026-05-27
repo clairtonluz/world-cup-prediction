@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { FirebaseAnalyticsConsent } from "@/components/analytics/firebase-analytics-consent";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,10 @@ export default function RootLayout({
       lang="pt-BR"
       className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <FirebaseAnalyticsConsent />
+      </body>
     </html>
   );
 }

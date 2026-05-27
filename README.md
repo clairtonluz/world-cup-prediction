@@ -21,7 +21,7 @@ Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, co
    pnpm install
    ```
 
-2. Create `.env` from `.env.example` and set the PostgreSQL and Keycloak values. The application and Prisma automatically derive their PostgreSQL connection URL from `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_PORT`; passwords may contain reserved URL characters. When running Next.js directly with `pnpm dev`, escape a literal `$` in `.env` as `\$`, following Next.js environment-variable expansion rules.
+2. Create `.env` from `.env.example` and set the PostgreSQL and Keycloak values. Add the optional Firebase values only when enabling consent-gated analytics. The application and Prisma automatically derive their PostgreSQL connection URL from `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_PORT`; passwords may contain reserved URL characters. When running Next.js directly with `pnpm dev`, escape a literal `$` in `.env` as `\$`, following Next.js environment-variable expansion rules.
 
 3. Create the PostgreSQL database, then generate and migrate Prisma:
 
@@ -125,6 +125,40 @@ Configure the existing Keycloak server before signing in:
 11. Copy the client secret and realm issuer into `.env`.
 
 Roles are validated from the verified Keycloak access token and are never stored as local application permissions.
+
+## Firebase Analytics
+
+Google Analytics for Firebase is optional. The application does not load the Firebase Analytics
+browser SDK or send analytics traffic until the visitor explicitly accepts analytics cookies.
+After acceptance, rendered application pages are recorded with sanitized route templates:
+invitation tokens, database identifiers, query strings, search terms, and displayed user/group
+names are not included in application-issued page-view events.
+
+To enable it:
+
+1. Register a Firebase Web app and enable its Google Analytics integration. Use separate Firebase
+   projects or Web apps for development and production data.
+2. Copy the Firebase Web app values to `.env`:
+
+   ```dotenv
+   FIREBASE_API_KEY="replace-with-firebase-browser-key"
+   FIREBASE_AUTH_DOMAIN="replace-with-project.firebaseapp.com"
+   FIREBASE_PROJECT_ID="replace-with-project-id"
+   FIREBASE_MESSAGING_SENDER_ID="replace-with-sender-id"
+   FIREBASE_APP_ID="replace-with-app-id"
+   FIREBASE_MEASUREMENT_ID="G-REPLACE"
+   ```
+
+3. In the linked GA4 web data stream, disable optional Enhanced Measurement interactions and
+   history-based page-view tracking so page navigation is reported only through the application's
+   sanitized manual page views. Disable advertising personalization/signals and enable available
+   data-redaction safeguards.
+4. Review the Firebase-provisioned browser API key restrictions in Google Cloud. Firebase Web app
+   configuration is visible to browsers by design; it is not an authorization secret.
+
+Firebase Crashlytics is not configured because Firebase does not provide a Crashlytics SDK for Web
+or Next.js applications. Crash reporting for this application requires a web-supported monitoring
+service.
 
 ## Commands
 
