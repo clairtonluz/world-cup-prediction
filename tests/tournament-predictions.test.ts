@@ -44,7 +44,7 @@ describe("knockout advancing team predictions", () => {
     expect(requiresAdvancingTeamPrediction("THIRD_PLACE_MATCH")).toBe(false);
   });
 
-  it("accepts a tie-break classifier and rejects incompatible selections", () => {
+  it("accepts a tie-break classifier and rejects invalid tie selections", () => {
     expect(
       advancingTeamPredictionForMatch(match, {
         teamAScore: 1,
@@ -54,18 +54,38 @@ describe("knockout advancing team predictions", () => {
     ).toEqual({ valid: true, value: "Brasil" });
     expect(
       advancingTeamPredictionForMatch(match, {
-        teamAScore: 2,
-        teamBScore: 0,
-        predictedAdvancingTeam: "Franca",
+        teamAScore: 1,
+        teamBScore: 1,
+        predictedAdvancingTeam: "Argentina",
       }).valid,
     ).toBe(false);
     expect(
       advancingTeamPredictionForMatch(match, {
         teamAScore: 1,
         teamBScore: 1,
-        predictedAdvancingTeam: "Argentina",
+        predictedAdvancingTeam: null,
       }).valid,
     ).toBe(false);
+  });
+
+  it("infers the advancing team from non-draw scores", () => {
+    expect(
+      advancingTeamPredictionForMatch(match, {
+        teamAScore: 2,
+        teamBScore: 0,
+        predictedAdvancingTeam: null,
+      }),
+    ).toEqual({ valid: true, value: "Brasil" });
+  });
+
+  it("ignores incompatible classifier input when the score has a winner", () => {
+    expect(
+      advancingTeamPredictionForMatch(match, {
+        teamAScore: 0,
+        teamBScore: 2,
+        predictedAdvancingTeam: "Brasil",
+      }),
+    ).toEqual({ valid: true, value: "Franca" });
   });
 
   it("discards classifier input for the final instead of scoring it", () => {

@@ -1,11 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { syncUser } from "@/lib/user-sync";
-import { Prisma } from "@/generated/prisma/client";
 
 const mocks = vi.hoisted(() => {
   class MockPrismaError extends Error {
     code: string;
-    meta: any;
+    meta: { target?: string[] };
     constructor(code: string, target?: string[]) {
       super(`Prisma error ${code}`);
       this.code = code;
@@ -97,7 +96,7 @@ describe("syncUser", () => {
     // Second update succeeds without email
     mocks.userUpdate.mockResolvedValueOnce({ ...existingUser, name: "User 1" });
 
-    const result = await syncUser(identity, profile);
+    await syncUser(identity, profile);
 
     expect(mocks.userUpdate).toHaveBeenCalledTimes(2);
     expect(mocks.userUpdate).toHaveBeenNthCalledWith(2, {
@@ -117,7 +116,7 @@ describe("syncUser", () => {
     // Second create succeeds without email
     mocks.userCreate.mockResolvedValueOnce({ id: "u1", keycloakId: "k1", name: "User 1", email: null });
 
-    const result = await syncUser(identity, profile);
+    await syncUser(identity, profile);
 
     expect(mocks.userCreate).toHaveBeenCalledTimes(2);
     expect(mocks.userCreate).toHaveBeenNthCalledWith(2, {

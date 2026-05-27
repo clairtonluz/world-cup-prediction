@@ -68,22 +68,19 @@ export function advancingTeamPredictionForMatch(
     return { valid: true, value: null };
   }
 
-  const selectedTeam = prediction.predictedAdvancingTeam;
-  if (
-    !match.teamA ||
-    !match.teamB ||
-    !selectedTeam ||
-    (selectedTeam !== match.teamA && selectedTeam !== match.teamB)
-  ) {
+  if (!match.teamA || !match.teamB) {
     return { valid: false, value: null };
   }
 
   if (prediction.teamAScore !== prediction.teamBScore) {
     const predictedWinner =
       prediction.teamAScore > prediction.teamBScore ? match.teamA : match.teamB;
-    if (selectedTeam !== predictedWinner) {
-      return { valid: false, value: null };
-    }
+    return { valid: true, value: predictedWinner };
+  }
+
+  const selectedTeam = prediction.predictedAdvancingTeam;
+  if (selectedTeam !== match.teamA && selectedTeam !== match.teamB) {
+    return { valid: false, value: null };
   }
 
   return { valid: true, value: selectedTeam };

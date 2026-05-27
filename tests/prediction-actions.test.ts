@@ -83,11 +83,99 @@ describe("savePredictionAction return destination", () => {
   });
 });
 
-function predictionForm(returnTo: string) {
+describe("savePredictionAction knockout advancing team", () => {
+  beforeEach(() => {
+    mocks.matchFindUnique.mockResolvedValue({
+      id: matchId,
+      startsAt: new Date("2099-06-11T19:00:00Z"),
+      status: "SCHEDULED",
+      participantsConfirmed: true,
+      stage: "ROUND_OF_16",
+      teamA: "Brasil",
+      teamB: "Argentina",
+    });
+  });
+
+  it("saves the predicted winner as the advancing team for non-draw scores", async () => {
+    await expect(
+      savePredictionAction(
+        predictionForm("match", {
+          teamAScore: "2",
+          teamBScore: "1",
+        }),
+      ),
+    ).rejects.toThrow(`redirect:/matches/${matchId}?success=prediction_saved`);
+
+    expect(mocks.predictionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          predictedAdvancingTeam: "Brasil",
+        }),
+        update: expect.objectContaining({
+          predictedAdvancingTeam: "Brasil",
+        }),
+      }),
+    );
+  });
+
+  it("rejects a tied knockout score without an advancing team", async () => {
+    await expect(
+      savePredictionAction(
+        predictionForm("match", {
+          teamAScore: "1",
+          teamBScore: "1",
+        }),
+      ),
+    ).rejects.toThrow(
+      `redirect:/matches/${matchId}?error=invalid_advancing_team_prediction`,
+    );
+
+    expect(mocks.predictionUpsert).not.toHaveBeenCalled();
+  });
+
+  it("saves a valid advancing team for tied knockout scores", async () => {
+    await expect(
+      savePredictionAction(
+        predictionForm("match", {
+          teamAScore: "1",
+          teamBScore: "1",
+          predictedAdvancingTeam: "Argentina",
+        }),
+      ),
+    ).rejects.toThrow(`redirect:/matches/${matchId}?success=prediction_saved`);
+
+    expect(mocks.predictionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        create: expect.objectContaining({
+          predictedAdvancingTeam: "Argentina",
+        }),
+        update: expect.objectContaining({
+          predictedAdvancingTeam: "Argentina",
+        }),
+      }),
+    );
+  });
+});
+
+function predictionForm(
+  returnTo: string,
+  {
+    teamAScore = "2",
+    teamBScore = "1",
+    predictedAdvancingTeam,
+  }: {
+    teamAScore?: string;
+    teamBScore?: string;
+    predictedAdvancingTeam?: string;
+  } = {},
+) {
   const formData = new FormData();
   formData.set("matchId", matchId);
-  formData.set("teamAScore", "2");
-  formData.set("teamBScore", "1");
+  formData.set("teamAScore", teamAScore);
+  formData.set("teamBScore", teamBScore);
   formData.set("returnTo", returnTo);
+  if (predictedAdvancingTeam) {
+    formData.set("predictedAdvancingTeam", predictedAdvancingTeam);
+  }
   return formData;
 }

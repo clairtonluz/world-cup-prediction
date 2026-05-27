@@ -3,10 +3,10 @@ import { MatchStatusIndicator } from "@/components/matches/match-status-indicato
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import {
-  BRAZIL_TIME_ZONE,
   formatMatchDay,
   formatMatchTime,
   formatStage,
+  matchDayKey,
 } from "@/lib/display";
 
 type ScheduleMatch = {
@@ -29,14 +29,14 @@ type ScheduleMatch = {
 export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
   const grouped = new Map<string, ScheduleMatch[]>();
   for (const match of matches) {
-    const key = dayKey(match.startsAt);
+    const key = matchDayKey(match.startsAt);
     grouped.set(key, [...(grouped.get(key) ?? []), match]);
   }
 
   return (
     <div className="space-y-6">
       {[...grouped.values()].map((dailyMatches) => (
-        <section key={dayKey(dailyMatches[0].startsAt)}>
+        <section key={matchDayKey(dailyMatches[0].startsAt)}>
           <h3 className="mb-2 text-sm font-semibold capitalize text-slate-700">
             {formatMatchDay(dailyMatches[0].startsAt)}
           </h3>
@@ -86,11 +86,4 @@ export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
       ))}
     </div>
   );
-}
-
-function dayKey(date: Date) {
-  return new Intl.DateTimeFormat("sv-SE", {
-    dateStyle: "short",
-    timeZone: BRAZIL_TIME_ZONE,
-  }).format(date);
 }

@@ -1,4 +1,5 @@
 import type { MatchStageValue } from "@/lib/constants";
+import { isCorrectAdvancingTeamPrediction } from "@/lib/tournament-predictions";
 
 export const STAGE_POINTS: Record<MatchStageValue, number> = {
   GROUP_STAGE: 10,
@@ -27,18 +28,26 @@ const SCORING_RATES: Record<ScoringCategory, number> = {
   WRONG_PREDICTION: 0,
 };
 
+const DRAW_ADVANCING_TEAM_BONUS_RATE = 0.1;
+
 type Score = {
   teamAScore: number;
   teamBScore: number;
 };
 
+type PredictionScore = Score & {
+  predictedAdvancingTeam?: string | null;
+};
+
 type FinishedMatch = Score & {
   stage: MatchStageValue;
+  advancingTeam?: string | null;
 };
 
 export type ScoringResult = {
   category: ScoringCategory;
   points: number;
+  bonusPoints: number;
 };
 
 type Outcome = "TEAM_A" | "TEAM_B" | "DRAW";
@@ -58,35 +67,36 @@ export function pointsForScoringCategory(
   return Math.round(STAGE_POINTS[stage] * SCORING_RATES[category]);
 }
 
+export function pointsForDrawAdvancingTeamBonus(stage: MatchStageValue) {
+  return Math.round(STAGE_POINTS[stage] * DRAW_ADVANCING_TEAM_BONUS_RATE);
+}
+
 export function calculatePredictionPoints(
-  prediction: Score,
+  prediction: PredictionScore,
   match: FinishedMatch,
 ): ScoringResult {
+  const predictedOutcome = scoreOutcome(prediction);
+  const actualOutcome = scoreOutcome(match);
+  const bonusPoints = drawAdvancingTeamBonusPoints(
+    prediction,
+    match,
+    predictedOutcome,
+    actualOutcome,
+  );
+
   if (
     prediction.teamAScore === match.teamAScore &&
     prediction.teamBScore === match.teamBScore
   ) {
-    return {
-      category: "EXACT_SCORE",
-      points: pointsForScoringCategory(match.stage, "EXACT_SCORE"),
-    };
+    return scoringResult(match.stage, "EXACT_SCORE", bonusPoints);
   }
 
-  const predictedOutcome = scoreOutcome(prediction);
-  const actualOutcome = scoreOutcome(match);
-
   if (predictedOutcome !== actualOutcome) {
-    return {
-      category: "WRONG_PREDICTION",
-      points: pointsForScoringCategory(match.stage, "WRONG_PREDICTION"),
-    };
+    return scoringResult(match.stage, "WRONG_PREDICTION", bonusPoints);
   }
 
   if (actualOutcome === "DRAW") {
-    return {
-      category: "CORRECT_DRAW_ONLY",
-      points: pointsForScoringCategory(match.stage, "CORRECT_DRAW_ONLY"),
-    };
+    return scoringResult(match.stage, "CORRECT_DRAW_ONLY", bonusPoints);
   }
 
   const winnerScoreMatches =
@@ -99,29 +109,22 @@ export function calculatePredictionPoints(
       : prediction.teamAScore === match.teamAScore;
 
   if (winnerScoreMatches) {
-    return {
-      category: "CORRECT_WINNER_EXACT_WINNER_SCORE",
-      points: pointsForScoringCategory(
-        match.stage,
-        "CORRECT_WINNER_EXACT_WINNER_SCORE",
-      ),
-    };
+    return scoringResult(
+      match.stage,
+      "CORRECT_WINNER_EXACT_WINNER_SCORE",
+      bonusPoints,
+    );
   }
 
   if (loserScoreMatches) {
-    return {
-      category: "CORRECT_WINNER_EXACT_LOSER_SCORE",
-      points: pointsForScoringCategory(
-        match.stage,
-        "CORRECT_WINNER_EXACT_LOSER_SCORE",
-      ),
-    };
+    return scoringResult(
+      match.stage,
+      "CORRECT_WINNER_EXACT_LOSER_SCORE",
+      bonusPoints,
+    );
   }
 
-  return {
-    category: "CORRECT_WINNER_ONLY",
-    points: pointsForScoringCategory(match.stage, "CORRECT_WINNER_ONLY"),
-  };
+  return scoringResult(match.stage, "CORRECT_WINNER_ONLY", bonusPoints);
 }
 
 export function isCorrectResult(
@@ -136,4 +139,35 @@ export function predictionAchievements(prediction: Score, match: FinishedMatch) 
     exact: calculatePredictionPoints(prediction, match).category === "EXACT_SCORE",
     correctResult: isCorrectResult(prediction, match),
   };
+}
+
+function scoringResult(
+  stage: MatchStageValue,
+  category: ScoringCategory,
+  bonusPoints: number,
+): ScoringResult {
+  return {
+    category,
+    points: pointsForScoringCategory(stage, category) + bonusPoints,
+    bonusPoints,
+  };
+}
+
+function drawAdvancingTeamBonusPoints(
+  prediction: PredictionScore,
+  match: FinishedMatch,
+  predictedOutcome: Outcome,
+  actualOutcome: Outcome,
+) {
+  if (predictedOutcome !== "DRAW" || actualOutcome !== "DRAW") {
+    return 0;
+  }
+
+  return isCorrectAdvancingTeamPrediction(
+    match.stage,
+    prediction.predictedAdvancingTeam ?? null,
+    match.advancingTeam ?? null,
+  )
+    ? pointsForDrawAdvancingTeamBonus(match.stage)
+    : 0;
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculatePredictionPoints,
   isCorrectResult,
+  pointsForDrawAdvancingTeamBonus,
   pointsForScoringCategory,
   predictionAchievements,
   STAGE_POINTS,
@@ -14,14 +15,14 @@ describe("calculatePredictionPoints", () => {
         { teamAScore: 2, teamBScore: 1 },
         { teamAScore: 2, teamBScore: 1, stage: "GROUP_STAGE" },
       ),
-    ).toEqual({ category: "EXACT_SCORE", points: 10 });
+    ).toEqual(scoringResult("EXACT_SCORE", 10));
 
     expect(
       calculatePredictionPoints(
         { teamAScore: 2, teamBScore: 2 },
         { teamAScore: 2, teamBScore: 2, stage: "FINAL" },
       ),
-    ).toEqual({ category: "EXACT_SCORE", points: 100 });
+    ).toEqual(scoringResult("EXACT_SCORE", 100));
   });
 
   it("awards the winner score and loser score categories for either winner", () => {
@@ -33,6 +34,7 @@ describe("calculatePredictionPoints", () => {
     ).toEqual({
       category: "CORRECT_WINNER_EXACT_WINNER_SCORE",
       points: 70,
+      bonusPoints: 0,
     });
 
     expect(
@@ -43,6 +45,7 @@ describe("calculatePredictionPoints", () => {
     ).toEqual({
       category: "CORRECT_WINNER_EXACT_WINNER_SCORE",
       points: 70,
+      bonusPoints: 0,
     });
 
     expect(
@@ -53,6 +56,7 @@ describe("calculatePredictionPoints", () => {
     ).toEqual({
       category: "CORRECT_WINNER_EXACT_LOSER_SCORE",
       points: 50,
+      bonusPoints: 0,
     });
   });
 
@@ -62,14 +66,86 @@ describe("calculatePredictionPoints", () => {
         { teamAScore: 3, teamBScore: 0 },
         { teamAScore: 2, teamBScore: 1, stage: "FINAL" },
       ),
-    ).toEqual({ category: "CORRECT_WINNER_ONLY", points: 30 });
+    ).toEqual(scoringResult("CORRECT_WINNER_ONLY", 30));
 
     expect(
       calculatePredictionPoints(
         { teamAScore: 1, teamBScore: 1 },
         { teamAScore: 2, teamBScore: 2, stage: "ROUND_OF_32" },
       ),
-    ).toEqual({ category: "CORRECT_DRAW_ONLY", points: 5 });
+    ).toEqual(scoringResult("CORRECT_DRAW_ONLY", 5));
+  });
+
+  it("adds a knockout draw bonus for exact draws with the correct advancing team", () => {
+    expect(
+      calculatePredictionPoints(
+        {
+          teamAScore: 2,
+          teamBScore: 2,
+          predictedAdvancingTeam: "Brasil",
+        },
+        {
+          teamAScore: 2,
+          teamBScore: 2,
+          stage: "ROUND_OF_16",
+          advancingTeam: "Brasil",
+        },
+      ),
+    ).toEqual(scoringResult("EXACT_SCORE", 22, 2));
+  });
+
+  it("adds a knockout draw bonus for non-exact draws with the correct advancing team", () => {
+    expect(
+      calculatePredictionPoints(
+        {
+          teamAScore: 1,
+          teamBScore: 1,
+          predictedAdvancingTeam: "Brasil",
+        },
+        {
+          teamAScore: 2,
+          teamBScore: 2,
+          stage: "ROUND_OF_32",
+          advancingTeam: "Brasil",
+        },
+      ),
+    ).toEqual(scoringResult("CORRECT_DRAW_ONLY", 7, 2));
+  });
+
+  it("does not add the draw bonus when the advancing team is wrong", () => {
+    expect(
+      calculatePredictionPoints(
+        {
+          teamAScore: 2,
+          teamBScore: 2,
+          predictedAdvancingTeam: "Franca",
+        },
+        {
+          teamAScore: 2,
+          teamBScore: 2,
+          stage: "ROUND_OF_16",
+          advancingTeam: "Brasil",
+        },
+      ),
+    ).toEqual(scoringResult("EXACT_SCORE", 20));
+  });
+
+  it("does not add the draw bonus to matches decided by the predicted score", () => {
+    expect(
+      calculatePredictionPoints(
+        {
+          teamAScore: 2,
+          teamBScore: 1,
+          predictedAdvancingTeam: "Brasil",
+        },
+        {
+          teamAScore: 2,
+          teamBScore: 1,
+          stage: "SEMI_FINALS",
+          advancingTeam: "Brasil",
+        },
+      ),
+    ).toEqual(scoringResult("EXACT_SCORE", 50));
   });
 
   it("awards zero for a wrong outcome", () => {
@@ -78,7 +154,7 @@ describe("calculatePredictionPoints", () => {
         { teamAScore: 1, teamBScore: 0 },
         { teamAScore: 1, teamBScore: 2, stage: "ROUND_OF_16" },
       ),
-    ).toEqual({ category: "WRONG_PREDICTION", points: 0 });
+    ).toEqual(scoringResult("WRONG_PREDICTION", 0));
   });
 
   it("defines every configured stage base value", () => {
@@ -108,6 +184,7 @@ describe("calculatePredictionPoints", () => {
       ),
     ).toBe(8);
     expect(pointsForScoringCategory("ROUND_OF_32", "CORRECT_DRAW_ONLY")).toBe(5);
+    expect(pointsForDrawAdvancingTeamBonus("ROUND_OF_32")).toBe(2);
   });
 });
 
@@ -127,6 +204,10 @@ describe("isCorrectResult", () => {
     ).toBe(true);
   });
 });
+
+function scoringResult(category: string, points: number, bonusPoints = 0) {
+  return { category, points, bonusPoints };
+}
 
 describe("predictionAchievements", () => {
   it("summarizes ranking counters from scoring outcomes", () => {

@@ -9,6 +9,7 @@ type ScoredMatch = {
   stage: string;
   teamAScore: number | null;
   teamBScore: number | null;
+  advancingTeam: string | null;
 };
 
 export async function recalculateMatchPredictions(
@@ -26,6 +27,7 @@ export async function recalculateMatchPredictions(
       stage: match.stage as MatchStageValue,
       teamAScore: match.teamAScore,
       teamBScore: match.teamBScore,
+      advancingTeam: match.advancingTeam,
     });
     await tx.prediction.update({
       where: { id: prediction.id },

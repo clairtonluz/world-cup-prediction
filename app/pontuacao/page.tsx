@@ -2,6 +2,7 @@ import { AppShell } from "@/components/shared/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MATCH_STAGES, STAGE_LABELS } from "@/lib/constants";
 import {
+  pointsForDrawAdvancingTeamBonus,
   pointsForScoringCategory,
   type ScoringCategory,
 } from "@/lib/scoring";
@@ -63,7 +64,8 @@ export default function ScoringPage() {
         <p className="mt-1 max-w-3xl text-slate-600">
           Cada jogo tem uma pontuação máxima conforme a fase da Copa. Sua
           aposta recebe uma única pontuação, de acordo com o acerto mais
-          preciso alcançado.
+          preciso alcançado. O placar considerado é o dos 90 minutos mais
+          acréscimos.
         </p>
       </section>
 
@@ -88,6 +90,22 @@ export default function ScoringPage() {
                   </span>
                 </div>
               ))}
+              <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
+                <div>
+                  <p className="font-medium text-slate-950">
+                    Bônus de empate no mata-mata
+                  </p>
+                  <p className="text-sm text-slate-600">
+                    Da segunda fase até a semifinal, se o placar previsto e o
+                    oficial forem empate, acertar a equipe que avança soma 10%
+                    dos pontos da fase. Na segunda fase, isso vale{" "}
+                    {pointsForDrawAdvancingTeamBonus("ROUND_OF_32")} pontos.
+                  </p>
+                </div>
+                <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">
+                  +10%
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -169,11 +187,6 @@ export default function ScoringPage() {
               Se o palpite coincidir com o campeão oficial após a final, ele
               soma <strong>{CHAMPION_BONUS_POINTS} pontos</strong>.
             </p>
-            <p>
-              Nos jogos entre a segunda fase e a semifinal, a aposta também
-              informa a equipe que avança, inclusive quando o placar previsto
-              terminar empatado.
-            </p>
           </CardContent>
         </Card>
         <Card>
@@ -194,6 +207,23 @@ export default function ScoringPage() {
           </CardContent>
         </Card>
       </section>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Placar e pênaltis</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 text-sm text-slate-700">
+          <p>
+            O placar da aposta vale para o tempo regulamentar: 90 minutos mais
+            acréscimos, quando houver.
+          </p>
+          <p>
+            Disputas de pênaltis não entram na contagem do placar. No
+            mata-mata, quando esse placar terminar empatado, a equipe que
+            avança é registrada separadamente.
+          </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

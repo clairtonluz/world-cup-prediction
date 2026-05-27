@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { savePredictionAction } from "@/actions/prediction-actions";
 import { TeamLabel } from "@/components/shared/team-label";
 import { Button } from "@/components/ui/button";
@@ -35,12 +38,40 @@ export function PredictionForm({
   returnTo?: "match" | "apostas";
   fieldIdPrefix?: string;
 }) {
+  const [teamAScore, setTeamAScore] = useState(
+    prediction?.teamAScore.toString() ?? "",
+  );
+  const [teamBScore, setTeamBScore] = useState(
+    prediction?.teamBScore.toString() ?? "",
+  );
+  const [selectedAdvancingTeam, setSelectedAdvancingTeam] = useState(
+    prediction?.predictedAdvancingTeam ?? "",
+  );
   const requestsAdvancingTeam = requiresAdvancingTeamPrediction(stage);
   const teamAScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamAScore` : "teamAScore";
   const teamBScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamBScore` : "teamBScore";
   const advancingTeamId = fieldIdPrefix
     ? `${fieldIdPrefix}-predictedAdvancingTeam`
     : "predictedAdvancingTeam";
+  const teamAScoreNumber = scoreFromField(teamAScore);
+  const teamBScoreNumber = scoreFromField(teamBScore);
+  const hasCompleteScores =
+    teamAScoreNumber !== null && teamBScoreNumber !== null;
+  const isDrawPrediction =
+    hasCompleteScores && teamAScoreNumber === teamBScoreNumber;
+  const inferredAdvancingTeam =
+    hasCompleteScores && !isDrawPrediction
+      ? teamAScoreNumber > teamBScoreNumber
+        ? teamA
+        : teamB
+      : null;
+  const displayedAdvancingTeam =
+    inferredAdvancingTeam ?? selectedAdvancingTeam;
+  const advancingTeamHelp = !hasCompleteScores
+    ? "Informe o placar para definir como a equipe classificada será registrada."
+    : isDrawPrediction
+      ? "Em caso de empate no placar previsto, informe quem avança."
+      : "O placar previsto define automaticamente quem avança.";
 
   if (disabled) {
     return (
@@ -65,7 +96,8 @@ export function PredictionForm({
             type="number"
             min={0}
             max={99}
-            defaultValue={prediction?.teamAScore}
+            value={teamAScore}
+            onChange={(event) => setTeamAScore(event.target.value)}
             required
           />
         </div>
@@ -80,7 +112,8 @@ export function PredictionForm({
             type="number"
             min={0}
             max={99}
-            defaultValue={prediction?.teamBScore}
+            value={teamBScore}
+            onChange={(event) => setTeamBScore(event.target.value)}
             required
           />
         </div>
@@ -88,23 +121,43 @@ export function PredictionForm({
       {requestsAdvancingTeam ? (
         <div>
           <Label htmlFor={advancingTeamId}>Equipe classificada</Label>
+          {!isDrawPrediction && inferredAdvancingTeam ? (
+            <input
+              type="hidden"
+              name="predictedAdvancingTeam"
+              value={inferredAdvancingTeam}
+            />
+          ) : null}
           <select
             id={advancingTeamId}
-            name="predictedAdvancingTeam"
-            defaultValue={prediction?.predictedAdvancingTeam ?? ""}
-            required
-            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-[#0e74e1] focus:ring-2 focus:ring-blue-100"
+            name={isDrawPrediction ? "predictedAdvancingTeam" : undefined}
+            value={displayedAdvancingTeam}
+            onChange={(event) => setSelectedAdvancingTeam(event.target.value)}
+            required={isDrawPrediction}
+            disabled={!isDrawPrediction}
+            className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-[#0e74e1] focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500"
           >
-            <option value="" disabled>Selecione quem avança</option>
+            <option value="" disabled>
+              {hasCompleteScores ? "Selecione quem avança" : "Aguardando placar"}
+            </option>
             {teamA ? <option value={teamA}>{teamA}</option> : null}
             {teamB ? <option value={teamB}>{teamB}</option> : null}
           </select>
           <p className="mt-1 text-sm text-slate-600">
-            Em caso de empate no placar previsto, informe quem avança.
+            {advancingTeamHelp}
           </p>
         </div>
       ) : null}
       <Button type="submit">{prediction ? "Atualizar aposta" : "Salvar aposta"}</Button>
     </form>
   );
+}
+
+function scoreFromField(value: string) {
+  if (value === "") {
+    return null;
+  }
+
+  const score = Number(value);
+  return Number.isInteger(score) && score >= 0 && score <= 99 ? score : null;
 }

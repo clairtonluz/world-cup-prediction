@@ -38,6 +38,13 @@ export function formatMatchTime(date: Date) {
   }).format(date);
 }
 
+export function matchDayKey(date: Date) {
+  return new Intl.DateTimeFormat("sv-SE", {
+    dateStyle: "short",
+    timeZone: BRAZIL_TIME_ZONE,
+  }).format(date);
+}
+
 export function teamText(team: string | null, slot: string | null) {
   return team ?? slot ?? "A definir";
 }
