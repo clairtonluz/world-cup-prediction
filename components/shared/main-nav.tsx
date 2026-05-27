@@ -9,6 +9,7 @@ import { signOutFromKeycloak } from "@/app/actions/auth";
 
 const navigationItems = [
   { href: "/matches", label: "Jogos" },
+  { href: "/apostas", label: "Minhas apostas" },
   { href: "/grupos", label: "Grupos" },
   { href: "/ranking", label: "Ranking" },
   { href: "/grupos-de-amigos", label: "Grupos de Amigos" },

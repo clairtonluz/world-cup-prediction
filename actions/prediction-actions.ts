@@ -11,6 +11,7 @@ import { predictionSchema } from "@/lib/validation";
 
 export async function savePredictionAction(formData: FormData) {
   const { user } = await requireUser();
+  const returnTo = formData.get("returnTo") === "apostas" ? "apostas" : "match";
   const parsed = predictionSchema.safeParse({
     matchId: formData.get("matchId"),
     teamAScore: formData.get("teamAScore"),
@@ -19,10 +20,16 @@ export async function savePredictionAction(formData: FormData) {
   });
 
   if (!parsed.success) {
-    redirect(feedbackUrl("/matches", { error: "invalid_prediction" }));
+    redirect(
+      feedbackUrl(returnTo === "apostas" ? "/apostas" : "/matches", {
+        error: "invalid_prediction",
+      }),
+    );
   }
 
   const input = parsed.data;
+  const returnPath =
+    returnTo === "apostas" ? "/apostas" : `/matches/${input.matchId}`;
   let error: ErrorFeedbackCode | null;
 
   try {
@@ -84,11 +91,14 @@ export async function savePredictionAction(formData: FormData) {
 
   if (error) {
     const pathname =
-      error === "match_not_found" ? "/matches" : `/matches/${input.matchId}`;
+      error === "match_not_found" && returnTo !== "apostas"
+        ? "/matches"
+        : returnPath;
     redirect(feedbackUrl(pathname, { error }));
   }
 
   revalidatePath(`/matches/${input.matchId}`);
   revalidatePath("/matches");
-  redirect(feedbackUrl(`/matches/${input.matchId}`, { success: "prediction_saved" }));
+  revalidatePath("/apostas");
+  redirect(feedbackUrl(returnPath, { success: "prediction_saved" }));
 }

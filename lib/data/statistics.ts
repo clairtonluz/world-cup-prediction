@@ -1,6 +1,6 @@
 import "server-only";
 
-import { STAGE_LABELS, type MatchStageValue } from "@/lib/constants";
+import { MATCH_STAGES, STAGE_LABELS, type MatchStageValue } from "@/lib/constants";
 import { requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
 import { predictionAchievements, STAGE_POINTS } from "@/lib/scoring";
@@ -9,16 +9,6 @@ import {
   isCorrectAdvancingTeamPrediction,
   officialChampionFromFinal,
 } from "@/lib/tournament-predictions";
-
-const stageOrder: MatchStageValue[] = [
-  "GROUP_STAGE",
-  "ROUND_OF_32",
-  "ROUND_OF_16",
-  "QUARTER_FINALS",
-  "SEMI_FINALS",
-  "THIRD_PLACE_MATCH",
-  "FINAL",
-];
 
 export async function getPersonalStatistics() {
   const { user } = await requireUser();
@@ -106,16 +96,18 @@ export async function getPersonalStatistics() {
     ([stageA, a], [stageB, b]) =>
       b.points - a.points ||
       b.points / b.available - a.points / a.available ||
-      stageOrder.indexOf(stageA) - stageOrder.indexOf(stageB),
+      MATCH_STAGES.indexOf(stageA) - MATCH_STAGES.indexOf(stageB),
   )[0];
 
   const championPoints = championBonusPoints(
     participant.predictedChampion,
     officialChampionFromFinal(finalMatch),
   );
+  const gamePoints = scored.reduce((total, prediction) => total + prediction.points, 0);
 
   return {
-    totalPoints: scored.reduce((total, prediction) => total + prediction.points, championPoints),
+    gamePoints,
+    totalPoints: gamePoints + championPoints,
     exactPredictions,
     correctResults,
     correctAdvancingTeams,
@@ -139,6 +131,11 @@ export async function getPersonalStatistics() {
           points: bestStage[1].points,
         }
       : null,
+    stagePoints: MATCH_STAGES.map((stage) => ({
+      stage,
+      label: STAGE_LABELS[stage],
+      points: stages.get(stage)?.points ?? 0,
+    })),
     provisional: scored.some((prediction) => prediction.match.status === "STARTED"),
   };
 }

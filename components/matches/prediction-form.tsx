@@ -16,6 +16,8 @@ export function PredictionForm({
   prediction,
   disabled,
   disabledReason,
+  returnTo = "match",
+  fieldIdPrefix,
 }: {
   matchId: string;
   teamA: string | null;
@@ -30,8 +32,15 @@ export function PredictionForm({
   };
   disabled: boolean;
   disabledReason?: string;
+  returnTo?: "match" | "apostas";
+  fieldIdPrefix?: string;
 }) {
   const requestsAdvancingTeam = requiresAdvancingTeamPrediction(stage);
+  const teamAScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamAScore` : "teamAScore";
+  const teamBScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamBScore` : "teamBScore";
+  const advancingTeamId = fieldIdPrefix
+    ? `${fieldIdPrefix}-predictedAdvancingTeam`
+    : "predictedAdvancingTeam";
 
   if (disabled) {
     return (
@@ -44,13 +53,14 @@ export function PredictionForm({
   return (
     <form action={savePredictionAction} className="space-y-4">
       <input type="hidden" name="matchId" value={matchId} />
+      <input type="hidden" name="returnTo" value={returnTo} />
       <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
         <div>
-          <Label htmlFor="teamAScore">
+          <Label htmlFor={teamAScoreId}>
             <TeamLabel team={teamA} slot={teamASlot} />
           </Label>
           <Input
-            id="teamAScore"
+            id={teamAScoreId}
             name="teamAScore"
             type="number"
             min={0}
@@ -61,11 +71,11 @@ export function PredictionForm({
         </div>
         <span className="pb-3 text-slate-500">x</span>
         <div>
-          <Label htmlFor="teamBScore">
+          <Label htmlFor={teamBScoreId}>
             <TeamLabel team={teamB} slot={teamBSlot} />
           </Label>
           <Input
-            id="teamBScore"
+            id={teamBScoreId}
             name="teamBScore"
             type="number"
             min={0}
@@ -77,9 +87,9 @@ export function PredictionForm({
       </div>
       {requestsAdvancingTeam ? (
         <div>
-          <Label htmlFor="predictedAdvancingTeam">Equipe classificada</Label>
+          <Label htmlFor={advancingTeamId}>Equipe classificada</Label>
           <select
-            id="predictedAdvancingTeam"
+            id={advancingTeamId}
             name="predictedAdvancingTeam"
             defaultValue={prediction?.predictedAdvancingTeam ?? ""}
             required
