@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
-import { TeamLabel } from "@/components/shared/team-label";
+import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import {
   BRAZIL_TIME_ZONE,
@@ -47,7 +47,14 @@ export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
                   href={`/matches/${match.id}`}
                   className="block rounded-lg text-slate-950 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0e74e1]"
                 >
-                  <MatchScoreboard match={match} />
+                  <MatchScoreboard
+                    teamA={match.teamA}
+                    teamB={match.teamB}
+                    teamASlot={match.teamASlot}
+                    teamBSlot={match.teamBSlot}
+                    teamAScore={match.teamAScore}
+                    teamBScore={match.teamBScore}
+                  />
                 </Link>
                 {!match.participantsConfirmed && (match.teamA || match.teamB) ? (
                   <div className="mt-2 text-center">
@@ -77,26 +84,6 @@ export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
           </div>
         </section>
       ))}
-    </div>
-  );
-}
-
-function MatchScoreboard({ match }: { match: ScheduleMatch }) {
-  const hasScore = match.teamAScore !== null && match.teamBScore !== null;
-
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 text-sm font-medium sm:gap-4 sm:text-lg">
-      <TeamLabel
-        team={match.teamA}
-        slot={match.teamASlot}
-        className="min-w-0 flex-row-reverse justify-start text-right"
-      />
-      <span className="inline-flex items-center gap-2 font-semibold tabular-nums">
-        {hasScore ? <span>{match.teamAScore}</span> : null}
-        <span className="text-slate-400">x</span>
-        {hasScore ? <span>{match.teamBScore}</span> : null}
-      </span>
-      <TeamLabel team={match.teamB} slot={match.teamBSlot} className="min-w-0" />
     </div>
   );
 }

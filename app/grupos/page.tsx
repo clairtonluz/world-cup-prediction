@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { AppShell } from "@/components/shared/app-shell";
-import { MatchTeams } from "@/components/shared/match-teams";
+import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { TeamLabel } from "@/components/shared/team-label";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { MatchStatusValue } from "@/lib/constants";
 import { listGroupMatches } from "@/lib/data/matches";
-import { formatMatchDate, scoreText } from "@/lib/display";
+import { formatMatchDate } from "@/lib/display";
 import {
   GROUP_CODES,
   calculateGroupStandings,
@@ -123,20 +123,22 @@ export default async function GroupsPage() {
                               href={`/matches/${match.id}`}
                               className="block rounded-md border p-3 text-sm hover:border-emerald-300 hover:bg-emerald-50"
                             >
-                              <div className="flex flex-col items-start gap-2">
-                                <MatchTeams
-                                  teamA={match.teamA}
-                                  teamB={match.teamB}
-                                  className="font-medium"
-                                />
+                              <MatchScoreboard
+                                teamA={match.teamA}
+                                teamB={match.teamB}
+                                teamASlot={match.teamASlot}
+                                teamBSlot={match.teamBSlot}
+                                teamAScore={match.teamAScore}
+                                teamBScore={match.teamBScore}
+                              />
+                              <div className="mt-3 flex flex-col items-start gap-2">
                                 <MatchStatusIndicator
                                   status={match.status as MatchStatusValue}
                                   startsAt={match.startsAt}
                                 />
                               </div>
-                              <div className="mt-2 space-y-1 text-xs text-slate-600">
+                              <div className="mt-2 text-xs text-slate-600">
                                 <p>{formatMatchDate(match.startsAt)}</p>
-                                <p>{scoreText(match.teamAScore, match.teamBScore)}</p>
                               </div>
                             </Link>
                           ))}
