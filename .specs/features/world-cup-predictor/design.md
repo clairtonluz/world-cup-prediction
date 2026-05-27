@@ -915,7 +915,7 @@ This direct loop is intentionally appropriate for a friend group. It is easy to 
 
 | Route | Access | Primary UI |
 | --- | --- | --- |
-| `/` | Public/session-aware | Redirect signed-in authorized users to `/matches`; otherwise direct to `/login`. |
+| `/` | Public/session-aware | Public invitation landing page with direct Keycloak sign-in; redirect signed-in authorized users to `/matches` and signed-in unauthorized users to `/login?error=forbidden`. |
 | `/login` | Public | App title, short description, “Sign in with Keycloak” button, access-denied/session-expired feedback. |
 | `/matches` | `USER` or `ADMIN` | Dashboard cards: My Position, Total Points, Accuracy; upcoming matches; recent predictions; ranking preview. |
 | `/matches/[id]` | `USER` or `ADMIN` | Match card, status badge, score/prediction form while open, final result, comparison table when visible. |

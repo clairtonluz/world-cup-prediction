@@ -6,7 +6,7 @@ import {
   Trophy,
   UsersRound,
 } from "lucide-react";
-import { signIn } from "@/auth";
+import { signInWithKeycloak } from "@/app/actions/auth";
 import { TournamentAccentBars, TournamentBackdrop } from "@/components/shared/tournament-theme";
 import { Button } from "@/components/ui/button";
 import { MessageAlert } from "@/components/shared/message-alert";
@@ -121,12 +121,7 @@ export default async function LoginPage({
 
           <div className="mt-8 space-y-5">
             <MessageAlert error={error} />
-            <form
-              action={async () => {
-                "use server";
-                await signIn("keycloak", { redirectTo: "/matches" });
-              }}
-            >
+            <form action={signInWithKeycloak}>
               <Button
                 aria-describedby="login-description login-security-note"
                 className="group h-12 w-full rounded-xl bg-[#080b12] text-base shadow-sm shadow-slate-950/15 hover:bg-slate-800"

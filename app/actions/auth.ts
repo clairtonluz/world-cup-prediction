@@ -3,8 +3,12 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getToken } from "next-auth/jwt";
-import { requiredAuthSetting, signOut } from "@/auth";
+import { requiredAuthSetting, signIn, signOut } from "@/auth";
 import { keycloakLogoutUrl } from "@/lib/keycloak-logout";
+
+export async function signInWithKeycloak() {
+  await signIn("keycloak", { redirectTo: "/matches" });
+}
 
 async function keycloakIdTokenHint() {
   const applicationUrl = new URL(requiredAuthSetting("AUTH_URL"));

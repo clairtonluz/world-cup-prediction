@@ -215,7 +215,7 @@ An authenticated Keycloak user without either application role receives access d
 | ADMIN-01 | Restrict every `/admin/*` page and admin Server Action to token-derived `ADMIN`. |
 | ADMIN-02 | Permit admin create/edit/status/result changes with Zod validation and explicit invalid-state messages. |
 | ADMIN-03 | Recalculate points in the same database transaction used to finish or correct a result. |
-| UI-01 | Implement `/login`, `/matches`, `/matches/[id]`, `/ranking`, `/me`, `/admin/matches`, `/admin/matches/new`, and `/admin/matches/[id]/edit` with accessible forms, tables/cards, status badges, progress indicators, loading/empty/error states, and current-user highlighting. |
+| UI-01 | Implement the public invitation landing page at `/`, plus `/login`, `/matches`, `/matches/[id]`, `/ranking`, `/me`, `/admin/matches`, `/admin/matches/new`, and `/admin/matches/[id]/edit` with accessible calls to action, forms, tables/cards, status badges, progress indicators, loading/empty/error states, and current-user highlighting. |
 
 ## Validation And Edge Cases
 
