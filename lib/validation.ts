@@ -20,6 +20,11 @@ export const predictionSchema = z.object({
   matchId: matchIdSchema,
   teamAScore: score,
   teamBScore: score,
+  predictedAdvancingTeam: z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() !== "" ? value : null,
+    z.string().trim().min(1).max(80).nullable(),
+  ),
 });
 
 const nullableScore = z.preprocess(
@@ -62,6 +67,14 @@ export const matchResultSchema = z.discriminatedUnion("status", [
 export const favoriteTeamSchema = z.object({
   favoriteTeam: z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? null : value),
+    z.string().trim().min(1).max(80).nullable(),
+  ),
+});
+
+export const championPredictionSchema = z.object({
+  predictedChampion: z.preprocess(
+    (value) =>
+      typeof value === "string" && value.trim() !== "" ? value : null,
     z.string().trim().min(1).max(80).nullable(),
   ),
 });

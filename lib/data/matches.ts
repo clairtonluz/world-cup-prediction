@@ -34,7 +34,7 @@ export async function listMatches() {
       ...matchSelect,
       predictions: {
         where: { userId: user.id },
-        select: { teamAScore: true, teamBScore: true, points: true },
+        select: { teamAScore: true, teamBScore: true, predictedAdvancingTeam: true, points: true },
         take: 1,
       },
     },
@@ -60,7 +60,13 @@ export async function getMatchDetail(id: string) {
       ...matchSelect,
       predictions: {
         where: { userId: user.id },
-        select: { id: true, teamAScore: true, teamBScore: true, points: true },
+        select: {
+          id: true,
+          teamAScore: true,
+          teamBScore: true,
+          predictedAdvancingTeam: true,
+          points: true,
+        },
         take: 1,
       },
     },
@@ -80,6 +86,7 @@ export async function getMatchDetail(id: string) {
       id: true,
       teamAScore: true,
       teamBScore: true,
+      predictedAdvancingTeam: true,
       points: true,
       user: { select: { id: true, name: true, image: true } },
     },

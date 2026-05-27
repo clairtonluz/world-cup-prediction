@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { hasEffectivelyStarted, mayEditPrediction } from "@/lib/match-rules";
 import {
+  championPredictionSchema,
   favoriteTeamSchema,
   inviteTokenSchema,
   friendGroupSchema,
@@ -26,7 +27,12 @@ describe("predictionSchema", () => {
         teamAScore: "2",
         teamBScore: "1",
       }),
-    ).toEqual({ matchId, teamAScore: 2, teamBScore: 1 });
+    ).toEqual({
+      matchId,
+      teamAScore: 2,
+      teamBScore: 1,
+      predictedAdvancingTeam: null,
+    });
   });
 
   it.each(["", "-1", "1.5", "100", "score"])(
@@ -93,6 +99,17 @@ describe("favoriteTeamSchema", () => {
   it("turns a cleared team value into null", () => {
     expect(favoriteTeamSchema.parse({ favoriteTeam: " " })).toEqual({
       favoriteTeam: null,
+    });
+  });
+});
+
+describe("championPredictionSchema", () => {
+  it("normalizes an optional champion selection", () => {
+    expect(championPredictionSchema.parse({ predictedChampion: " Brasil " })).toEqual({
+      predictedChampion: "Brasil",
+    });
+    expect(championPredictionSchema.parse({ predictedChampion: "" })).toEqual({
+      predictedChampion: null,
     });
   });
 });

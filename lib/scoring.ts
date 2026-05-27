@@ -124,17 +124,16 @@ export function calculatePredictionPoints(
   };
 }
 
-export function isCorrectWinner(
+export function isCorrectResult(
   prediction: Score,
   actual: Score,
 ): boolean {
-  const outcome = scoreOutcome(actual);
-  return outcome !== "DRAW" && scoreOutcome(prediction) === outcome;
+  return scoreOutcome(prediction) === scoreOutcome(actual);
 }
 
 export function predictionAchievements(prediction: Score, match: FinishedMatch) {
   return {
     exact: calculatePredictionPoints(prediction, match).category === "EXACT_SCORE",
-    correctWinner: isCorrectWinner(prediction, match),
+    correctResult: isCorrectResult(prediction, match),
   };
 }

@@ -90,6 +90,7 @@ export default async function MatchDetailPage({
               matchId={match.id}
               teamA={match.teamA}
               teamB={match.teamB}
+              stage={match.stage as MatchStageValue}
               teamASlot={match.teamASlot}
               teamBSlot={match.teamBSlot}
               prediction={prediction}

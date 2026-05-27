@@ -5,6 +5,7 @@ import {
   pointsForScoringCategory,
   type ScoringCategory,
 } from "@/lib/scoring";
+import { CHAMPION_BONUS_POINTS } from "@/lib/tournament-predictions";
 
 export const dynamic = "force-dynamic";
 
@@ -153,6 +154,46 @@ export default function ScoringPage() {
           </div>
         </CardContent>
       </Card>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Campeão da Copa</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-slate-700">
+            <p>
+              Antes do início do primeiro jogo, cada participante pode indicar
+              uma seleção campeã entre as equipes do torneio.
+            </p>
+            <p>
+              Se o palpite coincidir com o campeão oficial após a final, ele
+              soma <strong>{CHAMPION_BONUS_POINTS} pontos</strong>.
+            </p>
+            <p>
+              Nos jogos entre a segunda fase e a semifinal, a aposta também
+              informa a equipe que avança, inclusive quando o placar previsto
+              terminar empatado.
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Desempate</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-slate-700">
+            <ol className="list-decimal space-y-2 pl-5">
+              <li>Maior total de pontos, incluindo o bônus do campeão.</li>
+              <li>Maior número de placares exatos.</li>
+              <li>Maior número de resultados corretos, incluindo empates.</li>
+              <li>Maior número de classificados acertados no mata-mata.</li>
+              <li>Acerto do campeão da Copa.</li>
+            </ol>
+            <p className="mt-3">
+              Persistindo o empate, os participantes ocupam a mesma posição.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
 
       <Card>
         <CardHeader>

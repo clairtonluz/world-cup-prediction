@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth-guards";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
 import { mayEditPrediction } from "@/lib/match-rules";
 import { isTransactionConflict, runSerializableTransaction } from "@/lib/transactions";
+import { advancingTeamPredictionForMatch } from "@/lib/tournament-predictions";
 import { predictionSchema } from "@/lib/validation";
 
 export async function savePredictionAction(formData: FormData) {
@@ -14,6 +15,7 @@ export async function savePredictionAction(formData: FormData) {
     matchId: formData.get("matchId"),
     teamAScore: formData.get("teamAScore"),
     teamBScore: formData.get("teamBScore"),
+    predictedAdvancingTeam: formData.get("predictedAdvancingTeam"),
   });
 
   if (!parsed.success) {
@@ -32,6 +34,9 @@ export async function savePredictionAction(formData: FormData) {
           startsAt: true,
           status: true,
           participantsConfirmed: true,
+          stage: true,
+          teamA: true,
+          teamB: true,
         },
       });
 
@@ -47,14 +52,24 @@ export async function savePredictionAction(formData: FormData) {
         return "predictions_closed";
       }
 
+      const advancingPrediction = advancingTeamPredictionForMatch(match, input);
+      if (!advancingPrediction.valid) {
+        return "invalid_advancing_team_prediction";
+      }
+
       await tx.prediction.upsert({
         where: { userId_matchId: { userId: user.id, matchId: match.id } },
-        update: { teamAScore: input.teamAScore, teamBScore: input.teamBScore },
+        update: {
+          teamAScore: input.teamAScore,
+          teamBScore: input.teamBScore,
+          predictedAdvancingTeam: advancingPrediction.value,
+        },
         create: {
           userId: user.id,
           matchId: match.id,
           teamAScore: input.teamAScore,
           teamBScore: input.teamBScore,
+          predictedAdvancingTeam: advancingPrediction.value,
         },
       });
 

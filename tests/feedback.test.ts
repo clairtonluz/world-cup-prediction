@@ -20,6 +20,17 @@ describe("feedbackText", () => {
     });
   });
 
+  it("renders champion prediction action results", () => {
+    expect(feedbackText({ success: "predicted_champion_updated" })).toEqual({
+      kind: "success",
+      text: "Palpite de campeão salvo.",
+    });
+    expect(feedbackText({ error: "champion_prediction_closed" })).toEqual({
+      kind: "error",
+      text: "O prazo para indicar o campeão encerrou no início do primeiro jogo.",
+    });
+  });
+
   it("ignores arbitrary query-string messages", () => {
     expect(feedbackText({ error: "Administrator access granted." })).toBeNull();
   });

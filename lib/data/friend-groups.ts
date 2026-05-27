@@ -7,7 +7,7 @@ import { getDb } from "@/lib/db";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
 import { createInviteToken, hashInviteToken } from "@/lib/friend-group-invitations";
 import { calculateRanking } from "@/lib/ranking";
-import { rankingParticipantSelect } from "@/lib/data/ranking";
+import { getRankingContext, rankingParticipantSelect } from "@/lib/data/ranking";
 import { runSerializableTransaction } from "@/lib/transactions";
 import { friendGroupIdSchema, inviteTokenSchema } from "@/lib/validation";
 
@@ -74,26 +74,29 @@ export async function getFriendGroupDetail(id: string) {
   }
   const canManageAnyFriendGroup = isAdmin(session.user);
 
-  const friendGroup = await getDb().friendGroup.findFirst({
-    where: {
-      id: parsedId.data,
-      ...(canManageAnyFriendGroup ? {} : { members: { some: { userId: user.id } } }),
-    },
-    select: {
-      id: true,
-      name: true,
-      ownerId: true,
-      inviteTokenHash: true,
-      owner: { select: { name: true } },
-      members: {
-        select: {
-          joinedAt: true,
-          user: { select: rankingParticipantSelect },
-        },
-        orderBy: { joinedAt: "asc" },
+  const [friendGroup, rankingContext] = await Promise.all([
+    getDb().friendGroup.findFirst({
+      where: {
+        id: parsedId.data,
+        ...(canManageAnyFriendGroup ? {} : { members: { some: { userId: user.id } } }),
       },
-    },
-  });
+      select: {
+        id: true,
+        name: true,
+        ownerId: true,
+        inviteTokenHash: true,
+        owner: { select: { name: true } },
+        members: {
+          select: {
+            joinedAt: true,
+            user: { select: rankingParticipantSelect },
+          },
+          orderBy: { joinedAt: "asc" },
+        },
+      },
+    }),
+    getRankingContext(),
+  ]);
 
   if (!friendGroup) {
     redirect(feedbackUrl("/grupos-de-amigos", { error: "friend_group_not_found" }));
@@ -119,6 +122,7 @@ export async function getFriendGroupDetail(id: string) {
     ranking: calculateRanking(
       friendGroup.members.map((member) => member.user),
       user.id,
+      rankingContext,
     ),
   };
 }

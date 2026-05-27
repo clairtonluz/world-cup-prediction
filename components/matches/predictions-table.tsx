@@ -6,6 +6,7 @@ export function PredictionsTable({
     id: string;
     teamAScore: number;
     teamBScore: number;
+    predictedAdvancingTeam: string | null;
     points: number;
     user: { id: string; name: string; image: string | null };
   }[] | null;
@@ -39,7 +40,14 @@ export function PredictionsTable({
           {predictions.map((prediction) => (
             <tr key={prediction.id} className="border-b border-slate-100">
               <td className="py-3 font-medium text-slate-900">{prediction.user.name}</td>
-              <td className="py-3">{prediction.teamAScore} x {prediction.teamBScore}</td>
+              <td className="py-3">
+                <p>{prediction.teamAScore} x {prediction.teamBScore}</p>
+                {prediction.predictedAdvancingTeam ? (
+                  <p className="text-xs text-slate-600">
+                    Classificada: {prediction.predictedAdvancingTeam}
+                  </p>
+                ) : null}
+              </td>
               <td className="py-3 text-right">{prediction.points}</td>
             </tr>
           ))}

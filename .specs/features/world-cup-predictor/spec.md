@@ -32,6 +32,15 @@ fixtures or scoring only after `FINISHED`.
   fixture and show that a new bet is required.
 - Betting is available only before kickoff and only when both fixture
   participants are confirmed.
+- Each participant may optionally select a tournament champion before the
+  effective start of match 1, restricted to teams in the fixed group-stage
+  schedule. A correct champion adds 200 points after the final is finished.
+- Predictions from the round of 32 through the semifinals include the team
+  expected to advance; the final and third-place match do not count toward
+  this tie-break metric.
+- Rankings sort by total points including the champion bonus, exact scores,
+  correct outcomes including draws, correct advancing teams and correct
+  champion. Remaining ties display the same position.
 - Visible application text and match dates operate in `pt-BR` and
   `America/Sao_Paulo`; `/grupos` shows groups, standings and match rounds.
 
@@ -49,7 +58,7 @@ fixtures or scoring only after `FINISHED`.
 | Registration, password reset, or local roles | Keycloak owns identity and realm roles. |
 | Friend groups, invitations, multiple tournaments, or prizes | Not needed for the initial friend group. |
 | Live feeds, Redis, queues, WebSockets, notifications | Manual administration and page refresh are sufficient for v1. |
-| Alternative prediction modes, knockout bracket predictions, penalty shootout guesses | One final-score prediction is intentionally simple. |
+| Complete pre-tournament bracket predictions or penalty shootout score guesses | Per-match knockout advancement and one champion pick keep the competition simple. |
 | Clean Architecture, DDD, microservices, or event workflows | They add cost without improving this application. |
 
 ## Actors And Permissions
@@ -78,7 +87,8 @@ An authenticated Keycloak user without either application role receives access d
 | Scored prediction | A prediction attached to a `FINISHED` match with both final scores recorded. |
 | Point rounding | Fractional rewards are rounded to the nearest integer using `Math.round`; for example, 70% of 15 is 11 and 30% of 15 is 5. |
 | Exact prediction | Both predicted team scores equal the final team scores, including an exact draw. |
-| Correct winner count | Count of predictions whose selected winning team equals the final winning team, including exact winning scores; draws do not increment this count. |
+| Correct result count | Count of predictions whose win, loss or draw outcome matches the recorded match outcome. |
+| Predicted champion | Optional pre-tournament selection from the scheduled group-stage teams; editable only before the effective start of the first match and worth 200 points after a correct completed final. |
 | Accuracy | `predictionsWithPointsGreaterThanZero / scoredPredictions * 100`, displayed as a percentage; zero scored predictions displays `0%`. |
 | Favorite team | Optional value selected by the user on `/me`; it is not inferred from predictions. |
 | Best stage performance | Stage with the greatest total awarded points for the user; ties use greatest awarded-to-available percentage and then earlier tournament order. |
@@ -119,7 +129,7 @@ An authenticated Keycloak user without either application role receives access d
 
 1. WHEN a match is changed to `FINISHED` with a final score THEN the application SHALL recalculate integer points for every prediction of that match using the documented stage base and score categories. (`SCORE-01`, `SCORE-02`, `SCORE-03`)
 2. WHEN an exact draw is predicted THEN the application SHALL award the full stage value, not draw-only points. (`SCORE-02`)
-3. WHEN a user opens `/ranking` THEN rows SHALL sort by total points descending, exact prediction count descending, correct winner count descending, and name ascending. (`RANK-01`)
+3. WHEN a user opens `/ranking` THEN rows SHALL sort by total points including any champion bonus, exact prediction count, correct result count, correct advancing-team count, and correct champion; fully tied users SHALL share a position. (`RANK-01`)
 4. WHEN the signed-in user views ranking THEN their row and “My Position” summary SHALL be identifiable. (`RANK-02`)
 
 **Independent Test:** Seed finished matches and predictions representing every score category, recalculate, and verify points and sorted positions.
@@ -154,7 +164,7 @@ An authenticated Keycloak user without either application role receives access d
 
 **Acceptance Criteria:**
 
-1. WHEN a user opens `/me` THEN the application SHALL show total points, exact predictions, correct winners, total scored/predicted matches, accuracy, favorite team, and best stage performance. (`STAT-01`)
+1. WHEN a user opens `/me` THEN the application SHALL show total points, exact predictions, correct results, correct advancing teams, champion prediction/bonus, total scored/predicted matches, accuracy, favorite team, and best stage performance. (`STAT-01`)
 2. WHEN a user has not selected a favorite team or has no scored predictions THEN the UI SHALL show a clear empty state rather than invented statistics. (`STAT-01`, `STAT-03`)
 3. WHEN a user selects or updates a favorite team THEN only their own local profile SHALL be updated after server validation. (`STAT-02`)
 
@@ -193,7 +203,7 @@ An authenticated Keycloak user without either application role receives access d
 | SCORE-02 | Award exact score 100%, correct winner plus exact winner score 70%, correct winner plus exact loser score 50%, correct winner only 30%, correct non-exact draw 30%, otherwise 0%, rounded with `Math.round`. |
 | SCORE-03 | Set points to zero until a match is finished; recalculate every related prediction if its finished result is inserted or changed. |
 | RANK-01 | Aggregate ranking from predictions and finished match results with the specified deterministic tie-breakers. |
-| RANK-02 | Display position, public participant name/avatar fallback, total points, exact predictions, correct winners, and highlighted current user row. |
+| RANK-02 | Display position, public participant name/avatar fallback, total points, exact predictions, correct results, correct advancing teams, eligible champion picks, and highlighted current user row. |
 | STAT-01 | Aggregate and show the specified personal statistics using only the user's predictions and finished matches. |
 | STAT-02 | Store optional favorite-team preference on the local user rather than infer it. |
 | STAT-03 | Define best-stage and accuracy rules consistently with the business definitions above. |

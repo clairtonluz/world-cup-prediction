@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   calculatePredictionPoints,
-  isCorrectWinner,
+  isCorrectResult,
   pointsForScoringCategory,
   predictionAchievements,
   STAGE_POINTS,
@@ -111,20 +111,20 @@ describe("calculatePredictionPoints", () => {
   });
 });
 
-describe("isCorrectWinner", () => {
-  it("counts only correct winning teams, not draws", () => {
+describe("isCorrectResult", () => {
+  it("counts correct winning teams and correct draws", () => {
     expect(
-      isCorrectWinner(
+      isCorrectResult(
         { teamAScore: 3, teamBScore: 1 },
         { teamAScore: 2, teamBScore: 1 },
       ),
     ).toBe(true);
     expect(
-      isCorrectWinner(
+      isCorrectResult(
         { teamAScore: 1, teamBScore: 1 },
         { teamAScore: 2, teamBScore: 2 },
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 
@@ -135,12 +135,12 @@ describe("predictionAchievements", () => {
         { teamAScore: 2, teamBScore: 1 },
         { stage: "GROUP_STAGE", teamAScore: 2, teamBScore: 0 },
       ),
-    ).toEqual({ exact: false, correctWinner: true });
+    ).toEqual({ exact: false, correctResult: true });
     expect(
       predictionAchievements(
         { teamAScore: 2, teamBScore: 2 },
         { stage: "GROUP_STAGE", teamAScore: 2, teamBScore: 2 },
       ),
-    ).toEqual({ exact: true, correctWinner: false });
+    ).toEqual({ exact: true, correctResult: true });
   });
 });

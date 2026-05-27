@@ -3,7 +3,11 @@ import "server-only";
 import { Prisma } from "@/generated/prisma/client";
 import { requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
-import { calculateRanking } from "@/lib/ranking";
+import { calculateRanking, type RankingContext } from "@/lib/ranking";
+import {
+  mayRevealChampionPredictions,
+  officialChampionFromFinal,
+} from "@/lib/tournament-predictions";
 
 export type { RankingRow } from "@/lib/ranking";
 
@@ -11,6 +15,7 @@ export const rankingParticipantSelect = {
   id: true,
   name: true,
   image: true,
+  predictedChampion: true,
   predictions: {
     where: {
       match: {
@@ -27,6 +32,7 @@ export const rankingParticipantSelect = {
     select: {
       teamAScore: true,
       teamBScore: true,
+      predictedAdvancingTeam: true,
       points: true,
       match: {
         select: {
@@ -34,6 +40,7 @@ export const rankingParticipantSelect = {
           status: true,
           teamAScore: true,
           teamBScore: true,
+          advancingTeam: true,
         },
       },
     },
@@ -42,10 +49,32 @@ export const rankingParticipantSelect = {
 
 export async function getRanking() {
   const { user: currentUser } = await requireUser();
-  const users = await getDb().user.findMany({
-    where: { hiddenFromGlobalRanking: false },
-    select: rankingParticipantSelect,
-  });
+  const [users, context] = await Promise.all([
+    getDb().user.findMany({
+      where: { hiddenFromGlobalRanking: false },
+      select: rankingParticipantSelect,
+    }),
+    getRankingContext(),
+  ]);
 
-  return calculateRanking(users, currentUser.id);
+  return calculateRanking(users, currentUser.id, context);
+}
+
+export async function getRankingContext(): Promise<RankingContext> {
+  const db = getDb();
+  const [openingMatch, finalMatch] = await Promise.all([
+    db.match.findFirst({
+      select: { startsAt: true, status: true },
+      orderBy: [{ startsAt: "asc" }, { matchNumber: "asc" }],
+    }),
+    db.match.findFirst({
+      where: { stage: "FINAL" },
+      select: { status: true, advancingTeam: true },
+    }),
+  ]);
+
+  return {
+    officialChampion: officialChampionFromFinal(finalMatch),
+    revealPredictedChampion: mayRevealChampionPredictions(openingMatch),
+  };
 }

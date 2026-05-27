@@ -13,7 +13,8 @@ export default async function RankingPage() {
         <h1 className="text-3xl font-semibold text-slate-950">Ranking global</h1>
         <p className="mt-1 text-slate-600">
           {ranking.provisional ? "Classificação provisória com jogos ao vivo. " : ""}
-          Desempates por pontos, placares exatos, vencedores corretos e nome.
+          Desempates por pontos, placares exatos, resultados corretos,
+          classificados no mata-mata e campeão da Copa.
         </p>
       </section>
       {ranking.currentUser ? (
@@ -25,7 +26,12 @@ export default async function RankingPage() {
       ) : null}
       <Card>
         <CardHeader><CardTitle>Todos os participantes</CardTitle></CardHeader>
-        <CardContent><RankingTable rows={ranking.rows} /></CardContent>
+        <CardContent>
+          <RankingTable
+            rows={ranking.rows}
+            showPredictedChampion={ranking.championPredictionsVisible}
+          />
+        </CardContent>
       </Card>
     </AppShell>
   );

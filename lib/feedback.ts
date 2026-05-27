@@ -4,10 +4,15 @@ export const ERROR_MESSAGES = {
   account: "Seu perfil não foi encontrado. Entre novamente.",
   admin: "É necessário acesso de administrador.",
   invalid_prediction: "Informe placares válidos entre 0 e 99.",
+  invalid_advancing_team_prediction:
+    "Selecione a equipe classificada compatível com o placar previsto.",
   match_not_found: "Jogo não encontrado.",
   predictions_closed: "As apostas deste jogo já estão encerradas.",
   participants_pending: "A aposta será liberada quando as duas equipes estiverem confirmadas.",
   invalid_favorite_team: "O time favorito deve ter até 80 caracteres.",
+  invalid_predicted_champion: "Selecione uma equipe participante da Copa.",
+  champion_prediction_closed:
+    "O prazo para indicar o campeão encerrou no início do primeiro jogo.",
   invalid_friend_group: "Informe um nome de Grupo de Amigos com até 80 caracteres.",
   friend_group_not_found: "Grupo de Amigos não encontrado ou você não tem acesso a ele.",
   invite_invalid: "Este convite não existe mais ou foi desativado.",
@@ -26,6 +31,7 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   prediction_saved: "Aposta salva.",
   favorite_team_updated: "Time favorito atualizado.",
+  predicted_champion_updated: "Palpite de campeão salvo.",
   friend_group_created: "Grupo de Amigos criado.",
   friend_group_joined: "Você entrou no Grupo de Amigos.",
   friend_group_left: "Você saiu do Grupo de Amigos.",

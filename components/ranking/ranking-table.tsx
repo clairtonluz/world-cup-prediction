@@ -2,21 +2,31 @@ import { cn } from "@/lib/utils";
 import type { RankingRow } from "@/lib/ranking";
 import Image from "next/image";
 
-export function RankingTable({ rows }: { rows: RankingRow[] }) {
+export function RankingTable({
+  rows,
+  showPredictedChampion = false,
+}: {
+  rows: RankingRow[];
+  showPredictedChampion?: boolean;
+}) {
   if (rows.length === 0) {
     return <p className="text-sm text-slate-600">Nenhum participante no ranking.</p>;
   }
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm">
+      <table className="w-full min-w-[760px] text-left text-sm">
         <thead className="border-b text-slate-500">
           <tr>
             <th className="p-3 font-medium">Posição</th>
             <th className="p-3 font-medium">Participante</th>
             <th className="p-3 text-right font-medium">Pontos</th>
             <th className="p-3 text-right font-medium">Exatos</th>
-            <th className="p-3 text-right font-medium">Vencedores</th>
+            <th className="p-3 text-right font-medium">Resultados</th>
+            <th className="p-3 text-right font-medium">Classificados</th>
+            {showPredictedChampion ? (
+              <th className="p-3 font-medium">Campeão previsto</th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -49,7 +59,14 @@ export function RankingTable({ rows }: { rows: RankingRow[] }) {
               </td>
               <td className="p-3 text-right">{row.totalPoints}</td>
               <td className="p-3 text-right">{row.exactPredictions}</td>
-              <td className="p-3 text-right">{row.correctWinners}</td>
+              <td className="p-3 text-right">{row.correctResults}</td>
+              <td className="p-3 text-right">{row.correctAdvancingTeams}</td>
+              {showPredictedChampion ? (
+                <td className="p-3">
+                  {row.predictedChampion ?? "-"}
+                  {row.championPredictionCorrect ? " (+200 pts)" : ""}
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>

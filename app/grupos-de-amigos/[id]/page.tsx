@@ -37,7 +37,8 @@ export default async function FriendGroupDetailPage({
         <p className="mt-1 text-slate-600">
           Ranking privado de {friendGroup.members.length} {friendGroup.members.length === 1 ? "membro" : "membros"}.
           {" "}{friendGroup.ranking.provisional ? "Classificação provisória com jogos ao vivo. " : ""}
-          Desempates por pontos, placares exatos, vencedores corretos e nome.
+          Desempates por pontos, placares exatos, resultados corretos,
+          classificados no mata-mata e campeão da Copa.
         </p>
       </section>
       {friendGroup.ranking.currentUser ? (
@@ -49,7 +50,12 @@ export default async function FriendGroupDetailPage({
       ) : null}
       <Card>
         <CardHeader><CardTitle>Ranking do Grupo de Amigos</CardTitle></CardHeader>
-        <CardContent><RankingTable rows={friendGroup.ranking.rows} /></CardContent>
+        <CardContent>
+          <RankingTable
+            rows={friendGroup.ranking.rows}
+            showPredictedChampion={friendGroup.ranking.championPredictionsVisible}
+          />
+        </CardContent>
       </Card>
       {friendGroup.canManage ? (
         <section className="grid gap-6 lg:grid-cols-2">

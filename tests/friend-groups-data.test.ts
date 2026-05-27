@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => ({
   transactionFriendGroupFindFirst: vi.fn(),
   transactionFriendGroupUpdate: vi.fn(),
   transactionMemberDeleteMany: vi.fn(),
+  getRankingContext: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -38,6 +39,10 @@ vi.mock("@/lib/db", () => ({
       deleteMany: mocks.friendGroupDeleteMany,
     },
   }),
+}));
+vi.mock("@/lib/data/ranking", () => ({
+  rankingParticipantSelect: {},
+  getRankingContext: mocks.getRankingContext,
 }));
 vi.mock("@/lib/transactions", () => ({
   runSerializableTransaction: <T,>(
@@ -83,6 +88,7 @@ function friendGroupWithMembers(memberIds: string[]) {
         id,
         name: id === OWNER_ID ? "Criador" : "Participante",
         image: null,
+        predictedChampion: null,
         predictions: [],
       },
     })),
@@ -96,6 +102,10 @@ beforeEach(() => {
   });
   mocks.requireUser.mockResolvedValue(authenticatedUser(MEMBER_ID, ["USER"]));
   mocks.requireAdmin.mockResolvedValue(authenticatedUser(ADMIN_ID, ["ADMIN"]));
+  mocks.getRankingContext.mockResolvedValue({
+    officialChampion: null,
+    revealPredictedChampion: false,
+  });
 });
 
 describe("administrative friend group listing", () => {
