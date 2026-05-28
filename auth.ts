@@ -1,8 +1,6 @@
 import NextAuth from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
-import { Prisma } from "@/generated/prisma/client";
-import { getDb } from "@/lib/db";
 import { syncUser } from "@/lib/user-sync";
 import type { AppRole } from "@/lib/authorization";
 
@@ -21,6 +19,8 @@ type AppToken = {
   roles?: AppRole[];
   keycloakIdToken?: string;
 };
+
+const SESSION_MAX_AGE_SECONDS = 2 * 60 * 60;
 
 export function requiredAuthSetting(name: string) {
   const value = process.env[name];
@@ -77,7 +77,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60,
+    maxAge: SESSION_MAX_AGE_SECONDS,
   },
   callbacks: {
     async signIn({ account }) {
@@ -133,4 +133,3 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
-
