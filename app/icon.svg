@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="World Cup 2026 inspired app icon">
+  <defs>
+    <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="1" stop-color="#0b2f6e"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="27" cy="19" r="25" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dbeafe"/>
+    </radialGradient>
+    <clipPath id="tile">
+      <rect x="3" y="3" width="58" height="58" rx="15"/>
+    </clipPath>
+  </defs>
+
+  <rect x="3" y="3" width="58" height="58" rx="15" fill="url(#bg)"/>
+  <g clip-path="url(#tile)">
+    <path d="M-6 17 55-3 70 10 8 33z" fill="#ef4444" opacity=".9"/>
+    <path d="M-8 42 70 19v13L-8 55z" fill="#2563eb" opacity=".9"/>
+    <path d="M-7 53 70 31v15L-7 68z" fill="#16a34a" opacity=".92"/>
+  </g>
+
+  <circle cx="32" cy="25" r="17" fill="url(#ball)" stroke="#06101d" stroke-width="3"/>
+  <g stroke="#0f172a" stroke-width="2.1" stroke-linecap="round">
+    <path d="M32 19.5 32 10.5"/>
+    <path d="M37.2 23.3 45.9 20.5"/>
+    <path d="M35.2 29.4 40.6 36.8"/>
+    <path d="M28.8 29.4 23.4 36.8"/>
+    <path d="M26.8 23.3 18.1 20.5"/>
+  </g>
+  <path d="M32 18.7 38 23.1 35.7 30.1h-7.4L26 23.1z" fill="#0f172a"/>
+
+  <g fill="#06101d" opacity=".72">
+    <rect x="17.7" y="42.7" width="13" height="3" rx="1.5"/>
+    <rect x="27.7" y="44.9" width="3" height="6.5" rx="1.5"/>
+    <rect x="17.7" y="50.2" width="13" height="3" rx="1.5"/>
+    <rect x="17.7" y="52.4" width="3" height="6.5" rx="1.5"/>
+    <rect x="17.7" y="57.7" width="13" height="3" rx="1.5"/>
+    <rect x="35.3" y="42.7" width="13" height="3" rx="1.5"/>
+    <rect x="35.3" y="44.9" width="3" height="6.5" rx="1.5"/>
+    <rect x="35.3" y="50.2" width="13" height="3" rx="1.5"/>
+    <rect x="35.3" y="52.4" width="3" height="6.5" rx="1.5"/>
+    <rect x="45.3" y="52.4" width="3" height="6.5" rx="1.5"/>
+    <rect x="35.3" y="57.7" width="13" height="3" rx="1.5"/>
+  </g>
+  <g fill="#fbbf24">
+    <rect x="16.7" y="41.7" width="13" height="3" rx="1.5"/>
+    <rect x="26.7" y="43.9" width="3" height="6.5" rx="1.5"/>
+    <rect x="16.7" y="49.2" width="13" height="3" rx="1.5"/>
+    <rect x="16.7" y="51.4" width="3" height="6.5" rx="1.5"/>
+    <rect x="16.7" y="56.7" width="13" height="3" rx="1.5"/>
+    <rect x="34.3" y="41.7" width="13" height="3" rx="1.5"/>
+    <rect x="34.3" y="43.9" width="3" height="6.5" rx="1.5"/>
+    <rect x="34.3" y="49.2" width="13" height="3" rx="1.5"/>
+    <rect x="34.3" y="51.4" width="3" height="6.5" rx="1.5"/>
+    <rect x="44.3" y="51.4" width="3" height="6.5" rx="1.5"/>
+    <rect x="34.3" y="56.7" width="13" height="3" rx="1.5"/>
+  </g>
+</svg>
