@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { RankingRow } from "@/lib/ranking";
 import Image from "next/image";
+import { getPodiumRowClassName, RankingPosition } from "@/components/ranking/ranking-position";
 
 export function RankingTable({
   rows,
@@ -35,10 +36,13 @@ export function RankingTable({
               key={row.id}
               className={cn(
                 "border-b border-slate-100",
+                getPodiumRowClassName(row.position),
                 row.isCurrentUser && "bg-emerald-50 font-medium",
               )}
             >
-              <td className="p-3">#{row.position}</td>
+              <td className="p-3">
+                <RankingPosition position={row.position} />
+              </td>
               <td className="flex items-center gap-2 p-3">
                 {row.image ? (
                   <Image

@@ -4,12 +4,14 @@ import { AppShell } from "@/components/shared/app-shell";
 import { MatchSchedule } from "@/components/matches/match-schedule";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { getPodiumRowClassName, RankingPosition } from "@/components/ranking/ranking-position";
 import { StatCard } from "@/components/stats/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listMatches } from "@/lib/data/matches";
 import { getRanking } from "@/lib/data/ranking";
 import { getPersonalStatistics } from "@/lib/data/statistics";
 import { parseMatchAgendaView } from "@/lib/match-focus";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,16 @@ export default async function MatchesPage({
         </p>
       </section>
       <section className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Minha posição global" value={ranking.currentUser ? `#${ranking.currentUser.position}` : "-"} />
+        <StatCard
+          label="Minha posição global"
+          value={
+            ranking.currentUser ? (
+              <RankingPosition position={ranking.currentUser.position} />
+            ) : (
+              "-"
+            )
+          }
+        />
         <StatCard label={statistics.provisional ? "Pontos provisórios" : "Total de pontos"} value={statistics.totalPoints} />
         <StatCard label="Precisão das apostas" value={`${statistics.accuracy}%`} />
       </section>
@@ -75,9 +86,18 @@ export default async function MatchesPage({
             </CardHeader>
             <CardContent className="space-y-3">
               {ranking.rows.slice(0, 5).map((row) => (
-                <div key={row.id} className="flex justify-between text-sm">
-                  <span>#{row.position} {row.name}</span>
-                  <strong>{row.totalPoints} pts</strong>
+                <div
+                  key={row.id}
+                  className={cn(
+                    "flex items-center justify-between gap-3 rounded-md px-2 py-1.5 text-sm",
+                    getPodiumRowClassName(row.position),
+                  )}
+                >
+                  <span className="flex min-w-0 items-center gap-2">
+                    <RankingPosition position={row.position} className="shrink-0" />
+                    <span className="truncate">{row.name}</span>
+                  </span>
+                  <strong className="shrink-0">{row.totalPoints} pts</strong>
                 </div>
               ))}
               {ranking.rows.length === 0 ? <p className="text-sm text-slate-600">Nenhum participante no ranking.</p> : null}

@@ -1,6 +1,7 @@
+import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
-export function StatCard({ label, value }: { label: string; value: string | number }) {
+export function StatCard({ label, value }: { label: string; value: ReactNode }) {
   return (
     <Card className="overflow-hidden border-t-2 border-t-[#0e74e1]">
       <CardContent className="pt-5">
