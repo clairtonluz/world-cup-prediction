@@ -3,6 +3,7 @@ import { RefreshCw } from "lucide-react";
 import { recalculateAllPointsAction } from "@/actions/admin-match-actions";
 import { AppShell } from "@/components/shared/app-shell";
 import { MatchTeams } from "@/components/shared/match-teams";
+import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { listAdminMatches } from "@/lib/data/matches";
-import { formatMatchDate, formatStage, formatStatus, scoreText } from "@/lib/display";
+import { formatMatchDate, formatStage, formatStatus } from "@/lib/display";
 import { AdminTabs } from "@/components/admin/admin-tabs";
 
 export const dynamic = "force-dynamic";
@@ -84,7 +85,17 @@ export default async function AdminMatchesPage({
                       </td>
                       <td>{formatStage(match.stage as MatchStageValue)}<br /><span className="text-slate-500">{formatMatchDate(match.startsAt)}</span></td>
                       <td><StatusBadge status={match.status as MatchStatusValue}>{formatStatus(match.status as MatchStatusValue)}</StatusBadge></td>
-                      <td>{scoreText(match.teamAScore, match.teamBScore)}</td>
+                      <td className="min-w-64">
+                        <MatchScoreboard
+                          teamA={match.teamA}
+                          teamB={match.teamB}
+                          teamASlot={match.teamASlot}
+                          teamBSlot={match.teamBSlot}
+                          teamAScore={match.teamAScore}
+                          teamBScore={match.teamBScore}
+                          size="compact"
+                        />
+                      </td>
                       <td className="text-right"><Link className="text-emerald-700 hover:underline" href={`/admin/matches/${match.id}/edit`}>Atualizar</Link></td>
                     </tr>
                   ))}

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
-import { MatchTeams } from "@/components/shared/match-teams";
+import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -10,7 +10,7 @@ import {
   type MatchStatusValue,
 } from "@/lib/constants";
 import type { PersonalPrediction } from "@/lib/data/predictions";
-import { formatMatchDate, formatStage, scoreText } from "@/lib/display";
+import { formatMatchDate, formatStage } from "@/lib/display";
 import { mayEditPrediction } from "@/lib/match-rules";
 
 export function PersonalPredictionsList({
@@ -76,11 +76,15 @@ function PredictionCard({ prediction }: { prediction: PersonalPrediction }) {
       <CardHeader className="flex flex-row items-start justify-between gap-4">
         <div>
           <CardTitle>
-            <MatchTeams
+            <MatchScoreboard
               teamA={match.teamA}
               teamB={match.teamB}
               teamASlot={match.teamASlot}
               teamBSlot={match.teamBSlot}
+              teamAScore={match.teamAScore}
+              teamBScore={match.teamBScore}
+              size="compact"
+              className="text-base font-semibold sm:text-lg"
             />
           </CardTitle>
           <p className="mt-1 text-sm text-slate-600">
@@ -90,7 +94,7 @@ function PredictionCard({ prediction }: { prediction: PersonalPrediction }) {
         <MatchStatusIndicator status={status} startsAt={match.startsAt} />
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-3">
+        <div className="grid gap-3 rounded-xl bg-slate-50 p-4 text-sm sm:grid-cols-2">
           <div>
             <p className="text-slate-500">Sua aposta</p>
             <p className="font-semibold text-slate-950">
@@ -101,16 +105,6 @@ function PredictionCard({ prediction }: { prediction: PersonalPrediction }) {
                 Classificada: {prediction.predictedAdvancingTeam}
               </p>
             ) : null}
-          </div>
-          <div>
-            <p className="text-slate-500">
-              {status === "STARTED" ? "Placar ao vivo" : "Resultado"}
-            </p>
-            <p className="font-semibold text-slate-950">
-              {match.teamAScore === null || match.teamBScore === null
-                ? "Aguardando resultado"
-                : scoreText(match.teamAScore, match.teamBScore)}
-            </p>
           </div>
           <div>
             <p className="text-slate-500">

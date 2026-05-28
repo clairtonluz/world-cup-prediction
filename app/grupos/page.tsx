@@ -130,6 +130,7 @@ export default async function GroupsPage() {
                                 teamBSlot={match.teamBSlot}
                                 teamAScore={match.teamAScore}
                                 teamBScore={match.teamBScore}
+                                size="compact"
                               />
                               <div className="mt-3 flex flex-col items-start gap-2">
                                 <MatchStatusIndicator

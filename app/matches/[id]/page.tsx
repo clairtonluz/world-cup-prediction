@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
-import { MatchTeams } from "@/components/shared/match-teams";
+import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { PredictionsTable } from "@/components/matches/predictions-table";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getMatchDetail } from "@/lib/data/matches";
-import { formatMatchDate, formatStage, scoreText } from "@/lib/display";
+import { formatMatchDate, formatStage } from "@/lib/display";
 import { hasEffectivelyStarted } from "@/lib/match-rules";
 
 export const dynamic = "force-dynamic";
@@ -45,11 +45,14 @@ export default async function MatchDetailPage({
           <CardHeader className="flex flex-row items-center justify-between gap-4">
             <div>
               <CardTitle>
-                <MatchTeams
+                <MatchScoreboard
                   teamA={match.teamA}
                   teamB={match.teamB}
                   teamASlot={match.teamASlot}
                   teamBSlot={match.teamBSlot}
+                  teamAScore={match.teamAScore}
+                  teamBScore={match.teamBScore}
+                  className="font-semibold"
                 />
               </CardTitle>
               <p className="mt-1 text-sm text-slate-600">
@@ -62,11 +65,7 @@ export default async function MatchDetailPage({
             />
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-slate-600">
-              {match.status === "STARTED" ? "Placar ao vivo" : "Placar"}:{" "}
-              <strong className="text-slate-950">{scoreText(match.teamAScore, match.teamBScore)}</strong>
-            </p>
-            <p className="mt-2 text-sm text-slate-600">{match.venue}, {match.hostCity}</p>
+            <p className="text-sm text-slate-600">{match.venue}, {match.hostCity}</p>
             {!match.participantsConfirmed && (match.teamA || match.teamB) ? (
               <p className="mt-3 text-sm font-medium text-violet-700">Confronto projetado</p>
             ) : null}

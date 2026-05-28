@@ -2,6 +2,7 @@ import { Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type PodiumPosition = 1 | 2 | 3;
+type RankingPositionSize = "default" | "featured";
 
 const podiumPositionStyles: Record<
   PodiumPosition,
@@ -34,9 +35,11 @@ const podiumPositionStyles: Record<
 
 export function RankingPosition({
   position,
+  size = "default",
   className,
 }: {
   position: number;
+  size?: RankingPositionSize;
   className?: string;
 }) {
   const podiumPosition = getPodiumPosition(position);
@@ -45,7 +48,9 @@ export function RankingPosition({
     return (
       <span
         className={cn(
-          "inline-flex min-w-8 items-center font-medium text-slate-700",
+          size === "featured"
+            ? "inline-flex min-w-10 items-center text-3xl font-semibold text-slate-950"
+            : "inline-flex min-w-8 items-center font-medium text-slate-700",
           className,
         )}
       >
@@ -61,12 +66,21 @@ export function RankingPosition({
       aria-label={positionStyle.label}
       title={positionStyle.label}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold leading-none shadow-sm",
+        "inline-flex items-center rounded-full border font-semibold leading-none shadow-sm",
+        size === "featured"
+          ? "gap-2 px-3.5 py-2 text-lg"
+          : "gap-1.5 px-2.5 py-1 text-xs",
         positionStyle.badgeClassName,
         className,
       )}
     >
-      <Trophy className={cn("size-4", positionStyle.iconClassName)} aria-hidden="true" />
+      <Trophy
+        className={cn(
+          size === "featured" ? "size-5" : "size-4",
+          positionStyle.iconClassName,
+        )}
+        aria-hidden="true"
+      />
       <span>#{position}</span>
     </span>
   );

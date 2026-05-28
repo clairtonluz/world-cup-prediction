@@ -7,10 +7,12 @@ export function TeamLabel({
   team,
   slot,
   className,
+  textClassName,
 }: {
   team: string | null;
   slot?: string | null;
   className?: string;
+  textClassName?: string;
 }) {
   const flagPath = teamFlagPath(team);
 
@@ -22,10 +24,10 @@ export function TeamLabel({
           alt=""
           width={24}
           height={16}
-          className="h-4 w-6 rounded-sm object-cover shadow-sm"
+          className="h-4 w-6 shrink-0 rounded-sm object-cover shadow-sm"
         />
       ) : null}
-      <span>{teamText(team, slot ?? null)}</span>
+      <span className={textClassName}>{teamText(team, slot ?? null)}</span>
     </span>
   );
 }

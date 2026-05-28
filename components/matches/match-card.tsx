@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
-import { MatchTeams } from "@/components/shared/match-teams";
+import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
-import { formatMatchDate, formatStage, scoreText } from "@/lib/display";
+import { formatMatchDate, formatStage } from "@/lib/display";
 import { mayEditPrediction } from "@/lib/match-rules";
 import { cn } from "@/lib/utils";
 
@@ -51,11 +51,15 @@ export function MatchCard({ match, highlighted = false }: MatchCardProps) {
       <CardHeader className="flex flex-row items-center justify-between gap-3">
         <div>
           <CardTitle>
-            <MatchTeams
+            <MatchScoreboard
               teamA={match.teamA}
               teamB={match.teamB}
               teamASlot={match.teamASlot}
               teamBSlot={match.teamBSlot}
+              teamAScore={match.teamAScore}
+              teamBScore={match.teamBScore}
+              size="compact"
+              className="text-base font-semibold sm:text-lg"
             />
           </CardTitle>
           <p className="mt-1 text-sm text-slate-600">
@@ -69,12 +73,6 @@ export function MatchCard({ match, highlighted = false }: MatchCardProps) {
       </CardHeader>
       <CardContent className="flex flex-wrap items-center justify-between gap-4">
         <div className="text-sm text-slate-600">
-          <p>
-            {status === "STARTED" ? "Placar ao vivo" : "Placar"}:{" "}
-            <strong className="text-slate-900">
-              {scoreText(match.teamAScore, match.teamBScore)}
-            </strong>
-          </p>
           {prediction ? (
             <p>
               Sua aposta: <strong className="text-slate-900">{prediction.teamAScore} x {prediction.teamBScore}</strong>

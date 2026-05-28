@@ -48,12 +48,3 @@ export function matchDayKey(date: Date) {
 export function teamText(team: string | null, slot: string | null) {
   return team ?? slot ?? "A definir";
 }
-
-export function scoreText(
-  teamAScore: number | null,
-  teamBScore: number | null,
-) {
-  return teamAScore === null || teamBScore === null
-    ? "-"
-    : `${teamAScore} x ${teamBScore}`;
-}
