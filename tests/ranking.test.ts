@@ -132,6 +132,46 @@ describe("calculateRanking", () => {
       }).rows[0].predictedChampion,
     ).toBe("Brasil");
   });
+
+  it("summarizes champion favorites without revealing individual choices", () => {
+    const ranking = calculateRanking(
+      [
+        participant({ id: "ana", name: "Ana", predictedChampion: "Brasil" }),
+        participant({ id: "bia", name: "Bia", predictedChampion: "Brasil" }),
+        participant({ id: "caio", name: "Caio", predictedChampion: "Argentina" }),
+        participant({ id: "duda", name: "Duda", predictedChampion: null }),
+      ],
+      "ana",
+      pendingTournament,
+    );
+
+    expect(ranking.championFavorites).toEqual([
+      { team: "Brasil", predictionCount: 2, percentage: 67 },
+      { team: "Argentina", predictionCount: 1, percentage: 33 },
+    ]);
+    expect(ranking.rows.map((row) => row.predictedChampion)).toEqual([
+      null,
+      null,
+      null,
+      null,
+    ]);
+  });
+
+  it("orders tied champion favorites by team name", () => {
+    const ranking = calculateRanking(
+      [
+        participant({ id: "arg", name: "Ana", predictedChampion: "Argentina" }),
+        participant({ id: "bra", name: "Bia", predictedChampion: "Brasil" }),
+      ],
+      "arg",
+      pendingTournament,
+    );
+
+    expect(ranking.championFavorites.map((favorite) => favorite.team)).toEqual([
+      "Argentina",
+      "Brasil",
+    ]);
+  });
 });
 
 function participant({

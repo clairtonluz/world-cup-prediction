@@ -64,6 +64,25 @@ describe("updatePredictedChampionAction", () => {
       where: { id: user.id },
       data: { predictedChampion: "Brasil" },
     });
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/me");
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/apostas");
+  });
+
+  it("returns champion prediction updates to the personal predictions page", async () => {
+    mocks.matchFindFirst
+      .mockResolvedValueOnce(editableOpeningMatch)
+      .mockResolvedValueOnce({ id: "group-match" });
+
+    await expect(
+      updatePredictedChampionAction(formData("Brasil", "apostas")),
+    ).rejects.toThrow("redirect:/apostas?success=predicted_champion_updated");
+
+    expect(mocks.userUpdate).toHaveBeenCalledWith({
+      where: { id: user.id },
+      data: { predictedChampion: "Brasil" },
+    });
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/me");
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/apostas");
   });
 
   it("rejects a team outside the tournament schedule", async () => {
@@ -74,6 +93,19 @@ describe("updatePredictedChampionAction", () => {
     await expect(updatePredictedChampionAction(formData("Inexistente"))).rejects.toThrow(
       "redirect:/me?error=invalid_predicted_champion",
     );
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns validation errors to the selected page without trusting arbitrary paths", async () => {
+    await expect(
+      updatePredictedChampionAction(formData("A".repeat(81), "apostas")),
+    ).rejects.toThrow("redirect:/apostas?error=invalid_predicted_champion");
+
+    await expect(
+      updatePredictedChampionAction(formData("A".repeat(81), "https://example.com")),
+    ).rejects.toThrow("redirect:/me?error=invalid_predicted_champion");
+
+    expect(mocks.matchFindFirst).not.toHaveBeenCalled();
     expect(mocks.userUpdate).not.toHaveBeenCalled();
   });
 
@@ -105,8 +137,11 @@ describe("updatePredictedChampionAction", () => {
   });
 });
 
-function formData(predictedChampion: string) {
+function formData(predictedChampion: string, returnTo?: string) {
   const data = new FormData();
   data.set("predictedChampion", predictedChampion);
+  if (returnTo) {
+    data.set("returnTo", returnTo);
+  }
   return data;
 }

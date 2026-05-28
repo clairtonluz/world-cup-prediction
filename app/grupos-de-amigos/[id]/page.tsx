@@ -6,6 +6,7 @@ import {
   removeFriendGroupMemberAction,
 } from "@/actions/friend-group-actions";
 import { InviteControls } from "@/components/friend-groups/invite-controls";
+import { ChampionFavoritesCard } from "@/components/ranking/champion-favorites-card";
 import { RankingTable } from "@/components/ranking/ranking-table";
 import { AppShell } from "@/components/shared/app-shell";
 import { ConfirmationForm } from "@/components/shared/confirmation-form";
@@ -48,6 +49,7 @@ export default async function FriendGroupDetailPage({
           <Card><CardContent className="pt-5"><p className="text-sm text-slate-600">Placares exatos</p><p className="text-3xl font-semibold">{friendGroup.ranking.currentUser.exactPredictions}</p></CardContent></Card>
         </div>
       ) : null}
+      <ChampionFavoritesCard favorites={friendGroup.ranking.championFavorites} />
       <Card>
         <CardHeader><CardTitle>Ranking do Grupo de Amigos</CardTitle></CardHeader>
         <CardContent>

@@ -42,6 +42,12 @@ export type RankingRow = {
   isCurrentUser: boolean;
 };
 
+export type ChampionFavoriteRow = {
+  team: string;
+  predictionCount: number;
+  percentage: number;
+};
+
 export type RankingContext = {
   officialChampion: string | null;
   revealPredictedChampion: boolean;
@@ -142,6 +148,7 @@ export function calculateRanking(
   return {
     rows,
     currentUser: rows.find((row) => row.isCurrentUser) ?? null,
+    championFavorites: calculateChampionFavorites(participants),
     championPredictionsVisible: context.revealPredictedChampion,
     provisional: participants.some((participant) =>
       participant.predictions.some(
@@ -149,6 +156,44 @@ export function calculateRanking(
       ),
     ),
   };
+}
+
+function calculateChampionFavorites(
+  participants: RankingParticipant[],
+): ChampionFavoriteRow[] {
+  const predictionsByTeam = new Map<string, number>();
+
+  for (const participant of participants) {
+    if (!participant.predictedChampion) {
+      continue;
+    }
+
+    predictionsByTeam.set(
+      participant.predictedChampion,
+      (predictionsByTeam.get(participant.predictedChampion) ?? 0) + 1,
+    );
+  }
+
+  const totalPredictions = [...predictionsByTeam.values()].reduce(
+    (total, count) => total + count,
+    0,
+  );
+
+  if (totalPredictions === 0) {
+    return [];
+  }
+
+  return [...predictionsByTeam.entries()]
+    .map(([team, predictionCount]) => ({
+      team,
+      predictionCount,
+      percentage: Math.round((predictionCount / totalPredictions) * 100),
+    }))
+    .sort(
+      (a, b) =>
+        b.predictionCount - a.predictionCount ||
+        a.team.localeCompare(b.team, "pt-BR", { sensitivity: "base" }),
+    );
 }
 
 type UnpositionedRankingRow = Omit<RankingRow, "position" | "isCurrentUser">;

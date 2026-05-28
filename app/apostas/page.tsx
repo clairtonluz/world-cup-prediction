@@ -1,4 +1,5 @@
 import { FocusedMatches } from "@/components/matches/focused-matches";
+import { ChampionPredictionCard } from "@/components/predictions/champion-prediction-card";
 import { PersonalPredictionsList } from "@/components/predictions/personal-predictions-list";
 import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
@@ -7,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listMatches } from "@/lib/data/matches";
 import { listPersonalPredictions } from "@/lib/data/predictions";
 import { getPersonalStatistics } from "@/lib/data/statistics";
+import { getChampionPredictionFormData } from "@/lib/data/tournament-predictions";
 
 export const dynamic = "force-dynamic";
 
@@ -15,11 +17,12 @@ export default async function PersonalPredictionsPage({
 }: {
   searchParams: Promise<{ error?: string; success?: string }>;
 }) {
-  const [messages, matches, predictions, statistics] = await Promise.all([
+  const [messages, matches, predictions, statistics, championPrediction] = await Promise.all([
     searchParams,
     listMatches(),
     listPersonalPredictions(),
     getPersonalStatistics(),
+    getChampionPredictionFormData(),
   ]);
 
   return (
@@ -31,6 +34,12 @@ export default async function PersonalPredictionsPage({
           Acompanhe seus palpites, resultados e pontos em cada fase da Copa.
         </p>
       </section>
+
+      <ChampionPredictionCard
+        championPrediction={championPrediction}
+        returnTo="apostas"
+        featured
+      />
 
       <FocusedMatches
         matches={matches}
@@ -74,15 +83,6 @@ export default async function PersonalPredictionsPage({
               </div>
             ))}
           </div>
-          <p className="mt-4 text-sm text-slate-600">
-            Palpite de campeão:{" "}
-            <strong className="text-slate-950">
-              {statistics.predictedChampion ?? "Não selecionado"}
-            </strong>
-            {statistics.championBonusPoints > 0
-              ? ` (+${statistics.championBonusPoints} pts)`
-              : ""}
-          </p>
         </CardContent>
       </Card>
 

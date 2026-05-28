@@ -30,12 +30,13 @@ export async function updateFavoriteTeamAction(formData: FormData) {
 
 export async function updatePredictedChampionAction(formData: FormData) {
   const { user } = await requireUser();
+  const returnPath = championPredictionReturnPath(formData.get("returnTo"));
   const parsed = championPredictionSchema.safeParse({
     predictedChampion: formData.get("predictedChampion"),
   });
 
   if (!parsed.success) {
-    redirect(feedbackUrl("/me", { error: "invalid_predicted_champion" }));
+    redirect(feedbackUrl(returnPath, { error: "invalid_predicted_champion" }));
   }
 
   let error: ErrorFeedbackCode | null;
@@ -79,9 +80,14 @@ export async function updatePredictedChampionAction(formData: FormData) {
   }
 
   if (error) {
-    redirect(feedbackUrl("/me", { error }));
+    redirect(feedbackUrl(returnPath, { error }));
   }
 
   revalidatePath("/me");
-  redirect(feedbackUrl("/me", { success: "predicted_champion_updated" }));
+  revalidatePath("/apostas");
+  redirect(feedbackUrl(returnPath, { success: "predicted_champion_updated" }));
+}
+
+function championPredictionReturnPath(returnTo: FormDataEntryValue | null) {
+  return returnTo === "apostas" ? "/apostas" : "/me";
 }
