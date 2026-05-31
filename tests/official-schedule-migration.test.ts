@@ -8,6 +8,13 @@ const migration = readFileSync(
   ),
   "utf8",
 );
+const shiftStartTimesMigration = readFileSync(
+  new URL(
+    "../prisma/migrations/20260531000000_shift_match_start_times_forward_three_hours/migration.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const fixtureRows = migration
   .split("\n")
   .filter((line) => line.trimStart().startsWith("('c2026match"));
@@ -54,6 +61,24 @@ describe("official 2026 fixture migration", () => {
     expect(fixtureRows[103]).toContain(
       "'2026-07-19T16:00:00-03:00', 'Estádio de Nova York/Nova Jersey'",
     );
+  });
+});
+
+describe("match start time correction migration", () => {
+  it("shifts every stored kickoff three hours forward without changing fixture data", () => {
+    expect(shiftStartTimesMigration).toContain('UPDATE "Match"');
+    expect(shiftStartTimesMigration).toContain(
+      '"startsAt" = "startsAt" + INTERVAL \'3 hours\'',
+    );
+    expect(shiftStartTimesMigration).toContain('"updatedAt" = NOW()');
+    expect(shiftStartTimesMigration).not.toContain('"teamA"');
+    expect(shiftStartTimesMigration).not.toContain('"teamB"');
+    expect(shiftStartTimesMigration).not.toContain('"teamAScore"');
+    expect(shiftStartTimesMigration).not.toContain('"teamBScore"');
+    expect(shiftStartTimesMigration).not.toContain('"status"');
+    expect(shiftStartTimesMigration).not.toContain('"venue"');
+    expect(shiftStartTimesMigration).not.toContain('"hostCity"');
+    expect(shiftStartTimesMigration).not.toContain('"Prediction"');
   });
 });
 
