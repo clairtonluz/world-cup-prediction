@@ -76,6 +76,16 @@ describe("ESPN event mapping", () => {
   it("matches key Portuguese team names to ESPN English names", () => {
     expect(footballNamesMatch("México", "Mexico")).toBe(true);
     expect(footballNamesMatch("África do Sul", "South Africa")).toBe(true);
+    expect(footballNamesMatch("Alemanha", "Germany")).toBe(true);
+    expect(footballNamesMatch("Alemanha", "GER")).toBe(true);
+    expect(footballNamesMatch("Escócia", "Scotland")).toBe(true);
+    expect(footballNamesMatch("Curaçau", "Curacao")).toBe(true);
+    expect(footballNamesMatch("Suécia", "Sweden")).toBe(true);
+    expect(footballNamesMatch("Turquia", "Türkiye")).toBe(true);
+    expect(footballNamesMatch("EUA", "United States")).toBe(true);
+    expect(footballNamesMatch("Noruega", "Norway")).toBe(true);
+    expect(footballNamesMatch("Iraque", "Iraq")).toBe(true);
+    expect(footballNamesMatch("Cabo Verde", "Cape Verde")).toBe(true);
     expect(footballNamesMatch("República da Coreia", "South Korea")).toBe(true);
     expect(footballNamesMatch("Tchéquia", "Czechia")).toBe(true);
   });
