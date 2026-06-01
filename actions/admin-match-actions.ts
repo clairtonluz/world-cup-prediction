@@ -1,15 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth-guards";
-import { updatedMatchError } from "@/lib/admin-match-policy";
-import { propagateFutureParticipants } from "@/lib/bracket-propagation";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
-import {
-  recalculateAllMatchPredictions,
-  recalculateMatchPredictions,
-} from "@/lib/match-results";
+import { applyMatchResult } from "@/lib/match-result-application";
+import { revalidateMatchResultViews } from "@/lib/match-result-revalidation";
+import { recalculateAllMatchPredictions } from "@/lib/match-results";
 import { isTransactionConflict, runSerializableTransaction } from "@/lib/transactions";
 import { matchIdSchema, matchResultSchema } from "@/lib/validation";
 
@@ -40,16 +36,7 @@ export async function recalculateAllPointsAction() {
     redirect(feedbackUrl("/admin/matches", { error }));
   }
 
-  revalidatePath("/admin/matches");
-  revalidatePath("/admin/matches/[id]/edit", "page");
-  revalidatePath("/matches");
-  revalidatePath("/matches/[id]", "page");
-  revalidatePath("/apostas");
-  revalidatePath("/grupos");
-  revalidatePath("/grupos-de-amigos");
-  revalidatePath("/grupos-de-amigos/[id]", "page");
-  revalidatePath("/ranking");
-  revalidatePath("/me");
+  revalidateMatchResultViews();
   redirect(feedbackUrl("/admin/matches", { success: "points_recalculated" }));
 }
 
@@ -71,38 +58,7 @@ export async function updateMatchAction(id: string, formData: FormData) {
 
   try {
     const result = await runSerializableTransaction(async (tx) => {
-      const existing = await tx.match.findUnique({ where: { id: matchId } });
-      if (!existing) {
-        return { error: "match_not_found" as const, propagation: null };
-      }
-
-      const policyError = updatedMatchError(existing, parsed.data);
-      if (policyError) {
-        return { error: policyError, propagation: null };
-      }
-
-      if (parsed.data.status !== "SCHEDULED" && !existing.participantsConfirmed) {
-        return { error: "participants_pending" as const, propagation: null };
-      }
-
-      const advancingTeam = advancingTeamForResult(existing, parsed.data);
-      if (advancingTeam.error) {
-        return { error: advancingTeam.error, propagation: null };
-      }
-
-      const match = await tx.match.update({
-        where: { id: matchId },
-        data: {
-          status: parsed.data.status,
-          teamAScore: parsed.data.teamAScore,
-          teamBScore: parsed.data.teamBScore,
-          advancingTeam: advancingTeam.value,
-        },
-      });
-
-      await recalculateMatchPredictions(tx, match);
-      const propagation = await propagateFutureParticipants(tx);
-      return { error: null, propagation };
+      return applyMatchResult(tx, matchId, parsed.data);
     });
 
     error = result.error;
@@ -124,48 +80,6 @@ export async function updateMatchAction(id: string, formData: FormData) {
     redirect(feedbackUrl(pathname, { error }));
   }
 
-  revalidatePath("/admin/matches");
-  revalidatePath("/matches");
-  revalidatePath(`/matches/${matchId}`);
-  revalidatePath("/grupos");
-  revalidatePath("/ranking");
-  revalidatePath("/me");
+  revalidateMatchResultViews(matchId);
   redirect(feedbackUrl(`/admin/matches/${matchId}/edit`, { success: feedback }));
-}
-
-function advancingTeamForResult(
-  match: {
-    stage: string;
-    teamA: string | null;
-    teamB: string | null;
-  },
-  result: {
-    status: string;
-    teamAScore: number | null;
-    teamBScore: number | null;
-    advancingTeam: string | null;
-  },
-): { value: string | null; error: ErrorFeedbackCode | null } {
-  if (result.status !== "FINISHED" || match.stage === "GROUP_STAGE") {
-    return { value: null, error: null };
-  }
-
-  if (!match.teamA || !match.teamB) {
-    return { value: null, error: "unresolved_match" };
-  }
-
-  if (result.teamAScore === result.teamBScore) {
-    if (
-      result.advancingTeam !== match.teamA &&
-      result.advancingTeam !== match.teamB
-    ) {
-      return { value: null, error: "knockout_qualifier_required" };
-    }
-    return { value: result.advancingTeam, error: null };
-  }
-
-  return {
-    value: result.teamAScore! > result.teamBScore! ? match.teamA : match.teamB,
-    error: null,
-  };
 }

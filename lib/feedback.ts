@@ -24,6 +24,13 @@ export const ERROR_MESSAGES = {
   finished_match_locked: "Um jogo encerrado não pode voltar a um status anterior.",
   started_match_locked: "Um jogo ao vivo não pode voltar para agendado.",
   update_conflict: "Outra atualização ocorreu ao mesmo tempo. Tente novamente.",
+  invalid_score_sync_settings: "Confira a configuração de sincronização de placares.",
+  score_sync_failed: "A sincronização com o ESPN Scoreboard falhou. Tente novamente.",
+  score_sync_locked: "Outra sincronização de placares está em andamento.",
+  score_sync_no_matches: "Nenhum jogo está no horário de atualização automática.",
+  score_sync_event_missing: "Este jogo ainda não tem um event ID da ESPN.",
+  score_sync_match_not_started: "A sincronização de placar só pode iniciar após o horário do jogo.",
+  score_sync_match_locked: "As atualizações automáticas estão bloqueadas para este jogo.",
   Configuration: "A autenticação não está configurada neste ambiente.",
   AccessDenied: "Seu papel no Keycloak não permite acesso a esta aplicação.",
 } as const;
@@ -44,6 +51,12 @@ export const SUCCESS_MESSAGES = {
   match_updated_propagation_blocked:
     "Resultado atualizado. Um confronto dependente já começou ou passou do horário e não foi alterado automaticamente.",
   points_recalculated: "Pontuação recalculada para todos os jogos.",
+  score_sync_settings_updated: "Configuração de sincronização de placares atualizada.",
+  score_events_imported: "Eventos da ESPN importados.",
+  score_sync_completed: "Sincronização de placares executada.",
+  score_match_sync_completed: "Jogo atualizado pelo ESPN Scoreboard.",
+  score_match_locked: "Atualizações automáticas bloqueadas para este jogo.",
+  score_match_unlocked: "Atualizações automáticas liberadas para este jogo.",
 } as const;
 
 export type ErrorFeedbackCode = keyof typeof ERROR_MESSAGES;

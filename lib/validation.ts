@@ -64,6 +64,11 @@ export const matchResultSchema = z.discriminatedUnion("status", [
   }),
 ]);
 
+export const scoreSyncSettingsSchema = z.object({
+  enabled: z.boolean(),
+  intervalMinutes: z.coerce.number().int().min(1).max(180),
+});
+
 export const favoriteTeamSchema = z.object({
   favoriteTeam: z.preprocess(
     (value) => (typeof value === "string" && value.trim() === "" ? null : value),

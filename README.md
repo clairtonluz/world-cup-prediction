@@ -8,6 +8,7 @@ Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, co
 - Página de grupos com classificação projetada durante jogos ao vivo.
 - Chaveamento automático: resultados atualizam somente participantes de jogos futuros ainda não iniciados.
 - Pontuação provisória durante jogos ao vivo e definitiva ao encerrar o jogo.
+- Sincronização opcional com ESPN Scoreboard para resultados em andamento, com controles administrativos e bloqueio por jogo.
 - Palpite opcional do campeão antes da abertura da Copa, valendo 200 pontos após a final.
 - Ranking global, Grupos de Amigos privados e estatísticas pessoais em português do Brasil.
 - Convites de Grupos de Amigos por link privado reutilizável; somente o hash do convite é armazenado.
@@ -21,7 +22,7 @@ Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, co
    pnpm install
    ```
 
-2. Create `.env` from `.env.example` and set the PostgreSQL and Keycloak values. Add the optional Firebase values only when enabling consent-gated analytics. The application and Prisma automatically derive their PostgreSQL connection URL from `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_PORT`; passwords may contain reserved URL characters. When running Next.js directly with `pnpm dev`, escape a literal `$` in `.env` as `\$`, following Next.js environment-variable expansion rules.
+2. Create `.env` from `.env.example` and set the PostgreSQL and Keycloak values. Set `MATCH_SYNC_SECRET` when enabling automatic score sync. Add the optional Firebase values only when enabling consent-gated analytics. The application and Prisma automatically derive their PostgreSQL connection URL from `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_PORT`; passwords may contain reserved URL characters. When running Next.js directly with `pnpm dev`, escape a literal `$` in `.env` as `\$`, following Next.js environment-variable expansion rules.
 
 3. Create the PostgreSQL database, then generate and migrate Prisma:
 
@@ -62,6 +63,18 @@ The app is available at [http://localhost:3000](http://localhost:3000). PostgreS
 
 Use local `pnpm dev` for day-to-day development; the Docker app runs an optimized production build.
 
+### Score Sync
+
+Result sync uses ESPN's public FIFA World Cup scoreboard endpoint. Configure:
+
+```dotenv
+MATCH_SYNC_SECRET='long-random-secret-used-by-the-worker'
+```
+
+The Docker `sync-worker` calls the protected internal route every minute, but the application only calls ESPN when automatic sync is enabled, the configured interval is due, and at least one mapped match has already started and is still inside the 180-minute live window. Admins can import ESPN event IDs, run a sync manually, change the interval, disable global automatic sync, and lock updates for individual matches.
+
+ESPN's endpoint is public but not a contracted API, so keep the manual admin result update as the operational fallback.
+
 ### Production Deployment
 
 `compose.production.yaml` adds the production-only configuration used on a single server behind Traefik: TLS routing through the external `proxy` network, no published application or database ports, a persistent database directory, a container health check, and resource limits. This repository does not currently publish a runtime image, so production builds the checked-out application revision on the server. Use the explicit `-f` command below so the local-only `compose.override.yaml` is not loaded in production.
@@ -73,6 +86,7 @@ Use local `pnpm dev` for day-to-day development; the Docker app runs an optimize
    AUTH_URL="https://copa.example.com"
    POSTGRES_DATA_PATH="./data"
    TZ="America/Fortaleza"
+   MATCH_SYNC_SECRET='long-random-secret-used-by-the-worker'
    ```
 
    No connection URL needs to be stored for the Docker deployment. The application and migration containers use the `database` service internally and build their URL from `POSTGRES_*`.

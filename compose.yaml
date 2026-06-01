@@ -42,6 +42,8 @@ services:
       AUTH_KEYCLOAK_ID: ${AUTH_KEYCLOAK_ID:?Set AUTH_KEYCLOAK_ID in .env}
       AUTH_KEYCLOAK_SECRET: ${AUTH_KEYCLOAK_SECRET:?Set AUTH_KEYCLOAK_SECRET in .env}
       AUTH_KEYCLOAK_ISSUER: ${AUTH_KEYCLOAK_ISSUER:?Set AUTH_KEYCLOAK_ISSUER in .env}
+      ESPN_SCOREBOARD_BASE_URL: ${ESPN_SCOREBOARD_BASE_URL:-}
+      MATCH_SYNC_SECRET: ${MATCH_SYNC_SECRET:?Set MATCH_SYNC_SECRET in .env}
       FIREBASE_API_KEY: ${FIREBASE_API_KEY:-}
       FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN:-}
       FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID:-}
@@ -51,4 +53,31 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+    restart: unless-stopped
+
+  sync-worker:
+    build:
+      context: .
+      target: runner
+    environment:
+      MATCH_SYNC_SECRET: ${MATCH_SYNC_SECRET:?Set MATCH_SYNC_SECRET in .env}
+      MATCH_SYNC_URL: http://app:3000/api/integrations/score-sync/sync
+    command:
+      - node
+      - -e
+      - |
+        const url = process.env.MATCH_SYNC_URL;
+        const secret = process.env.MATCH_SYNC_SECRET;
+        async function tick() {
+          try {
+            await fetch(url, { method: "POST", headers: { authorization: `Bearer ${secret}` } });
+          } catch (error) {
+            console.error(error instanceof Error ? error.message : "match sync failed");
+          }
+        }
+        setInterval(tick, 60_000);
+        tick();
+    depends_on:
+      app:
+        condition: service_started
     restart: unless-stopped

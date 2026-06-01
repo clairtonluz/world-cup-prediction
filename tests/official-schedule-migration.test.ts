@@ -15,6 +15,13 @@ const shiftStartTimesMigration = readFileSync(
   ),
   "utf8",
 );
+const undoShiftStartTimesMigration = readFileSync(
+  new URL(
+    "../prisma/migrations/20260601000000_undo_shift_match_start_times_forward_three_hours/migration.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const fixtureRows = migration
   .split("\n")
   .filter((line) => line.trimStart().startsWith("('c2026match"));
@@ -79,6 +86,22 @@ describe("match start time correction migration", () => {
     expect(shiftStartTimesMigration).not.toContain('"venue"');
     expect(shiftStartTimesMigration).not.toContain('"hostCity"');
     expect(shiftStartTimesMigration).not.toContain('"Prediction"');
+  });
+
+  it("undoes the three-hour kickoff shift without changing fixture data", () => {
+    expect(undoShiftStartTimesMigration).toContain('UPDATE "Match"');
+    expect(undoShiftStartTimesMigration).toContain(
+      '"startsAt" = "startsAt" - INTERVAL \'3 hours\'',
+    );
+    expect(undoShiftStartTimesMigration).toContain('"updatedAt" = NOW()');
+    expect(undoShiftStartTimesMigration).not.toContain('"teamA"');
+    expect(undoShiftStartTimesMigration).not.toContain('"teamB"');
+    expect(undoShiftStartTimesMigration).not.toContain('"teamAScore"');
+    expect(undoShiftStartTimesMigration).not.toContain('"teamBScore"');
+    expect(undoShiftStartTimesMigration).not.toContain('"status"');
+    expect(undoShiftStartTimesMigration).not.toContain('"venue"');
+    expect(undoShiftStartTimesMigration).not.toContain('"hostCity"');
+    expect(undoShiftStartTimesMigration).not.toContain('"Prediction"');
   });
 });
 

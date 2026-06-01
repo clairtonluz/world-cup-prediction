@@ -58,6 +58,8 @@ model Match {
   id                    String       @id @default(cuid())
   matchNumber           Int          @unique
   fifaMatchId           String       @unique
+  espnEventId           String?      @unique
+  scoreSyncLocked       Boolean      @default(false)
   teamA                 String?
   teamB                 String?
   teamASlot             String?
@@ -81,6 +83,21 @@ model Match {
   @@index([status, startsAt])
   @@index([stage])
   @@index([groupCode, groupRound])
+}
+
+model ScoreSyncSettings {
+  id                   String    @id @default("default")
+  enabled              Boolean   @default(true)
+  intervalMinutes      Int       @default(10)
+  lastSyncStartedAt    DateTime? @db.Timestamptz(3)
+  lastSyncFinishedAt   DateTime? @db.Timestamptz(3)
+  lastSuccessfulSyncAt DateTime? @db.Timestamptz(3)
+  lastSyncSummary      String?
+  lastSyncError        String?
+  remainingRequests    Int?
+  syncInProgressSince  DateTime? @db.Timestamptz(3)
+  createdAt            DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt            DateTime  @updatedAt @db.Timestamptz(3)
 }
 
 model Prediction {

@@ -59,6 +59,20 @@ services:
           cpus: "0.25"
           memory: 256M
 
+  sync-worker:
+    environment:
+      TZ: ${TZ:-America/Fortaleza}
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 128M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
+
 networks:
   proxy:
     external: true

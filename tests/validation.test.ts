@@ -8,6 +8,7 @@ import {
   matchIdSchema,
   matchResultSchema,
   predictionSchema,
+  scoreSyncSettingsSchema,
 } from "@/lib/validation";
 
 const matchId = "cmatch000000000000000000001";
@@ -90,6 +91,24 @@ describe("matchResultSchema", () => {
         teamAScore: null,
         teamBScore: null,
         advancingTeam: null,
+      }),
+    ).toThrow();
+  });
+});
+
+describe("scoreSyncSettingsSchema", () => {
+  it("accepts the default sync interval and rejects out-of-range values", () => {
+    expect(
+      scoreSyncSettingsSchema.parse({
+        enabled: true,
+        intervalMinutes: "10",
+      }),
+    ).toEqual({ enabled: true, intervalMinutes: 10 });
+
+    expect(() =>
+      scoreSyncSettingsSchema.parse({
+        enabled: true,
+        intervalMinutes: "181",
       }),
     ).toThrow();
   });

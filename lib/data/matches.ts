@@ -9,6 +9,8 @@ const matchSelect = {
   id: true,
   matchNumber: true,
   fifaMatchId: true,
+  espnEventId: true,
+  scoreSyncLocked: true,
   teamA: true,
   teamB: true,
   teamASlot: true,
