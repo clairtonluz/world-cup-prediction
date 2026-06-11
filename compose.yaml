@@ -64,19 +64,7 @@ services:
       MATCH_SYNC_URL: http://app:3000/api/integrations/score-sync/sync
     command:
       - node
-      - -e
-      - |
-        const url = process.env.MATCH_SYNC_URL;
-        const secret = process.env.MATCH_SYNC_SECRET;
-        async function tick() {
-          try {
-            await fetch(url, { method: "POST", headers: { authorization: `Bearer ${secret}` } });
-          } catch (error) {
-            console.error(error instanceof Error ? error.message : "match sync failed");
-          }
-        }
-        setInterval(tick, 60_000);
-        tick();
+      - scripts/score-sync-worker.mjs
     depends_on:
       app:
         condition: service_started

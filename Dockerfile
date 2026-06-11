@@ -50,6 +50,7 @@ RUN apt-get update \
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/scripts/score-sync-worker.mjs ./scripts/score-sync-worker.mjs
 
 USER nextjs
 
