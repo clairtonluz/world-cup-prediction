@@ -63,6 +63,33 @@ The app is available at [http://localhost:3000](http://localhost:3000). PostgreS
 
 Use local `pnpm dev` for day-to-day development; the Docker app runs an optimized production build.
 
+### Database Backup And Restore
+
+Backups use the PostgreSQL tools inside the running `database` container, so the host machine does not need PostgreSQL client binaries installed. Dump files are written to `backups/`, ignored by Git and Docker build context, and may contain private user data.
+
+Create a local backup:
+
+```bash
+pnpm db:backup
+```
+
+Restore a local backup:
+
+```bash
+docker compose stop app sync-worker
+CONFIRM_RESTORE=yes pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump
+docker compose up -d app sync-worker
+```
+
+For production, run the same scripts on the server with the production Compose files so `compose.override.yaml` is not loaded:
+
+```bash
+COMPOSE_FILE=compose.yaml:compose.production.yaml pnpm db:backup
+docker compose -f compose.yaml -f compose.production.yaml stop app sync-worker
+CONFIRM_RESTORE=yes COMPOSE_FILE=compose.yaml:compose.production.yaml pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump
+docker compose -f compose.yaml -f compose.production.yaml up -d app sync-worker
+```
+
 ### Score Sync
 
 Result sync uses ESPN's public FIFA World Cup scoreboard endpoint. Configure:
@@ -181,6 +208,8 @@ pnpm test
 pnpm lint
 pnpm build
 pnpm db:deploy
+pnpm db:backup
+CONFIRM_RESTORE=yes pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump
 pnpm exec prisma validate
 ```
 

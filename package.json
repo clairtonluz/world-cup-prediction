@@ -11,7 +11,9 @@
     "test": "vitest run",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy"
+    "db:deploy": "prisma migrate deploy",
+    "db:backup": "sh scripts/database/backup.sh",
+    "db:restore": "sh scripts/database/restore.sh"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
