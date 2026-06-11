@@ -83,7 +83,10 @@ export async function getMatchDetail(id: string) {
   }
 
   const comparisonPredictions = await db.prediction.findMany({
-    where: { matchId: match.id },
+    where: {
+      matchId: match.id,
+      user: { is: { hiddenFromGlobalRanking: false } },
+    },
     select: {
       id: true,
       teamAScore: true,

@@ -50,6 +50,10 @@ describe("getMatchDetail prediction visibility", () => {
     expect(match.comparisonPredictions?.[0].predictedAdvancingTeam).toBe("Brasil");
     expect(mocks.predictionFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
+        where: {
+          matchId: "match",
+          user: { is: { hiddenFromGlobalRanking: false } },
+        },
         select: expect.objectContaining({ predictedAdvancingTeam: true }),
       }),
     );
