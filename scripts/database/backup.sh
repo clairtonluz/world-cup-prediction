@@ -3,6 +3,11 @@ set -eu
 
 backup_dir="${BACKUP_DIR:-backups}"
 timestamp="$(date +%Y%m%d-%H%M%S)"
+
+if [ "${1:-}" = "--" ]; then
+  shift
+fi
+
 output_file="${1:-$backup_dir/world-cup-prediction-$timestamp.dump}"
 
 if [ -e "$output_file" ]; then

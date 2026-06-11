@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
+if [ "${1:-}" = "--" ]; then
+  shift
+fi
+
 if [ "$#" -ne 1 ]; then
   printf >&2 'Usage: CONFIRM_RESTORE=yes pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump\n'
   exit 64
