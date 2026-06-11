@@ -35,16 +35,17 @@ const scoringRules: Array<{
     description: "Você acerta quem venceu e quantos gols o perdedor marcou.",
   },
   {
+    category: "CORRECT_RESULT_EXACT_GOAL_DIFFERENCE",
+    label: "Resultado e diferença de gols",
+    percentage: "40%",
+    description:
+      "Você acerta o resultado e a diferença de gols, incluindo empates.",
+  },
+  {
     category: "CORRECT_WINNER_ONLY",
     label: "Somente o vencedor",
     percentage: "30%",
     description: "Você acerta a equipe vencedora, mas não acerta os placares.",
-  },
-  {
-    category: "CORRECT_DRAW_ONLY",
-    label: "Somente o empate",
-    percentage: "30%",
-    description: "Você prevê um empate, mas o placar exato é diferente.",
   },
   {
     category: "WRONG_PREDICTION",
@@ -123,6 +124,7 @@ export default function ScoringPage() {
             <p><strong>2 x 1</strong> vale 10 pontos: placar exato.</p>
             <p><strong>2 x 0</strong> vale 7 pontos: vencedor e gols do vencedor.</p>
             <p><strong>3 x 1</strong> vale 5 pontos: vencedor e gols do perdedor.</p>
+            <p><strong>4 x 3</strong> vale 4 pontos: vencedor e diferença de gols.</p>
             <p><strong>3 x 0</strong> vale 3 pontos: somente o vencedor.</p>
             <p><strong>1 x 1</strong> vale 0 pontos: resultado incorreto.</p>
           </CardContent>

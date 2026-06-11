@@ -15,16 +15,16 @@ export type ScoringCategory =
   | "EXACT_SCORE"
   | "CORRECT_WINNER_EXACT_WINNER_SCORE"
   | "CORRECT_WINNER_EXACT_LOSER_SCORE"
+  | "CORRECT_RESULT_EXACT_GOAL_DIFFERENCE"
   | "CORRECT_WINNER_ONLY"
-  | "CORRECT_DRAW_ONLY"
   | "WRONG_PREDICTION";
 
 const SCORING_RATES: Record<ScoringCategory, number> = {
   EXACT_SCORE: 1,
   CORRECT_WINNER_EXACT_WINNER_SCORE: 0.7,
   CORRECT_WINNER_EXACT_LOSER_SCORE: 0.5,
+  CORRECT_RESULT_EXACT_GOAL_DIFFERENCE: 0.4,
   CORRECT_WINNER_ONLY: 0.3,
-  CORRECT_DRAW_ONLY: 0.3,
   WRONG_PREDICTION: 0,
 };
 
@@ -58,6 +58,10 @@ export function scoreOutcome(score: Score): Outcome {
   }
 
   return score.teamAScore > score.teamBScore ? "TEAM_A" : "TEAM_B";
+}
+
+function scoreGoalDifference(score: Score) {
+  return score.teamAScore - score.teamBScore;
 }
 
 export function pointsForScoringCategory(
@@ -95,31 +99,40 @@ export function calculatePredictionPoints(
     return scoringResult(match.stage, "WRONG_PREDICTION", bonusPoints);
   }
 
-  if (actualOutcome === "DRAW") {
-    return scoringResult(match.stage, "CORRECT_DRAW_ONLY", bonusPoints);
+  const goalDifferenceMatches =
+    scoreGoalDifference(prediction) === scoreGoalDifference(match);
+
+  if (actualOutcome !== "DRAW") {
+    const winnerScoreMatches =
+      actualOutcome === "TEAM_A"
+        ? prediction.teamAScore === match.teamAScore
+        : prediction.teamBScore === match.teamBScore;
+    const loserScoreMatches =
+      actualOutcome === "TEAM_A"
+        ? prediction.teamBScore === match.teamBScore
+        : prediction.teamAScore === match.teamAScore;
+
+    if (winnerScoreMatches) {
+      return scoringResult(
+        match.stage,
+        "CORRECT_WINNER_EXACT_WINNER_SCORE",
+        bonusPoints,
+      );
+    }
+
+    if (loserScoreMatches) {
+      return scoringResult(
+        match.stage,
+        "CORRECT_WINNER_EXACT_LOSER_SCORE",
+        bonusPoints,
+      );
+    }
   }
 
-  const winnerScoreMatches =
-    actualOutcome === "TEAM_A"
-      ? prediction.teamAScore === match.teamAScore
-      : prediction.teamBScore === match.teamBScore;
-  const loserScoreMatches =
-    actualOutcome === "TEAM_A"
-      ? prediction.teamBScore === match.teamBScore
-      : prediction.teamAScore === match.teamAScore;
-
-  if (winnerScoreMatches) {
+  if (goalDifferenceMatches) {
     return scoringResult(
       match.stage,
-      "CORRECT_WINNER_EXACT_WINNER_SCORE",
-      bonusPoints,
-    );
-  }
-
-  if (loserScoreMatches) {
-    return scoringResult(
-      match.stage,
-      "CORRECT_WINNER_EXACT_LOSER_SCORE",
+      "CORRECT_RESULT_EXACT_GOAL_DIFFERENCE",
       bonusPoints,
     );
   }

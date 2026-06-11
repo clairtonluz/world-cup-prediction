@@ -60,6 +60,29 @@ describe("calculatePredictionPoints", () => {
     });
   });
 
+  it("awards correct result and exact goal difference points", () => {
+    expect(
+      calculatePredictionPoints(
+        { teamAScore: 4, teamBScore: 3 },
+        { teamAScore: 2, teamBScore: 1, stage: "GROUP_STAGE" },
+      ),
+    ).toEqual(scoringResult("CORRECT_RESULT_EXACT_GOAL_DIFFERENCE", 4));
+
+    expect(
+      calculatePredictionPoints(
+        { teamAScore: 2, teamBScore: 4 },
+        { teamAScore: 1, teamBScore: 3, stage: "FINAL" },
+      ),
+    ).toEqual(scoringResult("CORRECT_RESULT_EXACT_GOAL_DIFFERENCE", 40));
+
+    expect(
+      calculatePredictionPoints(
+        { teamAScore: 1, teamBScore: 1 },
+        { teamAScore: 2, teamBScore: 2, stage: "ROUND_OF_32" },
+      ),
+    ).toEqual(scoringResult("CORRECT_RESULT_EXACT_GOAL_DIFFERENCE", 6));
+  });
+
   it("awards correct outcome points and rounds fractional stage rewards", () => {
     expect(
       calculatePredictionPoints(
@@ -67,13 +90,6 @@ describe("calculatePredictionPoints", () => {
         { teamAScore: 2, teamBScore: 1, stage: "FINAL" },
       ),
     ).toEqual(scoringResult("CORRECT_WINNER_ONLY", 30));
-
-    expect(
-      calculatePredictionPoints(
-        { teamAScore: 1, teamBScore: 1 },
-        { teamAScore: 2, teamBScore: 2, stage: "ROUND_OF_32" },
-      ),
-    ).toEqual(scoringResult("CORRECT_DRAW_ONLY", 5));
   });
 
   it("adds a knockout draw bonus for exact draws with the correct advancing team", () => {
@@ -109,7 +125,7 @@ describe("calculatePredictionPoints", () => {
           advancingTeam: "Brasil",
         },
       ),
-    ).toEqual(scoringResult("CORRECT_DRAW_ONLY", 7, 2));
+    ).toEqual(scoringResult("CORRECT_RESULT_EXACT_GOAL_DIFFERENCE", 8, 2));
   });
 
   it("does not add the draw bonus when the advancing team is wrong", () => {
@@ -183,7 +199,12 @@ describe("calculatePredictionPoints", () => {
         "CORRECT_WINNER_EXACT_LOSER_SCORE",
       ),
     ).toBe(8);
-    expect(pointsForScoringCategory("ROUND_OF_32", "CORRECT_DRAW_ONLY")).toBe(5);
+    expect(
+      pointsForScoringCategory(
+        "ROUND_OF_32",
+        "CORRECT_RESULT_EXACT_GOAL_DIFFERENCE",
+      ),
+    ).toBe(6);
     expect(pointsForDrawAdvancingTeamBonus("ROUND_OF_32")).toBe(2);
   });
 });
