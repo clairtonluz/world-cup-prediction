@@ -108,7 +108,7 @@ export default async function MatchDetailPage({
         <CardHeader><CardTitle>Apostas dos amigos</CardTitle></CardHeader>
         <CardContent>
           <PredictionsTable
-            predictions={match.comparisonPredictions}
+            predictionGroups={match.comparisonPredictionGroups}
             provisional={match.status === "STARTED"}
           />
         </CardContent>

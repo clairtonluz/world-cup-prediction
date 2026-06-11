@@ -1,18 +1,11 @@
 export function PredictionsTable({
-  predictions,
+  predictionGroups,
   provisional = false,
 }: {
-  predictions: {
-    id: string;
-    teamAScore: number;
-    teamBScore: number;
-    predictedAdvancingTeam: string | null;
-    points: number;
-    user: { id: string; name: string; image: string | null };
-  }[] | null;
+  predictionGroups: PredictionGroup[] | null;
   provisional?: boolean;
 }) {
-  if (predictions === null) {
+  if (predictionGroups === null) {
     return (
       <p className="rounded-lg bg-slate-100 p-4 text-sm text-slate-700">
         As apostas dos outros participantes ficam ocultas até o início do jogo.
@@ -20,10 +13,48 @@ export function PredictionsTable({
     );
   }
 
-  if (predictions.length === 0) {
+  const groupsWithPredictions = predictionGroups.filter(
+    (group) => group.predictions.length > 0,
+  );
+
+  if (groupsWithPredictions.length === 0) {
     return <p className="text-sm text-slate-600">Nenhuma aposta foi enviada.</p>;
   }
 
+  return (
+    <div className="space-y-6">
+      {groupsWithPredictions.map((group) => (
+        <section key={group.id} className="space-y-3">
+          <h3 className="text-base font-semibold text-slate-950">{group.name}</h3>
+          <PredictionGroupTable predictions={group.predictions} provisional={provisional} />
+        </section>
+      ))}
+    </div>
+  );
+}
+
+type PredictionGroup = {
+  id: string;
+  name: string;
+  predictions: PredictionRow[];
+};
+
+type PredictionRow = {
+  id: string;
+  teamAScore: number;
+  teamBScore: number;
+  predictedAdvancingTeam: string | null;
+  points: number;
+  user: { id: string; name: string; image: string | null };
+};
+
+function PredictionGroupTable({
+  predictions,
+  provisional,
+}: {
+  predictions: PredictionRow[];
+  provisional: boolean;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">

@@ -79,26 +79,74 @@ export async function getMatchDetail(id: string) {
   }
 
   if (!hasEffectivelyStarted(match)) {
-    return { ...match, comparisonPredictions: null };
+    return { ...match, comparisonPredictionGroups: null };
   }
 
-  const comparisonPredictions = await db.prediction.findMany({
+  const friendGroups = await db.friendGroup.findMany({
     where: {
-      matchId: match.id,
-      user: { is: { hiddenFromGlobalRanking: false } },
+      AND: [
+        { members: { some: { userId: user.id } } },
+        {
+          members: {
+            some: {
+              user: {
+                predictions: { some: { matchId: match.id } },
+              },
+            },
+          },
+        },
+      ],
     },
     select: {
       id: true,
-      teamAScore: true,
-      teamBScore: true,
-      predictedAdvancingTeam: true,
-      points: true,
-      user: { select: { id: true, name: true, image: true } },
+      name: true,
+      members: {
+        where: {
+          user: {
+            predictions: { some: { matchId: match.id } },
+          },
+        },
+        select: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+              predictions: {
+                where: { matchId: match.id },
+                select: {
+                  id: true,
+                  teamAScore: true,
+                  teamBScore: true,
+                  predictedAdvancingTeam: true,
+                  points: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: [{ user: { name: "asc" } }, { userId: "asc" }],
+      },
     },
-    orderBy: { user: { name: "asc" } },
+    orderBy: [{ name: "asc" }, { id: "asc" }],
   });
 
-  return { ...match, comparisonPredictions };
+  const comparisonPredictionGroups = friendGroups.map((friendGroup) => ({
+    id: friendGroup.id,
+    name: friendGroup.name,
+    predictions: friendGroup.members.flatMap((member) =>
+      member.user.predictions.map((prediction) => ({
+        ...prediction,
+        user: {
+          id: member.user.id,
+          name: member.user.name,
+          image: member.user.image,
+        },
+      })),
+    ),
+  }));
+
+  return { ...match, comparisonPredictionGroups };
 }
 
 export async function listAdminMatches() {

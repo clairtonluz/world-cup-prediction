@@ -4,7 +4,7 @@ import { getMatchDetail } from "@/lib/data/matches";
 const mocks = vi.hoisted(() => ({
   requireUser: vi.fn(),
   matchFindUnique: vi.fn(),
-  predictionFindMany: vi.fn(),
+  friendGroupFindMany: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
@@ -13,7 +13,7 @@ vi.mock("@/lib/auth-guards", () => ({ requireUser: mocks.requireUser }));
 vi.mock("@/lib/db", () => ({
   getDb: () => ({
     match: { findUnique: mocks.matchFindUnique },
-    prediction: { findMany: mocks.predictionFindMany },
+    friendGroup: { findMany: mocks.friendGroupFindMany },
   }),
 }));
 
@@ -28,33 +28,115 @@ describe("getMatchDetail prediction visibility", () => {
 
     const match = await getMatchDetail("match");
 
-    expect(match.comparisonPredictions).toBeNull();
-    expect(mocks.predictionFindMany).not.toHaveBeenCalled();
+    expect(match.comparisonPredictionGroups).toBeNull();
+    expect(mocks.friendGroupFindMany).not.toHaveBeenCalled();
   });
 
-  it("includes classified-team predictions after kickoff", async () => {
+  it("loads predictions grouped by friend groups shared with the current user after kickoff", async () => {
     mocks.matchFindUnique.mockResolvedValue(matchAt("2020-06-11T19:00:00Z", "STARTED"));
-    mocks.predictionFindMany.mockResolvedValue([
+    mocks.friendGroupFindMany.mockResolvedValue([
       {
-        id: "prediction",
-        teamAScore: 1,
-        teamBScore: 1,
-        predictedAdvancingTeam: "Brasil",
-        points: 0,
-        user: { id: "friend", name: "Amigo", image: null },
+        id: "group",
+        name: "Grupo da Copa",
+        members: [
+          {
+            user: {
+              id: "current",
+              name: "Pessoa Atual",
+              image: null,
+              predictions: [
+                {
+                  id: "current-prediction",
+                  teamAScore: 2,
+                  teamBScore: 1,
+                  predictedAdvancingTeam: null,
+                  points: 5,
+                },
+              ],
+            },
+          },
+          {
+            user: {
+              id: "friend",
+              name: "Amigo",
+              image: null,
+              predictions: [
+                {
+                  id: "friend-prediction",
+                  teamAScore: 1,
+                  teamBScore: 1,
+                  predictedAdvancingTeam: "Brasil",
+                  points: 0,
+                },
+              ],
+            },
+          },
+        ],
       },
     ]);
 
     const match = await getMatchDetail("match");
 
-    expect(match.comparisonPredictions?.[0].predictedAdvancingTeam).toBe("Brasil");
-    expect(mocks.predictionFindMany).toHaveBeenCalledWith(
+    expect(match.comparisonPredictionGroups).toEqual([
+      {
+        id: "group",
+        name: "Grupo da Copa",
+        predictions: [
+          {
+            id: "current-prediction",
+            teamAScore: 2,
+            teamBScore: 1,
+            predictedAdvancingTeam: null,
+            points: 5,
+            user: { id: "current", name: "Pessoa Atual", image: null },
+          },
+          {
+            id: "friend-prediction",
+            teamAScore: 1,
+            teamBScore: 1,
+            predictedAdvancingTeam: "Brasil",
+            points: 0,
+            user: { id: "friend", name: "Amigo", image: null },
+          },
+        ],
+      },
+    ]);
+    expect(mocks.friendGroupFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          matchId: "match",
-          user: { is: { hiddenFromGlobalRanking: false } },
+          AND: [
+            { members: { some: { userId: "current" } } },
+            {
+              members: {
+                some: {
+                  user: {
+                    predictions: { some: { matchId: "match" } },
+                  },
+                },
+              },
+            },
+          ],
         },
-        select: expect.objectContaining({ predictedAdvancingTeam: true }),
+        select: expect.objectContaining({
+          members: expect.objectContaining({
+            where: {
+              user: {
+                predictions: { some: { matchId: "match" } },
+              },
+            },
+            select: expect.objectContaining({
+              user: expect.objectContaining({
+                select: expect.objectContaining({
+                  predictions: expect.objectContaining({
+                    where: { matchId: "match" },
+                    select: expect.objectContaining({ predictedAdvancingTeam: true }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+        orderBy: [{ name: "asc" }, { id: "asc" }],
       }),
     );
   });
