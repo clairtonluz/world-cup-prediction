@@ -8,25 +8,47 @@ import {
   requiresAdvancingTeamPrediction,
 } from "@/lib/tournament-predictions";
 
-const openingMatch = {
-  startsAt: new Date("2026-06-11T19:00:00Z"),
+const knockoutDeadlineMatch = {
+  startsAt: new Date("2026-06-28T19:00:00Z"),
   status: "SCHEDULED" as const,
 };
 
 describe("champion prediction timing and scoring", () => {
-  it("allows edits only before the first effective kickoff", () => {
-    expect(mayEditChampionPrediction(openingMatch, new Date("2026-06-11T18:59:59Z"))).toBe(true);
-    expect(mayEditChampionPrediction(openingMatch, openingMatch.startsAt)).toBe(false);
+  it("allows edits during the group stage until the first knockout kickoff", () => {
+    expect(mayEditChampionPrediction(null, new Date("2026-06-27T19:00:00Z"))).toBe(false);
     expect(
       mayEditChampionPrediction(
-        { ...openingMatch, status: "STARTED" },
-        new Date("2026-06-11T18:00:00Z"),
+        knockoutDeadlineMatch,
+        new Date("2026-06-27T19:00:00Z"),
+      ),
+    ).toBe(true);
+    expect(
+      mayEditChampionPrediction(
+        knockoutDeadlineMatch,
+        knockoutDeadlineMatch.startsAt,
+      ),
+    ).toBe(false);
+    expect(
+      mayEditChampionPrediction(
+        { ...knockoutDeadlineMatch, status: "STARTED" },
+        new Date("2026-06-27T19:00:00Z"),
       ),
     ).toBe(false);
   });
 
   it("reveals predictions after closing and awards points only for the official final winner", () => {
-    expect(mayRevealChampionPredictions(openingMatch, openingMatch.startsAt)).toBe(true);
+    expect(
+      mayRevealChampionPredictions(
+        knockoutDeadlineMatch,
+        new Date("2026-06-27T19:00:00Z"),
+      ),
+    ).toBe(false);
+    expect(
+      mayRevealChampionPredictions(
+        knockoutDeadlineMatch,
+        knockoutDeadlineMatch.startsAt,
+      ),
+    ).toBe(true);
     expect(officialChampionFromFinal({ status: "STARTED", advancingTeam: "Brasil" })).toBeNull();
     expect(officialChampionFromFinal({ status: "FINISHED", advancingTeam: "Brasil" })).toBe("Brasil");
     expect(championBonusPoints("Brasil", "Brasil")).toBe(200);

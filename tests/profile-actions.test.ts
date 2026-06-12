@@ -28,9 +28,9 @@ vi.mock("@/lib/transactions", () => ({
 }));
 
 const user = { id: "cuser123" };
-const editableOpeningMatch = {
+const editableDeadlineMatch = {
   status: "SCHEDULED",
-  startsAt: new Date("2099-06-11T19:00:00Z"),
+  startsAt: new Date("2099-06-28T19:00:00Z"),
 };
 
 beforeEach(() => {
@@ -42,15 +42,21 @@ beforeEach(() => {
 });
 
 describe("updatePredictedChampionAction", () => {
-  it("saves a scheduled tournament team before the opening match", async () => {
+  it("saves a scheduled tournament team during the group stage before the knockout deadline", async () => {
     mocks.matchFindFirst
-      .mockResolvedValueOnce(editableOpeningMatch)
+      .mockResolvedValueOnce(editableDeadlineMatch)
       .mockResolvedValueOnce({ id: "group-match" });
 
     await expect(updatePredictedChampionAction(formData("Brasil"))).rejects.toThrow(
       "redirect:/me?success=predicted_champion_updated",
     );
 
+    expect(mocks.matchFindFirst).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        where: { stage: "ROUND_OF_32" },
+      }),
+    );
     expect(mocks.matchFindFirst).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
@@ -70,7 +76,7 @@ describe("updatePredictedChampionAction", () => {
 
   it("returns champion prediction updates to the personal predictions page", async () => {
     mocks.matchFindFirst
-      .mockResolvedValueOnce(editableOpeningMatch)
+      .mockResolvedValueOnce(editableDeadlineMatch)
       .mockResolvedValueOnce({ id: "group-match" });
 
     await expect(
@@ -87,11 +93,20 @@ describe("updatePredictedChampionAction", () => {
 
   it("rejects a team outside the tournament schedule", async () => {
     mocks.matchFindFirst
-      .mockResolvedValueOnce(editableOpeningMatch)
+      .mockResolvedValueOnce(editableDeadlineMatch)
       .mockResolvedValueOnce(null);
 
     await expect(updatePredictedChampionAction(formData("Inexistente"))).rejects.toThrow(
       "redirect:/me?error=invalid_predicted_champion",
+    );
+    expect(mocks.userUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects champion updates when the knockout deadline match is missing", async () => {
+    mocks.matchFindFirst.mockResolvedValueOnce(null);
+
+    await expect(updatePredictedChampionAction(formData("Brasil"))).rejects.toThrow(
+      "redirect:/me?error=champion_prediction_closed",
     );
     expect(mocks.userUpdate).not.toHaveBeenCalled();
   });
@@ -110,7 +125,7 @@ describe("updatePredictedChampionAction", () => {
   });
 
   it("allows clearing an optional selection only before the deadline", async () => {
-    mocks.matchFindFirst.mockResolvedValueOnce(editableOpeningMatch);
+    mocks.matchFindFirst.mockResolvedValueOnce(editableDeadlineMatch);
 
     await expect(updatePredictedChampionAction(formData(""))).rejects.toThrow(
       "redirect:/me?success=predicted_champion_updated",
@@ -126,7 +141,7 @@ describe("updatePredictedChampionAction", () => {
       throw new Error(`redirect:${url}`);
     });
     mocks.matchFindFirst.mockResolvedValueOnce({
-      ...editableOpeningMatch,
+      ...editableDeadlineMatch,
       status: "STARTED",
     });
 

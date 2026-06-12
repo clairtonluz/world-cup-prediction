@@ -121,7 +121,7 @@ describe("calculateRanking", () => {
     expect(beforeFinal.rows[0].championBonusPoints).toBe(0);
   });
 
-  it("hides champion predictions until the tournament begins", () => {
+  it("hides champion predictions until the champion deadline closes", () => {
     const entry = participant({ id: "current", name: "Ana", predictedChampion: "Brasil" });
 
     expect(calculateRanking([entry], "current", pendingTournament).rows[0].predictedChampion).toBeNull();

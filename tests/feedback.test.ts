@@ -27,7 +27,7 @@ describe("feedbackText", () => {
     });
     expect(feedbackText({ error: "champion_prediction_closed" })).toEqual({
       kind: "error",
-      text: "O prazo para indicar o campeão encerrou no início do primeiro jogo.",
+      text: "O prazo para indicar o campeão encerrou no início do mata-mata.",
     });
   });
 

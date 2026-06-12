@@ -2,17 +2,21 @@ import "server-only";
 
 import { requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
-import { mayEditChampionPrediction } from "@/lib/tournament-predictions";
+import {
+  CHAMPION_PREDICTION_DEADLINE_STAGE,
+  mayEditChampionPrediction,
+} from "@/lib/tournament-predictions";
 
 export async function getChampionPredictionFormData() {
   const { user } = await requireUser();
   const db = getDb();
-  const [participant, openingMatch, groupMatches] = await Promise.all([
+  const [participant, deadlineMatch, groupMatches] = await Promise.all([
     db.user.findUniqueOrThrow({
       where: { id: user.id },
       select: { predictedChampion: true },
     }),
     db.match.findFirst({
+      where: { stage: CHAMPION_PREDICTION_DEADLINE_STAGE },
       select: { startsAt: true, status: true },
       orderBy: [{ startsAt: "asc" }, { matchNumber: "asc" }],
     }),
@@ -31,8 +35,8 @@ export async function getChampionPredictionFormData() {
   return {
     predictedChampion: participant.predictedChampion,
     teams,
-    editable: mayEditChampionPrediction(openingMatch),
-    closesAt: openingMatch?.startsAt ?? null,
+    editable: mayEditChampionPrediction(deadlineMatch),
+    closesAt: deadlineMatch?.startsAt ?? null,
   };
 }
 

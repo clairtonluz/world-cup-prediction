@@ -182,8 +182,9 @@ export default function ScoringPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-slate-700">
             <p>
-              Antes do início do primeiro jogo, cada participante pode indicar
-              uma seleção campeã entre as equipes do torneio.
+              Durante a fase de grupos, cada participante pode indicar ou
+              alterar uma seleção campeã entre as equipes do torneio, até o
+              início do mata-mata.
             </p>
             <p>
               Se o palpite coincidir com o campeão oficial após a final, ele

@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
 import { calculateRanking, type RankingContext } from "@/lib/ranking";
 import {
+  CHAMPION_PREDICTION_DEADLINE_STAGE,
   mayRevealChampionPredictions,
   officialChampionFromFinal,
 } from "@/lib/tournament-predictions";
@@ -62,8 +63,9 @@ export async function getRanking() {
 
 export async function getRankingContext(): Promise<RankingContext> {
   const db = getDb();
-  const [openingMatch, finalMatch] = await Promise.all([
+  const [deadlineMatch, finalMatch] = await Promise.all([
     db.match.findFirst({
+      where: { stage: CHAMPION_PREDICTION_DEADLINE_STAGE },
       select: { startsAt: true, status: true },
       orderBy: [{ startsAt: "asc" }, { matchNumber: "asc" }],
     }),
@@ -75,6 +77,6 @@ export async function getRankingContext(): Promise<RankingContext> {
 
   return {
     officialChampion: officialChampionFromFinal(finalMatch),
-    revealPredictedChampion: mayRevealChampionPredictions(openingMatch),
+    revealPredictedChampion: mayRevealChampionPredictions(deadlineMatch),
   };
 }

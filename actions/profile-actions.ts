@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
 import { feedbackUrl, type ErrorFeedbackCode } from "@/lib/feedback";
-import { mayEditChampionPrediction } from "@/lib/tournament-predictions";
+import {
+  CHAMPION_PREDICTION_DEADLINE_STAGE,
+  mayEditChampionPrediction,
+} from "@/lib/tournament-predictions";
 import { isTransactionConflict, runSerializableTransaction } from "@/lib/transactions";
 import { championPredictionSchema, favoriteTeamSchema } from "@/lib/validation";
 
@@ -42,12 +45,13 @@ export async function updatePredictedChampionAction(formData: FormData) {
   let error: ErrorFeedbackCode | null;
   try {
     error = await runSerializableTransaction(async (tx) => {
-      const openingMatch = await tx.match.findFirst({
+      const deadlineMatch = await tx.match.findFirst({
+        where: { stage: CHAMPION_PREDICTION_DEADLINE_STAGE },
         select: { startsAt: true, status: true },
         orderBy: [{ startsAt: "asc" }, { matchNumber: "asc" }],
       });
 
-      if (!mayEditChampionPrediction(openingMatch)) {
+      if (!mayEditChampionPrediction(deadlineMatch)) {
         return "champion_prediction_closed";
       }
 

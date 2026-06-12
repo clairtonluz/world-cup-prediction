@@ -12,7 +12,7 @@ export const ERROR_MESSAGES = {
   invalid_favorite_team: "O time favorito deve ter até 80 caracteres.",
   invalid_predicted_champion: "Selecione uma equipe participante da Copa.",
   champion_prediction_closed:
-    "O prazo para indicar o campeão encerrou no início do primeiro jogo.",
+    "O prazo para indicar o campeão encerrou no início do mata-mata.",
   invalid_friend_group: "Informe um nome de Grupo de Amigos com até 80 caracteres.",
   friend_group_not_found: "Grupo de Amigos não encontrado ou você não tem acesso a ele.",
   invite_invalid: "Este convite não existe mais ou foi desativado.",

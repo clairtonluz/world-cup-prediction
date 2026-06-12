@@ -2,6 +2,8 @@ import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { hasEffectivelyStarted } from "@/lib/match-rules";
 
 export const CHAMPION_BONUS_POINTS = 200;
+export const CHAMPION_PREDICTION_DEADLINE_STAGE: MatchStageValue =
+  "ROUND_OF_32";
 
 const ADVANCING_TEAM_PREDICTION_STAGES: ReadonlySet<MatchStageValue> = new Set([
   "ROUND_OF_32",
@@ -10,7 +12,7 @@ const ADVANCING_TEAM_PREDICTION_STAGES: ReadonlySet<MatchStageValue> = new Set([
   "SEMI_FINALS",
 ]);
 
-type OpeningMatch = {
+type ChampionPredictionDeadlineMatch = {
   startsAt: Date;
   status: MatchStatusValue;
 };
@@ -32,17 +34,17 @@ export function requiresAdvancingTeamPrediction(stage: string) {
 }
 
 export function mayEditChampionPrediction(
-  openingMatch: OpeningMatch | null,
+  deadlineMatch: ChampionPredictionDeadlineMatch | null,
   now = new Date(),
 ) {
-  return openingMatch !== null && !hasEffectivelyStarted(openingMatch, now);
+  return deadlineMatch !== null && !hasEffectivelyStarted(deadlineMatch, now);
 }
 
 export function mayRevealChampionPredictions(
-  openingMatch: OpeningMatch | null,
+  deadlineMatch: ChampionPredictionDeadlineMatch | null,
   now = new Date(),
 ) {
-  return openingMatch !== null && hasEffectivelyStarted(openingMatch, now);
+  return deadlineMatch !== null && hasEffectivelyStarted(deadlineMatch, now);
 }
 
 export function officialChampionFromFinal(

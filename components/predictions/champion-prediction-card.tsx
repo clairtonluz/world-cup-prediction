@@ -34,7 +34,7 @@ export function ChampionPredictionCard({
         <p className="text-sm text-slate-600">
           Acertar o campeão da Copa vale <strong>{CHAMPION_BONUS_POINTS} pontos</strong>.
           {championPrediction.closesAt
-            ? ` O palpite pode ser alterado antes de ${formatMatchDate(championPrediction.closesAt)}.`
+            ? ` O palpite pode ser alterado durante a fase de grupos, antes do início do mata-mata em ${formatMatchDate(championPrediction.closesAt)}.`
             : ""}
         </p>
       </CardHeader>
@@ -64,7 +64,7 @@ export function ChampionPredictionCard({
           <p className="rounded-lg bg-slate-100 p-4 text-slate-700">
             {championPrediction.predictedChampion
               ? `Palpite registrado: ${championPrediction.predictedChampion}.`
-              : "Nenhum palpite de campeão foi registrado antes do prazo."}
+              : "Nenhum palpite de campeão foi registrado durante o prazo."}
           </p>
         )}
       </CardContent>
