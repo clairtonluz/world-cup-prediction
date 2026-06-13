@@ -44,7 +44,7 @@ export default async function PersonalPredictionsPage({
       <FocusedMatches
         matches={matches}
         title="Jogos em foco para apostar"
-        description="Veja rapidamente os jogos de hoje, os últimos confrontos e as próximas apostas disponíveis."
+        description="Veja rapidamente os jogos de hoje e as próximas apostas disponíveis."
         scheduleLink={{
           href: "/matches?view=all",
           label: "Ver agenda completa",

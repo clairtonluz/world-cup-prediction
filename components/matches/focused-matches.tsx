@@ -17,7 +17,7 @@ type FocusedMatchesProps = {
 export function FocusedMatches({
   matches,
   title = "Jogos em foco",
-  description = "Acompanhe os jogos de hoje, os últimos resultados e os próximos confrontos sem percorrer a agenda completa.",
+  description = "Acompanhe os jogos de hoje e os próximos confrontos sem percorrer a agenda completa.",
   scheduleLink,
 }: FocusedMatchesProps) {
   const focusedMatches = selectFocusedMatches(matches);
@@ -61,18 +61,11 @@ export function FocusedMatches({
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <FocusedMatchGroup
-          title="Últimos 3 jogos"
-          matches={focusedMatches.previous}
-          emptyMessage="Ainda não há jogos anteriores."
-        />
-        <FocusedMatchGroup
-          title="Próximos 3 jogos"
-          matches={focusedMatches.upcoming}
-          emptyMessage="Não há próximos jogos agendados."
-        />
-      </div>
+      <FocusedMatchGroup
+        title="Próximos jogos"
+        matches={focusedMatches.nextDay}
+        emptyMessage="Não há próximos jogos agendados."
+      />
     </section>
   );
 }
@@ -90,7 +83,7 @@ function FocusedMatchGroup({
     <section className="space-y-3">
       <h3 className="text-lg font-semibold text-slate-950">{title}</h3>
       {matches.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-3 xl:grid-cols-2">
           {matches.map((match) => (
             <MatchCard key={match.id} match={match} />
           ))}
