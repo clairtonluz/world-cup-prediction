@@ -1,5 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { savePredictionAction } from "@/actions/prediction-actions";
+import {
+  saveInlinePredictionAction,
+  savePredictionAction,
+  type InlinePredictionActionState,
+} from "@/actions/prediction-actions";
 
 const mocks = vi.hoisted(() => ({
   requireUser: vi.fn(),
@@ -46,6 +50,19 @@ beforeEach(() => {
 });
 
 describe("savePredictionAction return destination", () => {
+  it("returns inline edits to the matches page", async () => {
+    await expect(savePredictionAction(predictionForm("matches"))).rejects.toThrow(
+      "redirect:/matches?success=prediction_saved",
+    );
+
+    expect(mocks.predictionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_matchId: { userId: "current-user", matchId } },
+      }),
+    );
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/matches");
+  });
+
   it("returns inline edits to the personal predictions page", async () => {
     await expect(savePredictionAction(predictionForm("apostas"))).rejects.toThrow(
       "redirect:/apostas?success=prediction_saved",
@@ -157,6 +174,67 @@ describe("savePredictionAction knockout advancing team", () => {
   });
 });
 
+describe("saveInlinePredictionAction", () => {
+  it("returns local success feedback without redirecting", async () => {
+    await expect(
+      saveInlinePredictionAction(inlineState(), predictionForm("matches")),
+    ).resolves.toMatchObject({
+      status: "success",
+      message: "Aposta salva.",
+      prediction: {
+        teamAScore: "2",
+        teamBScore: "1",
+        predictedAdvancingTeam: "",
+      },
+    });
+
+    expect(mocks.redirect).not.toHaveBeenCalled();
+    expect(mocks.predictionUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId_matchId: { userId: "current-user", matchId } },
+      }),
+    );
+    expect(mocks.revalidatePath).toHaveBeenCalledWith("/matches");
+  });
+
+  it("returns local validation failure without saving", async () => {
+    await expect(
+      saveInlinePredictionAction(
+        inlineState(),
+        predictionForm("matches", { teamAScore: "" }),
+      ),
+    ).resolves.toMatchObject({
+      status: "error",
+      message: "Informe placares válidos entre 0 e 99.",
+    });
+
+    expect(mocks.redirect).not.toHaveBeenCalled();
+    expect(mocks.predictionUpsert).not.toHaveBeenCalled();
+  });
+
+  it("keeps server-side edit restrictions without saving", async () => {
+    mocks.matchFindUnique.mockResolvedValue({
+      id: matchId,
+      startsAt: new Date("2099-06-11T19:00:00Z"),
+      status: "SCHEDULED",
+      participantsConfirmed: false,
+      stage: "ROUND_OF_16",
+      teamA: "Brasil",
+      teamB: "Argentina",
+    });
+
+    await expect(
+      saveInlinePredictionAction(inlineState(), predictionForm("matches")),
+    ).resolves.toMatchObject({
+      status: "error",
+      message: "A aposta será liberada quando as duas equipes estiverem confirmadas.",
+    });
+
+    expect(mocks.redirect).not.toHaveBeenCalled();
+    expect(mocks.predictionUpsert).not.toHaveBeenCalled();
+  });
+});
+
 function predictionForm(
   returnTo: string,
   {
@@ -178,4 +256,12 @@ function predictionForm(
     formData.set("predictedAdvancingTeam", predictedAdvancingTeam);
   }
   return formData;
+}
+
+function inlineState(): InlinePredictionActionState {
+  return {
+    status: "idle",
+    message: "",
+    submittedAt: 0,
+  };
 }

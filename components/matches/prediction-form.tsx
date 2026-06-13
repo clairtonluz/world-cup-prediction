@@ -1,13 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { savePredictionAction } from "@/actions/prediction-actions";
+import {
+  type FormEvent,
+  useActionState,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  saveInlinePredictionAction,
+  savePredictionAction,
+  type InlinePredictionActionState,
+} from "@/actions/prediction-actions";
 import { TeamLabel } from "@/components/shared/team-label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { MatchStageValue } from "@/lib/constants";
+import { teamText } from "@/lib/display";
 import { requiresAdvancingTeamPrediction } from "@/lib/tournament-predictions";
+import { CircleCheck, CircleX } from "lucide-react";
+
+type PredictionFormVariant = "default" | "inline";
+type PredictionInlineLayout = "withTeamLabels" | "scoreOnly";
+type PredictionReturnDestination = "match" | "matches" | "apostas";
+type PredictionFormValues = {
+  teamAScore: string;
+  teamBScore: string;
+  predictedAdvancingTeam: string;
+};
+
+const INITIAL_INLINE_ACTION_STATE: InlinePredictionActionState = {
+  status: "idle",
+  message: "",
+  submittedAt: 0,
+};
 
 export function PredictionForm({
   matchId,
@@ -21,6 +48,8 @@ export function PredictionForm({
   disabledReason,
   returnTo = "match",
   fieldIdPrefix,
+  variant = "default",
+  inlineLayout = "withTeamLabels",
 }: {
   matchId: string;
   teamA: string | null;
@@ -35,18 +64,25 @@ export function PredictionForm({
   };
   disabled: boolean;
   disabledReason?: string;
-  returnTo?: "match" | "apostas";
+  returnTo?: PredictionReturnDestination;
   fieldIdPrefix?: string;
+  variant?: PredictionFormVariant;
+  inlineLayout?: PredictionInlineLayout;
 }) {
-  const [teamAScore, setTeamAScore] = useState(
-    prediction?.teamAScore.toString() ?? "",
+  const isInline = variant === "inline";
+  const isScoreOnlyInline = isInline && inlineLayout === "scoreOnly";
+  const formRef = useRef<HTMLFormElement>(null);
+  const initialPrediction = predictionFormValues(prediction);
+  const [inlineActionState, inlineFormAction, inlinePending] = useActionState(
+    saveInlinePredictionAction,
+    { ...INITIAL_INLINE_ACTION_STATE, prediction: initialPrediction },
   );
-  const [teamBScore, setTeamBScore] = useState(
-    prediction?.teamBScore.toString() ?? "",
-  );
-  const [selectedAdvancingTeam, setSelectedAdvancingTeam] = useState(
-    prediction?.predictedAdvancingTeam ?? "",
-  );
+  const savedPrediction = inlineActionState.prediction ?? initialPrediction;
+  const [teamAScore, setTeamAScore] = useState(initialPrediction.teamAScore);
+  const [teamBScore, setTeamBScore] = useState(initialPrediction.teamBScore);
+  const [selectedAdvancingTeam, setSelectedAdvancingTeam] =
+    useState(initialPrediction.predictedAdvancingTeam);
+  const [hiddenFeedbackSubmittedAt, setHiddenFeedbackSubmittedAt] = useState(0);
   const requestsAdvancingTeam = requiresAdvancingTeamPrediction(stage);
   const teamAScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamAScore` : "teamAScore";
   const teamBScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamBScore` : "teamBScore";
@@ -67,11 +103,74 @@ export function PredictionForm({
       : null;
   const displayedAdvancingTeam =
     inferredAdvancingTeam ?? selectedAdvancingTeam;
+  const submittedAdvancingTeam = requestsAdvancingTeam
+    ? isDrawPrediction
+      ? selectedAdvancingTeam
+      : inferredAdvancingTeam ?? ""
+    : "";
+  const initialSubmittedAdvancingTeam = requestsAdvancingTeam
+    ? savedPrediction.predictedAdvancingTeam
+    : "";
+  const hasPredictionChanged =
+    teamAScore !== savedPrediction.teamAScore ||
+    teamBScore !== savedPrediction.teamBScore ||
+    submittedAdvancingTeam !== initialSubmittedAdvancingTeam;
+  const showActions = !isInline || hasPredictionChanged;
+  const showInlineFeedback =
+    isInline &&
+    inlineActionState.status !== "idle" &&
+    inlineActionState.submittedAt > 0 &&
+    inlineActionState.submittedAt !== hiddenFeedbackSubmittedAt;
+  const hasSavedPrediction =
+    savedPrediction.teamAScore !== "" && savedPrediction.teamBScore !== "";
+  const submitLabel = isInline
+    ? hasSavedPrediction
+      ? "Salvar alteração"
+      : "Salvar aposta"
+    : prediction
+      ? "Atualizar aposta"
+      : "Salvar aposta";
   const advancingTeamHelp = !hasCompleteScores
     ? "Informe o placar para definir como a equipe classificada será registrada."
     : isDrawPrediction
       ? "Em caso de empate no placar previsto, informe quem avança."
       : "O placar previsto define automaticamente quem avança.";
+  const teamAScoreLabel = `Palpite de ${teamText(teamA, teamASlot ?? null)}`;
+  const teamBScoreLabel = `Palpite de ${teamText(teamB, teamBSlot ?? null)}`;
+
+  useEffect(() => {
+    if (
+      !isInline ||
+      inlineActionState.status === "idle" ||
+      inlineActionState.submittedAt === 0
+    ) {
+      return;
+    }
+
+    formRef.current?.focus({ preventScroll: true });
+
+    const timeoutId = window.setTimeout(() => {
+      setHiddenFeedbackSubmittedAt((currentSubmittedAt) =>
+        currentSubmittedAt === inlineActionState.submittedAt
+          ? currentSubmittedAt
+          : inlineActionState.submittedAt,
+      );
+    }, 2500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [inlineActionState, isInline]);
+
+  function resetPrediction() {
+    setTeamAScore(savedPrediction.teamAScore);
+    setTeamBScore(savedPrediction.teamBScore);
+    setSelectedAdvancingTeam(savedPrediction.predictedAdvancingTeam);
+  }
+
+  function preventUnchangedInlineSubmit(event: FormEvent<HTMLFormElement>) {
+    if (isInline && !hasPredictionChanged) {
+      event.preventDefault();
+    }
+  }
 
   if (disabled) {
     return (
@@ -81,14 +180,70 @@ export function PredictionForm({
     );
   }
 
+  const scoreGridClassName = isScoreOnlyInline
+    ? "grid w-full grid-cols-[4rem_auto_4rem] items-center gap-1"
+    : isInline
+      ? "grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2"
+      : "grid grid-cols-[1fr_auto_1fr] items-end gap-3";
+  const teamAScoreFieldClassName = isScoreOnlyInline
+    ? "min-w-0"
+    : isInline
+      ? "min-w-0 space-y-1 text-right"
+      : undefined;
+  const teamBScoreFieldClassName = isScoreOnlyInline
+    ? "min-w-0"
+    : isInline
+      ? "min-w-0 space-y-1"
+      : undefined;
+  const teamAScoreInputClassName = isScoreOnlyInline
+    ? "h-8 w-16 px-2 text-center"
+    : isInline
+      ? "ml-auto w-20 text-center sm:w-[5.5rem]"
+      : undefined;
+  const teamBScoreInputClassName = isScoreOnlyInline
+    ? "h-8 w-16 px-2 text-center"
+    : isInline
+      ? "mr-auto w-20 text-center sm:w-[5.5rem]"
+      : undefined;
+  const scoreSeparatorClassName = isScoreOnlyInline
+    ? "text-center text-xs text-slate-400"
+    : "pb-3 text-center text-slate-500";
+  const formClassName = isScoreOnlyInline
+    ? "w-full space-y-2"
+    : isInline
+      ? "space-y-3"
+      : "space-y-4";
+  const actionsClassName = isScoreOnlyInline
+    ? "flex flex-wrap items-center justify-center gap-2"
+    : "flex flex-wrap items-center gap-2";
+
   return (
-    <form action={savePredictionAction} className="space-y-4">
+    <form
+      ref={formRef}
+      action={isInline ? inlineFormAction : savePredictionAction}
+      aria-label={isInline ? "Aposta do jogo" : undefined}
+      className={formClassName}
+      onSubmit={preventUnchangedInlineSubmit}
+      tabIndex={isInline ? -1 : undefined}
+    >
       <input type="hidden" name="matchId" value={matchId} />
       <input type="hidden" name="returnTo" value={returnTo} />
-      <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
-        <div>
-          <Label htmlFor={teamAScoreId}>
-            <TeamLabel team={teamA} slot={teamASlot} />
+      <div className={scoreGridClassName}>
+        <div className={teamAScoreFieldClassName}>
+          <Label
+            htmlFor={teamAScoreId}
+            className={isScoreOnlyInline ? "sr-only" : undefined}
+          >
+            {isScoreOnlyInline ? (
+              teamAScoreLabel
+            ) : (
+              <TeamLabel
+                team={teamA}
+                slot={teamASlot}
+                className={isInline ? "w-full max-w-full justify-end" : undefined}
+                textClassName={isInline ? "min-w-0 break-words text-right" : undefined}
+              />
+            )}
           </Label>
           <Input
             id={teamAScoreId}
@@ -98,13 +253,26 @@ export function PredictionForm({
             max={99}
             value={teamAScore}
             onChange={(event) => setTeamAScore(event.target.value)}
+            className={teamAScoreInputClassName}
             required
           />
         </div>
-        <span className="pb-3 text-slate-500">x</span>
-        <div>
-          <Label htmlFor={teamBScoreId}>
-            <TeamLabel team={teamB} slot={teamBSlot} />
+        <span className={scoreSeparatorClassName}>x</span>
+        <div className={teamBScoreFieldClassName}>
+          <Label
+            htmlFor={teamBScoreId}
+            className={isScoreOnlyInline ? "sr-only" : undefined}
+          >
+            {isScoreOnlyInline ? (
+              teamBScoreLabel
+            ) : (
+              <TeamLabel
+                team={teamB}
+                slot={teamBSlot}
+                className={isInline ? "w-full max-w-full" : undefined}
+                textClassName={isInline ? "min-w-0 break-words" : undefined}
+              />
+            )}
           </Label>
           <Input
             id={teamBScoreId}
@@ -114,12 +282,13 @@ export function PredictionForm({
             max={99}
             value={teamBScore}
             onChange={(event) => setTeamBScore(event.target.value)}
+            className={teamBScoreInputClassName}
             required
           />
         </div>
       </div>
       {requestsAdvancingTeam ? (
-        <div>
+        <div className={isScoreOnlyInline ? "text-left" : undefined}>
           <Label htmlFor={advancingTeamId}>Equipe classificada</Label>
           {!isDrawPrediction && inferredAdvancingTeam ? (
             <input
@@ -148,9 +317,74 @@ export function PredictionForm({
           </p>
         </div>
       ) : null}
-      <Button type="submit">{prediction ? "Atualizar aposta" : "Salvar aposta"}</Button>
+      {showActions || showInlineFeedback ? (
+        <div className={actionsClassName}>
+          {showActions ? (
+            <>
+              <Button
+                type="submit"
+                size={isInline ? "sm" : "default"}
+                disabled={isInline && inlinePending}
+              >
+                {inlinePending ? "Salvando..." : submitLabel}
+              </Button>
+              {isInline ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={resetPrediction}
+                  disabled={inlinePending}
+                >
+                  Cancelar
+                </Button>
+              ) : null}
+            </>
+          ) : null}
+          {showInlineFeedback ? (
+            <InlinePredictionFeedback state={inlineActionState} />
+          ) : null}
+        </div>
+      ) : null}
     </form>
   );
+}
+
+function InlinePredictionFeedback({
+  state,
+}: {
+  state: InlinePredictionActionState;
+}) {
+  const iconClassName =
+    state.status === "success" ? "text-emerald-700" : "text-red-700";
+  const Icon = state.status === "success" ? CircleCheck : CircleX;
+
+  return (
+    <span
+      aria-live="polite"
+      className={`inline-flex h-9 items-center ${iconClassName}`}
+      title={state.message}
+    >
+      <Icon className="size-5" aria-hidden="true" />
+      <span className="sr-only">{state.message}</span>
+    </span>
+  );
+}
+
+function predictionFormValues(
+  prediction:
+    | {
+        teamAScore: number;
+        teamBScore: number;
+        predictedAdvancingTeam: string | null;
+      }
+    | undefined,
+): PredictionFormValues {
+  return {
+    teamAScore: prediction?.teamAScore.toString() ?? "",
+    teamBScore: prediction?.teamBScore.toString() ?? "",
+    predictedAdvancingTeam: prediction?.predictedAdvancingTeam ?? "",
+  };
 }
 
 function scoreFromField(value: string) {
