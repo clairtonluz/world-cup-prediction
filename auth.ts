@@ -1,6 +1,7 @@
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import Keycloak from "next-auth/providers/keycloak";
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import { authSessionConfig } from "@/lib/auth-session";
 import { syncUser } from "@/lib/user-sync";
 import type { AppRole } from "@/lib/authorization";
 
@@ -19,8 +20,6 @@ type AppToken = {
   roles?: AppRole[];
   keycloakIdToken?: string;
 };
-
-const SESSION_MAX_AGE_SECONDS = 2 * 60 * 60;
 
 export function requiredAuthSetting(name: string) {
   const value = process.env[name];
@@ -64,7 +63,7 @@ async function verifiedIdentity(accessToken: string) {
   return { keycloakId: payload.sub, roles: applicationRoles(payload) };
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authConfig = {
   providers: [
     Keycloak({
       clientId: process.env.AUTH_KEYCLOAK_ID ?? "",
@@ -75,10 +74,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
   },
-  session: {
-    strategy: "jwt",
-    maxAge: SESSION_MAX_AGE_SECONDS,
-  },
+  session: authSessionConfig,
   callbacks: {
     async signIn({ account }) {
       if (!account?.access_token) {
@@ -132,4 +128,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+} satisfies NextAuthConfig;
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
