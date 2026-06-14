@@ -19,6 +19,7 @@ const navigationItems: NavigationItem[] = [
   { href: "/matches", label: "Jogos" },
   { href: "/apostas", label: "Minhas apostas" },
   { href: "/grupos", label: "Grupos" },
+  { href: "/mata-mata", label: "Mata-mata" },
   { href: "/ranking", label: "Ranking" },
   { href: "/grupos-de-amigos", label: "Grupos de Amigos" },
   { href: "/pontuacao", label: "Pontuação" },
