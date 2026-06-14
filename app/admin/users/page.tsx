@@ -5,7 +5,8 @@ import { MessageAlert } from "@/components/shared/message-alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { searchAdminUsers } from "@/lib/data/users";
+import { formatMatchDate } from "@/lib/display";
+import { getAdminUsersPageData } from "@/lib/data/users";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export default async function AdminUsersPage({
 }) {
   const params = await searchParams;
   const query = params.q || "";
-  const users = await searchAdminUsers(query);
+  const { users, totalUsers } = await getAdminUsersPageData(query);
 
   return (
     <AppShell>
@@ -51,7 +52,13 @@ export default async function AdminUsersPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Usuários</CardTitle>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle>Usuários</CardTitle>
+            <p className="text-sm font-medium text-slate-600">
+              Total de usuários:{" "}
+              <span className="text-slate-950">{totalUsers}</span>
+            </p>
+          </div>
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
@@ -63,6 +70,7 @@ export default async function AdminUsersPage({
                   <tr>
                     <th className="py-3">Nome</th>
                     <th>E-mail</th>
+                    <th>Cadastro</th>
                     <th>Visibilidade no Ranking</th>
                     <th className="text-right">Ações</th>
                   </tr>
@@ -72,6 +80,7 @@ export default async function AdminUsersPage({
                     <tr key={user.id} className="border-b border-slate-100">
                       <td className="py-4 font-medium">{user.name}</td>
                       <td>{user.email}</td>
+                      <td className="text-slate-600">{formatMatchDate(user.createdAt)}</td>
                       <td>
                         {user.hiddenFromGlobalRanking ? (
                           <span className="text-red-600 font-medium">Oculto</span>
