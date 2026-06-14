@@ -81,6 +81,7 @@ function PredictionCard({ prediction }: { prediction: PersonalPrediction }) {
               teamB={match.teamB}
               teamASlot={match.teamASlot}
               teamBSlot={match.teamBSlot}
+              linkToTeamMatches
               teamAScore={match.teamAScore}
               teamBScore={match.teamBScore}
               size="compact"

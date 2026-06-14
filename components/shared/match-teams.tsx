@@ -6,19 +6,29 @@ export function MatchTeams({
   teamB,
   teamASlot,
   teamBSlot,
+  linkToTeamMatches = false,
   className,
 }: {
   teamA: string | null;
   teamB: string | null;
   teamASlot?: string | null;
   teamBSlot?: string | null;
+  linkToTeamMatches?: boolean;
   className?: string;
 }) {
   return (
     <span className={cn("inline-flex flex-wrap items-center gap-2", className)}>
-      <TeamLabel team={teamA} slot={teamASlot} />
+      <TeamLabel
+        team={teamA}
+        slot={teamASlot}
+        linkToTeamMatches={linkToTeamMatches}
+      />
       <span className="text-slate-400">x</span>
-      <TeamLabel team={teamB} slot={teamBSlot} />
+      <TeamLabel
+        team={teamB}
+        slot={teamBSlot}
+        linkToTeamMatches={linkToTeamMatches}
+      />
     </span>
   );
 }

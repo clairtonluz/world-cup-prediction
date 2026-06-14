@@ -41,6 +41,7 @@ export default async function EditMatchPage({
               teamB={match.teamB}
               teamASlot={match.teamASlot}
               teamBSlot={match.teamBSlot}
+              linkToTeamMatches
             />
           </CardTitle>
           <p className="text-sm text-slate-600">

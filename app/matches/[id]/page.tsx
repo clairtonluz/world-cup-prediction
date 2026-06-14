@@ -10,7 +10,6 @@ import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getMatchDetail } from "@/lib/data/matches";
 import { formatMatchDate, formatStage } from "@/lib/display";
 import { hasEffectivelyStarted } from "@/lib/match-rules";
-import { teamMatchesHref } from "@/lib/team-matches";
 
 export const dynamic = "force-dynamic";
 
@@ -34,8 +33,6 @@ export default async function MatchDetailPage({
     : !match.participantsConfirmed
       ? "As apostas serão liberadas quando as duas equipes deste confronto forem confirmadas."
       : undefined;
-  const teamAHref = match.participantsConfirmed ? teamMatchesHref(match.teamA) : null;
-  const teamBHref = match.participantsConfirmed ? teamMatchesHref(match.teamB) : null;
 
   return (
     <AppShell>
@@ -53,8 +50,7 @@ export default async function MatchDetailPage({
                   teamB={match.teamB}
                   teamASlot={match.teamASlot}
                   teamBSlot={match.teamBSlot}
-                  teamAHref={teamAHref}
-                  teamBHref={teamBHref}
+                  linkToTeamMatches
                   teamAScore={match.teamAScore}
                   teamBScore={match.teamBScore}
                   className="font-semibold"

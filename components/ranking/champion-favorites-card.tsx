@@ -21,7 +21,11 @@ export function ChampionFavoritesCard({
           favorites.map((favorite) => (
             <div key={favorite.team} className="space-y-2">
               <div className="flex items-center justify-between gap-3 text-sm">
-                <TeamLabel team={favorite.team} className="min-w-0 font-medium text-slate-950" />
+                <TeamLabel
+                  team={favorite.team}
+                  linkToTeamMatches
+                  className="min-w-0 font-medium text-slate-950"
+                />
                 <span className="shrink-0 text-slate-600">
                   {favorite.percentage}% - {favorite.predictionCount}{" "}
                   {favorite.predictionCount === 1 ? "palpite" : "palpites"}

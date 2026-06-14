@@ -134,18 +134,28 @@ export default async function MatchesPage({
             <CardHeader><CardTitle>Apostas recentes</CardTitle></CardHeader>
             <CardContent className="space-y-3">
               {recent.map((match) => (
-                <Link key={match.id} href={`/matches/${match.id}`} className="block text-sm hover:text-emerald-700">
-                  <span className="inline-flex flex-wrap items-center gap-2">
+                <div
+                  key={match.id}
+                  className="flex flex-wrap items-center justify-between gap-2 text-sm"
+                >
+                  <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
                     <MatchTeams
                       teamA={match.teamA}
                       teamB={match.teamB}
                       teamASlot={match.teamASlot}
                       teamBSlot={match.teamBSlot}
+                      linkToTeamMatches
                       className="flex-nowrap whitespace-nowrap"
                     />
                     <span>: {match.predictions[0].teamAScore} x {match.predictions[0].teamBScore}</span>
                   </span>
-                </Link>
+                  <Link
+                    href={`/matches/${match.id}`}
+                    className="shrink-0 font-medium text-emerald-700 hover:underline"
+                  >
+                    Ver jogo
+                  </Link>
+                </div>
               ))}
               {recent.length === 0 ? <p className="text-sm text-slate-600">Nenhuma aposta enviada.</p> : null}
             </CardContent>

@@ -75,7 +75,7 @@ export default async function GroupsPage() {
                     {standings.map((row) => (
                       <tr key={row.team} className="border-b border-slate-100">
                         <th scope="row" className="py-3 text-left font-medium">
-                          <TeamLabel team={row.team} />
+                          <TeamLabel team={row.team} linkToTeamMatches />
                         </th>
                         {standingsColumns.map(({ label, value, emphasized }) => (
                           <td
@@ -93,7 +93,7 @@ export default async function GroupsPage() {
                   {standings.map((row) => (
                     <section key={row.team} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <h3 className="font-medium text-slate-950">
-                        <TeamLabel team={row.team} />
+                        <TeamLabel team={row.team} linkToTeamMatches />
                       </h3>
                       <dl className="mt-3 grid grid-cols-3 gap-x-3 gap-y-3">
                         {standingsColumns.map(({ label, description, value, emphasized }) => (
@@ -118,16 +118,16 @@ export default async function GroupsPage() {
                         {groupMatches
                           .filter((match) => match.groupRound === round)
                           .map((match) => (
-                            <Link
+                            <div
                               key={match.id}
-                              href={`/matches/${match.id}`}
-                              className="block rounded-md border p-3 text-sm hover:border-emerald-300 hover:bg-emerald-50"
+                              className="rounded-md border p-3 text-sm"
                             >
                               <MatchScoreboard
                                 teamA={match.teamA}
                                 teamB={match.teamB}
                                 teamASlot={match.teamASlot}
                                 teamBSlot={match.teamBSlot}
+                                linkToTeamMatches
                                 teamAScore={match.teamAScore}
                                 teamBScore={match.teamBScore}
                                 size="compact"
@@ -141,7 +141,13 @@ export default async function GroupsPage() {
                               <div className="mt-2 text-xs text-slate-600">
                                 <p>{formatMatchDate(match.startsAt)}</p>
                               </div>
-                            </Link>
+                              <Link
+                                href={`/matches/${match.id}`}
+                                className="mt-3 inline-block text-xs font-medium text-emerald-700 hover:underline"
+                              >
+                                Ver jogo
+                              </Link>
+                            </div>
                           ))}
                       </div>
                     </section>

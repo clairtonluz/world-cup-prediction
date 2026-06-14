@@ -140,6 +140,7 @@ function MatchCardScorePanel({
       <TeamLabel
         team={match.teamA}
         slot={match.teamASlot}
+        linkToTeamMatches
         className="min-w-0 flex-row-reverse justify-start text-right"
         textClassName="min-w-0 break-words leading-tight"
       />
@@ -153,6 +154,7 @@ function MatchCardScorePanel({
       <TeamLabel
         team={match.teamB}
         slot={match.teamBSlot}
+        linkToTeamMatches
         className="min-w-0"
         textClassName="min-w-0 break-words leading-tight"
       />

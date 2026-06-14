@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { teamText } from "@/lib/display";
+import { teamMatchesHref } from "@/lib/team-matches";
 import { teamFlagPath } from "@/lib/team-flags";
 import { cn } from "@/lib/utils";
 
@@ -8,20 +9,28 @@ export function TeamLabel({
   team,
   slot,
   href,
+  linkToTeamMatches = false,
   className,
   textClassName,
 }: {
   team: string | null;
   slot?: string | null;
   href?: string | null;
+  linkToTeamMatches?: boolean;
   className?: string;
   textClassName?: string;
 }) {
   const flagPath = teamFlagPath(team);
   const label = teamText(team, slot ?? null);
+  const resolvedHref =
+    href !== undefined
+      ? href
+      : linkToTeamMatches
+        ? teamMatchesHref(team)
+        : null;
   const classNames = cn(
     "inline-flex items-center gap-2",
-    href &&
+    resolvedHref &&
       "rounded-md transition-colors hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2",
     className,
   );
@@ -40,9 +49,9 @@ export function TeamLabel({
     </>
   );
 
-  if (href) {
+  if (resolvedHref) {
     return (
-      <Link href={href} className={classNames}>
+      <Link href={resolvedHref} className={classNames}>
         {content}
       </Link>
     );

@@ -167,6 +167,7 @@ export default async function AdminMatchesPage({
                           teamB={match.teamB}
                           teamASlot={match.teamASlot}
                           teamBSlot={match.teamBSlot}
+                          linkToTeamMatches
                         />
                       </td>
                       <td>{formatStage(match.stage as MatchStageValue)}<br /><span className="text-slate-500">{formatMatchDate(match.startsAt)}</span></td>
@@ -177,6 +178,7 @@ export default async function AdminMatchesPage({
                           teamB={match.teamB}
                           teamASlot={match.teamASlot}
                           teamBSlot={match.teamBSlot}
+                          linkToTeamMatches
                           teamAScore={match.teamAScore}
                           teamBScore={match.teamBScore}
                           size="compact"

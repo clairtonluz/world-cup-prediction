@@ -43,6 +43,7 @@ export function MatchForm({
               teamB={match.teamB}
               teamASlot={match.teamASlot}
               teamBSlot={match.teamBSlot}
+              linkToTeamMatches
             />
           </dd>
         </div>

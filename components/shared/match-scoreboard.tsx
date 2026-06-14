@@ -8,6 +8,7 @@ type MatchScoreboardProps = {
   teamBSlot?: string | null;
   teamAHref?: string | null;
   teamBHref?: string | null;
+  linkToTeamMatches?: boolean;
   teamAScore: number | null;
   teamBScore: number | null;
   size?: "default" | "compact";
@@ -21,6 +22,7 @@ export function MatchScoreboard({
   teamBSlot,
   teamAHref,
   teamBHref,
+  linkToTeamMatches = false,
   teamAScore,
   teamBScore,
   size = "default",
@@ -42,6 +44,7 @@ export function MatchScoreboard({
         team={teamA}
         slot={teamASlot}
         href={teamAHref}
+        linkToTeamMatches={linkToTeamMatches}
         className="min-w-0 flex-row-reverse justify-start text-right"
         textClassName="min-w-0 break-words leading-tight"
       />
@@ -54,6 +57,7 @@ export function MatchScoreboard({
         team={teamB}
         slot={teamBSlot}
         href={teamBHref}
+        linkToTeamMatches={linkToTeamMatches}
         className="min-w-0"
         textClassName="min-w-0 break-words leading-tight"
       />
