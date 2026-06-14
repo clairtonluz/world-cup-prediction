@@ -3,6 +3,7 @@ import {
   formatMatchDay,
   matchDayKey,
 } from "@/lib/display";
+import { cn } from "@/lib/utils";
 
 type ScheduleMatch = {
   id: string;
@@ -27,7 +28,17 @@ type ScheduleMatch = {
   }[];
 };
 
-export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
+type MatchScheduleProps = {
+  matches: ScheduleMatch[];
+  focusedMatchId?: string | null;
+  focusedMatchElementId?: string;
+};
+
+export function MatchSchedule({
+  matches,
+  focusedMatchId = null,
+  focusedMatchElementId = "focused-match",
+}: MatchScheduleProps) {
   const grouped = new Map<string, ScheduleMatch[]>();
   for (const match of matches) {
     const key = matchDayKey(match.startsAt);
@@ -42,14 +53,28 @@ export function MatchSchedule({ matches }: { matches: ScheduleMatch[] }) {
             {formatMatchDay(dailyMatches[0].startsAt)}
           </h3>
           <div className="space-y-3">
-            {dailyMatches.map((match) => (
-              <MatchCard
-                key={match.id}
-                match={match}
-                showDetails
-                fieldIdPrefix="schedule-match"
-              />
-            ))}
+            {dailyMatches.map((match) => {
+              const focused = match.id === focusedMatchId;
+
+              return (
+                <div
+                  key={match.id}
+                  id={focused ? focusedMatchElementId : undefined}
+                  tabIndex={focused ? -1 : undefined}
+                  className={cn(
+                    focused &&
+                      "scroll-mt-24 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600",
+                  )}
+                >
+                  <MatchCard
+                    match={match}
+                    highlighted={focused}
+                    showDetails
+                    fieldIdPrefix="schedule-match"
+                  />
+                </div>
+              );
+            })}
           </div>
         </section>
       ))}

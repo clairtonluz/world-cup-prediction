@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseMatchAgendaView,
   selectFocusedMatches,
+  selectTeamTimelineFocusMatch,
 } from "@/lib/match-focus";
 
 describe("selectFocusedMatches", () => {
@@ -108,8 +109,61 @@ describe("parseMatchAgendaView", () => {
   });
 });
 
+describe("selectTeamTimelineFocusMatch", () => {
+  it("prefers a started match over future matches", () => {
+    const focused = selectTeamTimelineFocusMatch(
+      [
+        timelineMatch("future", "2026-06-15T16:00:00-03:00", "SCHEDULED"),
+        timelineMatch("started", "2026-06-14T16:00:00-03:00", "STARTED"),
+        timelineMatch("finished", "2026-06-10T16:00:00-03:00", "FINISHED"),
+      ],
+      new Date("2026-06-14T17:00:00-03:00"),
+    );
+
+    expect(focused?.id).toBe("started");
+  });
+
+  it("selects the next non-finished future match", () => {
+    const focused = selectTeamTimelineFocusMatch(
+      [
+        timelineMatch("later", "2026-06-18T16:00:00-03:00", "SCHEDULED"),
+        timelineMatch("past", "2026-06-10T16:00:00-03:00", "FINISHED"),
+        timelineMatch("next", "2026-06-15T16:00:00-03:00", "SCHEDULED"),
+      ],
+      new Date("2026-06-14T12:00:00-03:00"),
+    );
+
+    expect(focused?.id).toBe("next");
+  });
+
+  it("falls back to the most recent past match", () => {
+    const focused = selectTeamTimelineFocusMatch(
+      [
+        timelineMatch("oldest", "2026-06-10T16:00:00-03:00", "FINISHED"),
+        timelineMatch("latest", "2026-06-12T16:00:00-03:00", "FINISHED"),
+        timelineMatch("middle", "2026-06-11T16:00:00-03:00", "FINISHED"),
+      ],
+      new Date("2026-06-14T12:00:00-03:00"),
+    );
+
+    expect(focused?.id).toBe("latest");
+  });
+
+  it("returns no focus match for an empty timeline", () => {
+    expect(selectTeamTimelineFocusMatch([])).toBeNull();
+  });
+});
+
 function match(id: string, startsAt: string, stage = "GROUP_STAGE") {
   return { id, stage, startsAt: new Date(startsAt) };
+}
+
+function timelineMatch(
+  id: string,
+  startsAt: string,
+  status: "SCHEDULED" | "STARTED" | "FINISHED",
+) {
+  return { id, startsAt: new Date(startsAt), status };
 }
 
 function ids(matches: { id: string }[]) {

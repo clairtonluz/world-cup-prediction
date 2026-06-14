@@ -2,26 +2,50 @@ import Link from "next/link";
 import { FocusedMatches } from "@/components/matches/focused-matches";
 import { AppShell } from "@/components/shared/app-shell";
 import { MatchSchedule } from "@/components/matches/match-schedule";
+import { TeamTimelineFocus } from "@/components/matches/team-timeline-focus";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { TeamLabel } from "@/components/shared/team-label";
 import { getPodiumRowClassName, RankingPosition } from "@/components/ranking/ranking-position";
 import { StatCard } from "@/components/stats/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listMatches } from "@/lib/data/matches";
 import { getRanking } from "@/lib/data/ranking";
 import { getPersonalStatistics } from "@/lib/data/statistics";
-import { parseMatchAgendaView } from "@/lib/match-focus";
+import { parseMatchAgendaView, selectTeamTimelineFocusMatch } from "@/lib/match-focus";
+import { parseTeamSearchParam } from "@/lib/team-matches";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+const TEAM_TIMELINE_FOCUS_ID = "team-timeline-focus-match";
+
 export default async function MatchesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; success?: string; view?: string | string[] }>;
+  searchParams: Promise<{
+    error?: string;
+    success?: string;
+    team?: string | string[];
+    view?: string | string[];
+  }>;
 }) {
-  const [messages, matches, ranking, statistics] = await Promise.all([
-    searchParams,
+  const messages = await searchParams;
+  const selectedTeam = parseTeamSearchParam(messages.team);
+
+  if (selectedTeam) {
+    const matches = await listMatches();
+    return (
+      <TeamMatchesPage
+        error={messages.error}
+        success={messages.success}
+        matches={matches}
+        selectedTeam={selectedTeam}
+      />
+    );
+  }
+
+  const [matches, ranking, statistics] = await Promise.all([
     listMatches(),
     getRanking(),
     getPersonalStatistics(),
@@ -128,6 +152,65 @@ export default async function MatchesPage({
           </Card>
         </div>
       </section>
+    </AppShell>
+  );
+}
+
+function TeamMatchesPage({
+  error,
+  success,
+  matches,
+  selectedTeam,
+}: {
+  error?: string;
+  success?: string;
+  matches: Awaited<ReturnType<typeof listMatches>>;
+  selectedTeam: string;
+}) {
+  const teamMatches = matches.filter(
+    (match) => match.teamA === selectedTeam || match.teamB === selectedTeam,
+  );
+  const focusedMatch = selectTeamTimelineFocusMatch(teamMatches);
+
+  return (
+    <AppShell>
+      <MessageAlert error={error} success={success} />
+      <section className="space-y-3">
+        <Link href="/matches" className="text-sm font-medium text-emerald-700 hover:underline">
+          Voltar para todos os jogos
+        </Link>
+        <div>
+          <h1 className="flex flex-wrap items-center gap-2 text-3xl font-semibold text-slate-950">
+            <span>Jogos do</span>
+            <TeamLabel
+              team={selectedTeam}
+              className="min-w-0"
+              textClassName="min-w-0 break-words"
+            />
+          </h1>
+          <p className="mt-1 text-slate-600">
+            Partidas em ordem cronológica, com destaque para o jogo atual ou o próximo compromisso.
+          </p>
+        </div>
+      </section>
+
+      <TeamTimelineFocus
+        targetId={focusedMatch ? TEAM_TIMELINE_FOCUS_ID : null}
+      />
+
+      {teamMatches.length > 0 ? (
+        <MatchSchedule
+          matches={teamMatches}
+          focusedMatchId={focusedMatch?.id}
+          focusedMatchElementId={TEAM_TIMELINE_FOCUS_ID}
+        />
+      ) : (
+        <Card>
+          <CardContent className="pt-5 text-sm text-slate-600">
+            Nenhum jogo encontrado para {selectedTeam}.
+          </CardContent>
+        </Card>
+      )}
     </AppShell>
   );
 }
