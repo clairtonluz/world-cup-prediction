@@ -1,6 +1,35 @@
 # Bolão da Copa do Mundo 2026
 
-Aplicação privada e simples para apostas de placares da Copa do Mundo 2026, construída com Next.js App Router, PostgreSQL, Prisma, Keycloak, Tailwind CSS e componentes no estilo shadcn/ui.
+Aplicação privada para palpites da Copa do Mundo 2026, criada para transformar a disputa entre amigos em uma experiência digital completa, segura e fácil de acompanhar.
+
+O projeto combina uma ideia divertida com decisões técnicas de produto real: autenticação segura, regras de negócio testadas, rankings, grupos privados, chaveamento projetado, agenda oficial e implantação em produção com Docker.
+
+## Projeto em produção
+
+- Aplicação: [https://copa.luz.tec.br/](https://copa.luz.tec.br/)
+- Código-fonte: [https://github.com/clairtonluz/world-cup-prediction](https://github.com/clairtonluz/world-cup-prediction)
+
+## Prévia do produto
+
+### Jogos e palpites
+
+![Painel de jogos e palpites](project-media/03-matches-page-preview.png)
+
+### Grupos e classificação
+
+![Classificação dos grupos](project-media/01-groups-page-preview.png)
+
+### Mata-mata
+
+![Chaveamento do mata-mata](project-media/02-knockout-bracket-preview.png)
+
+## Stack
+
+- Next.js App Router, React, TypeScript e Tailwind CSS.
+- PostgreSQL e Prisma para persistência e migrações.
+- Keycloak e NextAuth para autenticação.
+- Docker Compose para execução local e produção.
+- Vitest para testes automatizados das regras principais.
 
 ## Funcionalidades
 
