@@ -2,6 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type TooltipPosition = {
@@ -12,10 +13,12 @@ type TooltipPosition = {
 export function Tooltip({
   label,
   description,
+  ariaLabel,
   className,
 }: {
-  label: string;
+  label: ReactNode;
   description: string;
+  ariaLabel?: string;
   className?: string;
 }) {
   const tooltipId = useId();
@@ -98,6 +101,7 @@ export function Tooltip({
       <button
         ref={triggerRef}
         type="button"
+        aria-label={ariaLabel}
         aria-describedby={tooltipId}
         className={cn(
           "cursor-help decoration-dotted underline underline-offset-4 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0e74e1]",
@@ -122,7 +126,7 @@ export function Tooltip({
               id={tooltipId}
               role="tooltip"
               style={{ left: position.left, top: position.top }}
-              className="fixed z-50 w-max max-w-[min(14rem,calc(100vw-2rem))] -translate-x-1/2 rounded-md bg-slate-950 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+              className="fixed z-50 w-max max-w-[min(18rem,calc(100vw-2rem))] -translate-x-1/2 rounded-md bg-slate-950 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
               onPointerEnter={clearHideTimer}
               onPointerLeave={scheduleTooltipHide}
             >

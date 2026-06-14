@@ -2,14 +2,17 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { Info } from "lucide-react";
 import { TeamLabel } from "@/components/shared/team-label";
 import { StatusBadge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { Tooltip } from "@/components/ui/tooltip";
 import { formatMatchDate, formatStatus } from "@/lib/display";
 import {
   filterKnockoutStagesFrom,
   toggleKnockoutStageFilter,
 } from "@/lib/knockout-bracket-filter";
+import { buildKnockoutMatchExplanation } from "@/lib/knockout-bracket-explanation";
 import type {
   KnockoutBracket,
   KnockoutBracketMatch,
@@ -143,6 +146,11 @@ function StageFilterButton({
 }
 
 function BracketMatchCard({ match }: { match: KnockoutBracketMatch }) {
+  const participantExplanation = buildKnockoutMatchExplanation(
+    match.teamA,
+    match.teamB,
+  );
+
   return (
     <article className="relative rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-950/[0.04]">
       {match.sourceMatchNumbers.length > 0 ? (
@@ -161,9 +169,17 @@ function BracketMatchCard({ match }: { match: KnockoutBracketMatch }) {
             {formatMatchDate(match.startsAt)}
           </p>
         </div>
-        <StatusBadge status={match.status}>
-          {formatStatus(match.status)}
-        </StatusBadge>
+        <div className="flex shrink-0 items-center gap-2">
+          <Tooltip
+            ariaLabel={`Explicar definição das seleções do jogo ${match.matchNumber}`}
+            label={<Info className="h-4 w-4" aria-hidden />}
+            description={participantExplanation}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 no-underline hover:border-[#0e74e1]/40 hover:bg-blue-50/60 hover:text-[#0756ac] focus-visible:ring-offset-2"
+          />
+          <StatusBadge status={match.status}>
+            {formatStatus(match.status)}
+          </StatusBadge>
+        </div>
       </header>
 
       <div className="mt-3 space-y-2">
