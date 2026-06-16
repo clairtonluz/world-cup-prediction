@@ -5,7 +5,7 @@ import { TournamentAccentBars, TournamentBackdrop } from "@/components/shared/to
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const { session, user } = await requireUser();
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#080b12]">
+    <div className="relative min-h-screen overflow-x-hidden bg-[#080b12]">
       <TournamentBackdrop />
       <AppHeader name={user.name} roles={session.user.roles} />
       <main className="relative mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">

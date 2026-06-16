@@ -62,14 +62,16 @@ export function KnockoutBracketView({ bracket }: { bracket: KnockoutBracket }) {
         ) : null}
       </div>
 
+      <StageFilterBar
+        stages={bracket.stages}
+        selectedStage={selectedStage}
+        onSelect={setSelectedStage}
+      />
+
       <div className="space-y-6 lg:hidden">
         {visibleStages.map((stage) => (
           <section key={stage.stage} className="space-y-3">
-            <StageFilterButton
-              stage={stage}
-              selectedStage={selectedStage}
-              onSelect={setSelectedStage}
-            />
+            <StageHeading stage={stage} />
             <div className="space-y-3">
               {stage.matches.map((match) => (
                 <BracketMatchCard key={match.id} match={match} />
@@ -90,12 +92,7 @@ export function KnockoutBracketView({ bracket }: { bracket: KnockoutBracket }) {
         >
           {visibleStages.map((stage) => (
             <section key={stage.stage} className="flex min-w-0 flex-col">
-              <StageFilterButton
-                stage={stage}
-                selectedStage={selectedStage}
-                onSelect={setSelectedStage}
-                className="mb-3"
-              />
+              <StageHeading stage={stage} className="mb-3" />
               <div className="flex flex-1 flex-col justify-around gap-4">
                 {stage.matches.map((match) => (
                   <BracketMatchCard key={match.id} match={match} />
@@ -106,6 +103,50 @@ export function KnockoutBracketView({ bracket }: { bracket: KnockoutBracket }) {
         </div>
       </div>
     </section>
+  );
+}
+
+function StageFilterBar({
+  stages,
+  selectedStage,
+  onSelect,
+}: {
+  stages: KnockoutBracketStage[];
+  selectedStage: KnockoutStageValue | null;
+  onSelect: (stage: KnockoutStageValue | null) => void;
+}) {
+  return (
+    <div className="sticky top-0 z-20 -mx-4 border-y border-slate-200 bg-slate-50/95 px-4 py-3 shadow-sm shadow-slate-950/[0.04] backdrop-blur supports-[backdrop-filter]:bg-slate-50/85 sm:-mx-8 sm:px-8">
+      <div
+        className="flex gap-2 overflow-x-auto pb-1"
+        role="group"
+        aria-label="Filtros de fases do mata-mata"
+      >
+        {stages.map((stage) => (
+          <StageFilterButton
+            key={stage.stage}
+            stage={stage}
+            selectedStage={selectedStage}
+            onSelect={onSelect}
+            className="w-auto shrink-0 whitespace-nowrap px-3 text-center text-xs sm:text-sm"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StageHeading({
+  stage,
+  className,
+}: {
+  stage: KnockoutBracketStage;
+  className?: string;
+}) {
+  return (
+    <h3 className={cn("text-sm font-semibold uppercase text-slate-500", className)}>
+      {stage.label}
+    </h3>
   );
 }
 
