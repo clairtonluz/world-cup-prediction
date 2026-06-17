@@ -11,6 +11,7 @@ type FocusedMatchesProps = {
   scheduleLink: {
     href: string;
     label: string;
+    scroll?: boolean;
   };
 };
 
@@ -35,6 +36,7 @@ export function FocusedMatches({
         </div>
         <Link
           href={scheduleLink.href}
+          scroll={scheduleLink.scroll}
           className={buttonVariants({ variant: "outline", size: "sm" })}
         >
           {scheduleLink.label}

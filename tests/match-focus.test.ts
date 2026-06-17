@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   parseMatchAgendaView,
+  selectCurrentOrNextMatch,
   selectFocusedMatches,
   selectTeamTimelineFocusMatch,
 } from "@/lib/match-focus";
@@ -151,6 +152,46 @@ describe("selectTeamTimelineFocusMatch", () => {
 
   it("returns no focus match for an empty timeline", () => {
     expect(selectTeamTimelineFocusMatch([])).toBeNull();
+  });
+});
+
+describe("selectCurrentOrNextMatch", () => {
+  it("prefers a started match over future matches", () => {
+    const focused = selectCurrentOrNextMatch(
+      [
+        timelineMatch("future", "2026-06-15T16:00:00-03:00", "SCHEDULED"),
+        timelineMatch("started", "2026-06-14T16:00:00-03:00", "STARTED"),
+        timelineMatch("finished", "2026-06-10T16:00:00-03:00", "FINISHED"),
+      ],
+      new Date("2026-06-14T17:00:00-03:00"),
+    );
+
+    expect(focused?.id).toBe("started");
+  });
+
+  it("selects the earliest future non-finished match when none are live", () => {
+    const focused = selectCurrentOrNextMatch(
+      [
+        timelineMatch("later", "2026-06-18T16:00:00-03:00", "SCHEDULED"),
+        timelineMatch("past", "2026-06-10T16:00:00-03:00", "FINISHED"),
+        timelineMatch("next", "2026-06-15T16:00:00-03:00", "SCHEDULED"),
+      ],
+      new Date("2026-06-14T12:00:00-03:00"),
+    );
+
+    expect(focused?.id).toBe("next");
+  });
+
+  it("returns null when there is no live or future match", () => {
+    const focused = selectCurrentOrNextMatch(
+      [
+        timelineMatch("oldest", "2026-06-10T16:00:00-03:00", "FINISHED"),
+        timelineMatch("latest", "2026-06-12T16:00:00-03:00", "FINISHED"),
+      ],
+      new Date("2026-06-14T12:00:00-03:00"),
+    );
+
+    expect(focused).toBeNull();
   });
 });
 

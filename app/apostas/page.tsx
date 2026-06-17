@@ -48,6 +48,7 @@ export default async function PersonalPredictionsPage({
         scheduleLink={{
           href: "/matches?view=all",
           label: "Ver agenda completa",
+          scroll: false,
         }}
       />
 

@@ -48,17 +48,9 @@ export function selectTeamTimelineFocusMatch<T extends TimelineMatch>(
   now = new Date(),
 ): T | null {
   const orderedMatches = orderMatchesChronologically(matches);
-  const startedMatch = orderedMatches.find((match) => match.status === "STARTED");
-  if (startedMatch) {
-    return startedMatch;
-  }
-
-  const nextFutureMatch = orderedMatches.find(
-    (match) =>
-      match.status !== "FINISHED" && match.startsAt.getTime() >= now.getTime(),
-  );
-  if (nextFutureMatch) {
-    return nextFutureMatch;
+  const currentOrNextMatch = findCurrentOrNextMatch(orderedMatches, now);
+  if (currentOrNextMatch) {
+    return currentOrNextMatch;
   }
 
   for (let index = orderedMatches.length - 1; index >= 0; index -= 1) {
@@ -69,6 +61,30 @@ export function selectTeamTimelineFocusMatch<T extends TimelineMatch>(
   }
 
   return null;
+}
+
+export function selectCurrentOrNextMatch<T extends TimelineMatch>(
+  matches: readonly T[],
+  now = new Date(),
+): T | null {
+  return findCurrentOrNextMatch(orderMatchesChronologically(matches), now);
+}
+
+function findCurrentOrNextMatch<T extends TimelineMatch>(
+  orderedMatches: readonly T[],
+  now: Date,
+): T | null {
+  const startedMatch = orderedMatches.find((match) => match.status === "STARTED");
+  if (startedMatch) {
+    return startedMatch;
+  }
+
+  return (
+    orderedMatches.find(
+      (match) =>
+        match.status !== "FINISHED" && match.startsAt.getTime() >= now.getTime(),
+    ) ?? null
+  );
 }
 
 export function parseMatchAgendaView(

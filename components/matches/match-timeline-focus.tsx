@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export function TeamTimelineFocus({ targetId }: { targetId: string | null }) {
+export function MatchTimelineFocus({ targetId }: { targetId: string | null }) {
   useEffect(() => {
     if (!targetId) {
       return;

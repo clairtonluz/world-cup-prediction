@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FocusedMatches } from "@/components/matches/focused-matches";
 import { AppShell } from "@/components/shared/app-shell";
 import { MatchSchedule } from "@/components/matches/match-schedule";
-import { TeamTimelineFocus } from "@/components/matches/team-timeline-focus";
+import { MatchTimelineFocus } from "@/components/matches/match-timeline-focus";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { TeamLabel } from "@/components/shared/team-label";
@@ -12,13 +12,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { listMatches } from "@/lib/data/matches";
 import { getRanking } from "@/lib/data/ranking";
 import { getPersonalStatistics } from "@/lib/data/statistics";
-import { parseMatchAgendaView, selectTeamTimelineFocusMatch } from "@/lib/match-focus";
+import {
+  parseMatchAgendaView,
+  selectCurrentOrNextMatch,
+  selectTeamTimelineFocusMatch,
+} from "@/lib/match-focus";
 import { parseTeamSearchParam } from "@/lib/team-matches";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 const TEAM_TIMELINE_FOCUS_ID = "team-timeline-focus-match";
+const MATCH_AGENDA_FOCUS_ID = "match-agenda-focus-match";
 
 export default async function MatchesPage({
   searchParams,
@@ -56,6 +61,9 @@ export default async function MatchesPage({
     .reverse();
   const agendaView = parseMatchAgendaView(messages.view);
   const showingCompleteAgenda = agendaView === "all";
+  const focusedAgendaMatch = showingCompleteAgenda
+    ? selectCurrentOrNextMatch(matches)
+    : null;
 
   return (
     <AppShell>
@@ -87,7 +95,11 @@ export default async function MatchesPage({
           label: showingCompleteAgenda
             ? "Ocultar agenda completa"
             : `Ver todos os ${matches.length} jogos`,
+          scroll: showingCompleteAgenda ? undefined : false,
         }}
+      />
+      <MatchTimelineFocus
+        targetId={focusedAgendaMatch ? MATCH_AGENDA_FOCUS_ID : null}
       />
       <section className={showingCompleteAgenda ? "grid gap-6 lg:grid-cols-[2fr_1fr]" : ""}>
         {showingCompleteAgenda ? (
@@ -97,7 +109,11 @@ export default async function MatchesPage({
               <Link href="/grupos" className="text-sm font-medium text-emerald-700 hover:underline">Ver grupos</Link>
             </div>
             {matches.length ? (
-              <MatchSchedule matches={matches} />
+              <MatchSchedule
+                matches={matches}
+                focusedMatchId={focusedAgendaMatch?.id}
+                focusedMatchElementId={MATCH_AGENDA_FOCUS_ID}
+              />
             ) : (
               <Card><CardContent className="pt-5 text-sm text-slate-600">Nenhum jogo disponível.</CardContent></Card>
             )}
@@ -204,7 +220,7 @@ function TeamMatchesPage({
         </div>
       </section>
 
-      <TeamTimelineFocus
+      <MatchTimelineFocus
         targetId={focusedMatch ? TEAM_TIMELINE_FOCUS_ID : null}
       />
 
