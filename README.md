@@ -45,7 +45,7 @@ O projeto combina uma ideia divertida com decisões técnicas de produto real: a
 
 ## Local Setup
 
-1. Install dependencies:
+1. Use Node.js 24 and pnpm 11, then install dependencies:
 
    ```bash
    pnpm install

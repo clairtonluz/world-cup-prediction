@@ -2,7 +2,11 @@
   "name": "world-cup-prediction",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.33.0",
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=11 <12"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -20,29 +24,30 @@
     "@prisma/client": "^7.8.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "firebase": "^12.13.0",
+    "firebase": "^12.15.0",
     "jose": "^6.2.3",
-    "lucide-react": "^1.16.0",
-    "next": "16.2.6",
+    "lucide-react": "^1.21.0",
+    "next": "16.2.9",
     "next-auth": "5.0.0-beta.31",
-    "pg": "^8.21.0",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "pg": "^8.22.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "server-only": "^0.0.1",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@tailwindcss/postcss": "^4.3.1",
+    "@types/node": "^24.13.2",
     "@types/pg": "^8.20.0",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.6",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "dotenv": "^17.4.2",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "16.2.9",
     "prisma": "^7.8.0",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.1.7"
+    "tailwindcss": "^4.3.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   }
 }
