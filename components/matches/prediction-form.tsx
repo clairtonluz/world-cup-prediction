@@ -75,6 +75,9 @@ export function PredictionForm({
   const isInline = variant === "inline";
   const isScoreOnlyInline = isInline && inlineLayout === "scoreOnly";
   const formRef = useRef<HTMLFormElement>(null);
+  const advancingTeamSelectRef = useRef<HTMLSelectElement>(null);
+  const autoAdvanceInputRef = useRef<HTMLInputElement | null>(null);
+  const handledAutoAdvanceRequestRef = useRef(0);
   const initialPrediction = predictionFormValues(prediction);
   const [inlineActionState, inlineFormAction, inlinePending] = useActionState(
     saveInlinePredictionAction,
@@ -83,6 +86,7 @@ export function PredictionForm({
   const savedPrediction = inlineActionState.prediction ?? initialPrediction;
   const [teamAScore, setTeamAScore] = useState(initialPrediction.teamAScore);
   const [teamBScore, setTeamBScore] = useState(initialPrediction.teamBScore);
+  const [autoAdvanceRequestId, setAutoAdvanceRequestId] = useState(0);
   const [selectedAdvancingTeam, setSelectedAdvancingTeam] =
     useState(initialPrediction.predictedAdvancingTeam);
   const [hiddenFeedbackSubmittedAt, setHiddenFeedbackSubmittedAt] = useState(0);
@@ -111,6 +115,9 @@ export function PredictionForm({
       ? selectedAdvancingTeam
       : inferredAdvancingTeam ?? ""
     : "";
+  const canAutoSubmitPrediction =
+    hasCompleteScores &&
+    (!requestsAdvancingTeam || submittedAdvancingTeam !== "");
   const initialSubmittedAdvancingTeam = requestsAdvancingTeam
     ? savedPrediction.predictedAdvancingTeam
     : "";
@@ -150,7 +157,14 @@ export function PredictionForm({
       return;
     }
 
-    formRef.current?.focus({ preventScroll: true });
+    const autoAdvanceInput = autoAdvanceInputRef.current;
+    autoAdvanceInputRef.current = null;
+
+    if (autoAdvanceInput && inlineActionState.status === "success") {
+      focusNextPredictionScoreInput(autoAdvanceInput);
+    } else {
+      formRef.current?.focus({ preventScroll: true });
+    }
 
     const timeoutId = window.setTimeout(() => {
       setHiddenFeedbackSubmittedAt((currentSubmittedAt) =>
@@ -162,6 +176,46 @@ export function PredictionForm({
 
     return () => window.clearTimeout(timeoutId);
   }, [inlineActionState, isInline]);
+
+  useEffect(() => {
+    if (
+      !isInline ||
+      autoAdvanceRequestId === 0 ||
+      handledAutoAdvanceRequestRef.current === autoAdvanceRequestId ||
+      inlinePending
+    ) {
+      return;
+    }
+
+    if (!canAutoSubmitPrediction) {
+      if (hasCompleteScores && requestsAdvancingTeam) {
+        advancingTeamSelectRef.current?.focus();
+      }
+      return;
+    }
+
+    handledAutoAdvanceRequestRef.current = autoAdvanceRequestId;
+    const autoAdvanceInput = autoAdvanceInputRef.current;
+    if (!autoAdvanceInput) {
+      return;
+    }
+
+    if (!hasPredictionChanged) {
+      autoAdvanceInputRef.current = null;
+      focusNextPredictionScoreInput(autoAdvanceInput);
+      return;
+    }
+
+    formRef.current?.requestSubmit();
+  }, [
+    autoAdvanceRequestId,
+    canAutoSubmitPrediction,
+    hasCompleteScores,
+    hasPredictionChanged,
+    inlinePending,
+    isInline,
+    requestsAdvancingTeam,
+  ]);
 
   function resetPrediction() {
     setTeamAScore(savedPrediction.teamAScore);
@@ -175,15 +229,26 @@ export function PredictionForm({
     }
   }
 
-  function handleScoreChange(
-    event: ChangeEvent<HTMLInputElement>,
-    updateScore: (score: string) => void,
-  ) {
+  function handleTeamAScoreChange(event: ChangeEvent<HTMLInputElement>) {
     const score = event.currentTarget.value;
-    updateScore(score);
+    setTeamAScore(score);
 
     if (scoreFromField(score) !== null) {
       focusNextPredictionScoreInput(event.currentTarget);
+    }
+  }
+
+  function handleTeamBScoreChange(event: ChangeEvent<HTMLInputElement>) {
+    const score = event.currentTarget.value;
+    setTeamBScore(score);
+
+    if (scoreFromField(teamAScore) === null || scoreFromField(score) === null) {
+      return;
+    }
+
+    if (isInline) {
+      autoAdvanceInputRef.current = event.currentTarget;
+      setAutoAdvanceRequestId((requestId) => requestId + 1);
     }
   }
 
@@ -267,7 +332,7 @@ export function PredictionForm({
             min={0}
             max={99}
             value={teamAScore}
-            onChange={(event) => handleScoreChange(event, setTeamAScore)}
+            onChange={handleTeamAScoreChange}
             className={teamAScoreInputClassName}
             data-prediction-score-input="true"
             required
@@ -297,7 +362,7 @@ export function PredictionForm({
             min={0}
             max={99}
             value={teamBScore}
-            onChange={(event) => handleScoreChange(event, setTeamBScore)}
+            onChange={handleTeamBScoreChange}
             className={teamBScoreInputClassName}
             data-prediction-score-input="true"
             required
@@ -315,6 +380,7 @@ export function PredictionForm({
             />
           ) : null}
           <select
+            ref={advancingTeamSelectRef}
             id={advancingTeamId}
             name={isDrawPrediction ? "predictedAdvancingTeam" : undefined}
             value={displayedAdvancingTeam}
