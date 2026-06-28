@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  type ChangeEvent,
   type FormEvent,
   useActionState,
   useEffect,
@@ -35,6 +36,8 @@ const INITIAL_INLINE_ACTION_STATE: InlinePredictionActionState = {
   message: "",
   submittedAt: 0,
 };
+const PREDICTION_SCORE_INPUT_SELECTOR =
+  'input[data-prediction-score-input="true"]';
 
 export function PredictionForm({
   matchId,
@@ -172,6 +175,18 @@ export function PredictionForm({
     }
   }
 
+  function handleScoreChange(
+    event: ChangeEvent<HTMLInputElement>,
+    updateScore: (score: string) => void,
+  ) {
+    const score = event.currentTarget.value;
+    updateScore(score);
+
+    if (scoreFromField(score) !== null) {
+      focusNextPredictionScoreInput(event.currentTarget);
+    }
+  }
+
   if (disabled) {
     return (
       <p className="rounded-lg bg-slate-100 p-4 text-sm text-slate-700">
@@ -252,8 +267,9 @@ export function PredictionForm({
             min={0}
             max={99}
             value={teamAScore}
-            onChange={(event) => setTeamAScore(event.target.value)}
+            onChange={(event) => handleScoreChange(event, setTeamAScore)}
             className={teamAScoreInputClassName}
+            data-prediction-score-input="true"
             required
           />
         </div>
@@ -281,8 +297,9 @@ export function PredictionForm({
             min={0}
             max={99}
             value={teamBScore}
-            onChange={(event) => setTeamBScore(event.target.value)}
+            onChange={(event) => handleScoreChange(event, setTeamBScore)}
             className={teamBScoreInputClassName}
+            data-prediction-score-input="true"
             required
           />
         </div>
@@ -394,4 +411,33 @@ function scoreFromField(value: string) {
 
   const score = Number(value);
   return Number.isInteger(score) && score >= 0 && score <= 99 ? score : null;
+}
+
+function focusNextPredictionScoreInput(currentInput: HTMLInputElement) {
+  const scoreInputs = Array.from(
+    document.querySelectorAll<HTMLInputElement>(PREDICTION_SCORE_INPUT_SELECTOR),
+  );
+  const currentIndex = scoreInputs.indexOf(currentInput);
+  if (currentIndex === -1) {
+    return;
+  }
+
+  const nextInput = scoreInputs
+    .slice(currentIndex + 1)
+    .find(isFocusablePredictionScoreInput);
+  if (!nextInput) {
+    return;
+  }
+
+  nextInput.focus();
+  nextInput.select();
+}
+
+function isFocusablePredictionScoreInput(input: HTMLInputElement) {
+  return (
+    !input.disabled &&
+    !input.readOnly &&
+    input.getClientRects().length > 0 &&
+    window.getComputedStyle(input).visibility !== "hidden"
+  );
 }
