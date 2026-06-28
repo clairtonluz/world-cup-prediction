@@ -65,8 +65,9 @@ export default function ScoringPage() {
         <p className="mt-1 max-w-3xl text-slate-600">
           Cada jogo tem uma pontuação máxima conforme a fase da Copa. Sua
           aposta recebe uma única pontuação, de acordo com o acerto mais
-          preciso alcançado. O placar considerado é o dos 90 minutos mais
-          acréscimos.
+          preciso alcançado. No mata-mata, o placar considerado inclui a
+          prorrogação, quando houver, mas não inclui os gols da disputa de
+          pênaltis.
         </p>
       </section>
 
@@ -98,8 +99,9 @@ export default function ScoringPage() {
                   </p>
                   <p className="text-sm text-slate-600">
                     Da segunda fase até a semifinal, se o placar previsto e o
-                    oficial forem empate, acertar a equipe que avança soma 10%
-                    dos pontos da fase. Na segunda fase, isso vale{" "}
+                    oficial forem empate após a prorrogação, quando houver,
+                    acertar a equipe que avança soma 10% dos pontos da fase. Na
+                    segunda fase, isso vale{" "}
                     {pointsForDrawAdvancingTeamBonus("ROUND_OF_32")} pontos.
                   </p>
                 </div>
@@ -217,14 +219,30 @@ export default function ScoringPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-slate-700">
           <p>
-            O placar da aposta vale para o tempo regulamentar: 90 minutos mais
-            acréscimos, quando houver.
+            Na fase de grupos, o placar da aposta é o placar final dos 90
+            minutos mais acréscimos. No mata-mata, se houver prorrogação, os
+            gols da prorrogação entram no placar da aposta.
           </p>
           <p>
-            Disputas de pênaltis não entram na contagem do placar. No
-            mata-mata, quando esse placar terminar empatado, a equipe que
-            avança é registrada separadamente.
+            Disputas de pênaltis não entram na contagem de gols. Quando o jogo
+            termina empatado depois da prorrogação, o placar fica empatado e a
+            equipe classificada é registrada separadamente.
           </p>
+          <div className="rounded-lg bg-slate-50 p-4">
+            <p className="font-medium text-slate-950">Exemplos no mata-mata</p>
+            <ul className="mt-2 list-disc space-y-2 pl-5">
+              <li>
+                90 minutos: <strong>1 x 1</strong>; prorrogação: uma equipe faz
+                1 gol. O placar considerado é <strong>2 x 1</strong>.
+              </li>
+              <li>
+                90 minutos: <strong>1 x 1</strong>; prorrogação: termina{" "}
+                <strong>2 x 2</strong>; Brasil vence nos pênaltis. O placar
+                considerado é <strong>2 x 2</strong> e a equipe classificada é{" "}
+                <strong>Brasil</strong>.
+              </li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
 

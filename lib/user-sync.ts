@@ -42,6 +42,11 @@ export async function syncUser(identity: { keycloakId: string }, profile: UserSy
     email,
     image,
   };
+  const userDataWithoutEmail = {
+    keycloakId: identity.keycloakId,
+    name: profile.name,
+    image,
+  };
 
   if (user) {
     try {
@@ -56,10 +61,9 @@ export async function syncUser(identity: { keycloakId: string }, profile: UserSy
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2002"
       ) {
-        const { email: _, ...dataWithoutEmail } = userData;
         return await db.user.update({
           where: { id: user.id },
-          data: dataWithoutEmail,
+          data: userDataWithoutEmail,
         });
       }
       throw error;
@@ -76,9 +80,8 @@ export async function syncUser(identity: { keycloakId: string }, profile: UserSy
         error instanceof Prisma.PrismaClientKnownRequestError &&
         error.code === "P2002"
       ) {
-        const { email: _, ...dataWithoutEmail } = userData;
         return await db.user.create({
-          data: dataWithoutEmail,
+          data: userDataWithoutEmail,
         });
       }
       throw error;
