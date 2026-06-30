@@ -173,6 +173,41 @@ describe("getPlayerScorePageData", () => {
     });
   });
 
+  it("adds the running total after each match in fixture order", async () => {
+    mocks.matchFindMany.mockResolvedValue([
+      match({
+        id: "match-1",
+        teamAScore: 2,
+        teamBScore: 1,
+        predictions: [prediction({ teamAScore: 2, teamBScore: 1, points: 0 })],
+      }),
+      match({
+        id: "match-2",
+        teamAScore: 1,
+        teamBScore: 1,
+        predictions: [],
+      }),
+      match({
+        id: "match-3",
+        teamAScore: 3,
+        teamBScore: 1,
+        predictions: [prediction({ teamAScore: 1, teamBScore: 0, points: 0 })],
+      }),
+    ]);
+
+    const data = await getPlayerScorePageData(PLAYER_ID);
+
+    expect(data.matches.map((match) => ({
+      id: match.id,
+      points: match.points,
+      cumulativePoints: match.cumulativePoints,
+    }))).toEqual([
+      { id: "match-1", points: 10, cumulativePoints: 10 },
+      { id: "match-2", points: 0, cumulativePoints: 10 },
+      { id: "match-3", points: 3, cumulativePoints: 13 },
+    ]);
+  });
+
   it("counts exact predictions and correct results in the summary", async () => {
     mocks.matchFindMany.mockResolvedValue([
       match({

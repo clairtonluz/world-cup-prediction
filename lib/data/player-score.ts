@@ -92,7 +92,7 @@ export async function getPlayerScorePageData(playerId: string) {
     orderBy: [{ startsAt: "asc" }, { matchNumber: "asc" }],
   });
 
-  const rows = matches.map(playerScoreMatchRow);
+  const rows = withCumulativePoints(matches.map(playerScoreMatchRow));
   const summary = playerScoreSummary(rows);
 
   return {
@@ -142,7 +142,21 @@ function playerScoreMatchRow(match: PlayerScoreMatch) {
   };
 }
 
-function playerScoreSummary(matches: ReturnType<typeof playerScoreMatchRow>[]) {
+type PlayerScoreMatchRow = ReturnType<typeof playerScoreMatchRow>;
+
+function withCumulativePoints(matches: PlayerScoreMatchRow[]) {
+  let cumulativePoints = 0;
+
+  return matches.map((match) => {
+    cumulativePoints += match.points;
+    return {
+      ...match,
+      cumulativePoints,
+    };
+  });
+}
+
+function playerScoreSummary(matches: PlayerScoreMatchRow[]) {
   let exactPredictions = 0;
   let correctResults = 0;
   let correctAdvancingTeams = 0;
