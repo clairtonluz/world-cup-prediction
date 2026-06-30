@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getMatchDetail } from "@/lib/data/matches";
+import { getMatchDetail, listMatches } from "@/lib/data/matches";
 
 const mocks = vi.hoisted(() => ({
   requireUser: vi.fn(),
   matchFindUnique: vi.fn(),
+  matchFindMany: vi.fn(),
   friendGroupFindMany: vi.fn(),
 }));
 
@@ -12,7 +13,7 @@ vi.mock("next/navigation", () => ({ notFound: vi.fn() }));
 vi.mock("@/lib/auth-guards", () => ({ requireUser: mocks.requireUser }));
 vi.mock("@/lib/db", () => ({
   getDb: () => ({
-    match: { findUnique: mocks.matchFindUnique },
+    match: { findMany: mocks.matchFindMany, findUnique: mocks.matchFindUnique },
     friendGroup: { findMany: mocks.friendGroupFindMany },
   }),
 }));
@@ -20,6 +21,28 @@ vi.mock("@/lib/db", () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.requireUser.mockResolvedValue({ user: { id: "current" } });
+  mocks.matchFindMany.mockResolvedValue([]);
+});
+
+describe("listMatches display points", () => {
+  it("returns current display points for the current user's match predictions", async () => {
+    mocks.matchFindMany.mockResolvedValue([
+      scoredKnockoutMatch({
+        predictions: [
+          {
+            teamAScore: 3,
+            teamBScore: 1,
+            predictedAdvancingTeam: "Brasil",
+            points: 0,
+          },
+        ],
+      }),
+    ]);
+
+    const matches = await listMatches();
+
+    expect(matches[0].predictions[0].points).toBe(12);
+  });
 });
 
 describe("getMatchDetail prediction visibility", () => {
@@ -30,6 +53,41 @@ describe("getMatchDetail prediction visibility", () => {
 
     expect(match.comparisonPredictionGroups).toBeNull();
     expect(mocks.friendGroupFindMany).not.toHaveBeenCalled();
+  });
+
+  it("returns current display points for friend predictions after kickoff", async () => {
+    mocks.matchFindUnique.mockResolvedValue(scoredKnockoutMatch());
+    mocks.friendGroupFindMany.mockResolvedValue([
+      {
+        id: "group",
+        name: "Grupo da Copa",
+        members: [
+          {
+            user: {
+              id: "friend",
+              name: "Amigo",
+              image: null,
+              predictions: [
+                {
+                  id: "friend-prediction",
+                  teamAScore: 3,
+                  teamBScore: 1,
+                  predictedAdvancingTeam: "Brasil",
+                  points: 0,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ]);
+
+    const match = await getMatchDetail("match");
+
+    expect(match.comparisonPredictionGroups?.[0].predictions[0]).toMatchObject({
+      id: "friend-prediction",
+      points: 12,
+    });
   });
 
   it("loads predictions grouped by friend groups shared with the current user after kickoff", async () => {
@@ -147,6 +205,38 @@ function matchAt(startsAt: string, status: "SCHEDULED" | "STARTED") {
     id: "match",
     startsAt: new Date(startsAt),
     status,
+    stage: "GROUP_STAGE",
+    teamAScore: null,
+    teamBScore: null,
+    advancingTeam: null,
     predictions: [],
+  };
+}
+
+function scoredKnockoutMatch(overrides = {}) {
+  return {
+    id: "match",
+    matchNumber: 1,
+    fifaMatchId: "fifa-match",
+    espnEventId: null,
+    scoreSyncLocked: false,
+    teamA: "Brasil",
+    teamB: "Argentina",
+    teamASlot: null,
+    teamBSlot: null,
+    participantsConfirmed: true,
+    stage: "ROUND_OF_16",
+    groupCode: null,
+    groupRound: null,
+    startsAt: new Date("2020-06-11T19:00:00Z"),
+    venue: "Estadio",
+    hostCity: "Cidade",
+    status: "FINISHED",
+    teamAScore: 2,
+    teamBScore: 1,
+    advancingTeam: "Brasil",
+    predictionsResetAt: null,
+    predictions: [],
+    ...overrides,
   };
 }

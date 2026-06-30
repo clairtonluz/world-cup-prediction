@@ -1,12 +1,13 @@
 import "server-only";
 
 import { requireUser } from "@/lib/auth-guards";
+import { withCurrentDisplayPoints } from "@/lib/data/display-points";
 import { getDb } from "@/lib/db";
 
 export async function listPersonalPredictions() {
   const { user } = await requireUser();
 
-  return getDb().prediction.findMany({
+  const predictions = await getDb().prediction.findMany({
     where: { userId: user.id },
     select: {
       id: true,
@@ -28,6 +29,7 @@ export async function listPersonalPredictions() {
           status: true,
           teamAScore: true,
           teamBScore: true,
+          advancingTeam: true,
         },
       },
     },
@@ -36,6 +38,10 @@ export async function listPersonalPredictions() {
       { match: { matchNumber: "asc" } },
     ],
   });
+
+  return predictions.map((prediction) =>
+    withCurrentDisplayPoints(prediction, prediction.match),
+  );
 }
 
 export type PersonalPrediction = Awaited<

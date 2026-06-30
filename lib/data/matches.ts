@@ -3,6 +3,10 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { requireAdmin, requireUser } from "@/lib/auth-guards";
 import { getDb } from "@/lib/db";
+import {
+  withCurrentDisplayPoints,
+  withCurrentDisplayPredictionPoints,
+} from "@/lib/data/display-points";
 import { hasEffectivelyStarted } from "@/lib/match-rules";
 
 const matchSelect = {
@@ -31,17 +35,24 @@ const matchSelect = {
 
 export async function listMatches() {
   const { user } = await requireUser();
-  return getDb().match.findMany({
+  const matches = await getDb().match.findMany({
     select: {
       ...matchSelect,
       predictions: {
         where: { userId: user.id },
-        select: { teamAScore: true, teamBScore: true, predictedAdvancingTeam: true, points: true },
+        select: {
+          teamAScore: true,
+          teamBScore: true,
+          predictedAdvancingTeam: true,
+          points: true,
+        },
         take: 1,
       },
     },
     orderBy: { startsAt: "asc" },
   });
+
+  return matches.map(withCurrentDisplayPredictionPoints);
 }
 
 export async function listGroupMatches() {
@@ -78,8 +89,10 @@ export async function getMatchDetail(id: string) {
     notFound();
   }
 
-  if (!hasEffectivelyStarted(match)) {
-    return { ...match, comparisonPredictionGroups: null };
+  const matchWithDisplayPoints = withCurrentDisplayPredictionPoints(match);
+
+  if (!hasEffectivelyStarted(matchWithDisplayPoints)) {
+    return { ...matchWithDisplayPoints, comparisonPredictionGroups: null };
   }
 
   const friendGroups = await db.friendGroup.findMany({
@@ -90,7 +103,7 @@ export async function getMatchDetail(id: string) {
           members: {
             some: {
               user: {
-                predictions: { some: { matchId: match.id } },
+                predictions: { some: { matchId: matchWithDisplayPoints.id } },
               },
             },
           },
@@ -103,7 +116,7 @@ export async function getMatchDetail(id: string) {
       members: {
         where: {
           user: {
-            predictions: { some: { matchId: match.id } },
+            predictions: { some: { matchId: matchWithDisplayPoints.id } },
           },
         },
         select: {
@@ -113,7 +126,7 @@ export async function getMatchDetail(id: string) {
               name: true,
               image: true,
               predictions: {
-                where: { matchId: match.id },
+                where: { matchId: matchWithDisplayPoints.id },
                 select: {
                   id: true,
                   teamAScore: true,
@@ -136,7 +149,7 @@ export async function getMatchDetail(id: string) {
     name: friendGroup.name,
     predictions: friendGroup.members.flatMap((member) =>
       member.user.predictions.map((prediction) => ({
-        ...prediction,
+        ...withCurrentDisplayPoints(prediction, matchWithDisplayPoints),
         user: {
           id: member.user.id,
           name: member.user.name,
@@ -146,7 +159,7 @@ export async function getMatchDetail(id: string) {
     ),
   }));
 
-  return { ...match, comparisonPredictionGroups };
+  return { ...matchWithDisplayPoints, comparisonPredictionGroups };
 }
 
 export async function listAdminMatches() {
