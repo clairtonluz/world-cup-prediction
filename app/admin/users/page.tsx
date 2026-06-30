@@ -5,7 +5,7 @@ import { MessageAlert } from "@/components/shared/message-alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { formatMatchDate } from "@/lib/display";
+import { formatDateTime } from "@/lib/display";
 import { getAdminUsersPageData } from "@/lib/data/users";
 
 export const dynamic = "force-dynamic";
@@ -80,7 +80,7 @@ export default async function AdminUsersPage({
                     <tr key={user.id} className="border-b border-slate-100">
                       <td className="py-4 font-medium">{user.name}</td>
                       <td>{user.email}</td>
-                      <td className="text-slate-600">{formatMatchDate(user.createdAt)}</td>
+                      <td className="text-slate-600">{formatDateTime(user.createdAt)}</td>
                       <td>
                         {user.hiddenFromGlobalRanking ? (
                           <span className="text-red-600 font-medium">Oculto</span>

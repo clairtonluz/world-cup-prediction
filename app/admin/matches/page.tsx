@@ -17,7 +17,7 @@ import { StatusBadge } from "@/components/ui/badge";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getScoreSyncSettings } from "@/lib/score-sync/sync";
 import { listAdminMatches } from "@/lib/data/matches";
-import { formatMatchDate, formatStage, formatStatus } from "@/lib/display";
+import { formatDateTime, formatMatchDate, formatStage, formatStatus } from "@/lib/display";
 import { AdminTabs } from "@/components/admin/admin-tabs";
 
 export const dynamic = "force-dynamic";
@@ -79,8 +79,8 @@ export default async function AdminMatchesPage({
             </Button>
           </form>
           <div className="grid gap-3 text-sm text-slate-600 md:grid-cols-3">
-            <p>Última tentativa: {scoreSyncSettings.lastSyncFinishedAt ? formatMatchDate(scoreSyncSettings.lastSyncFinishedAt) : "nunca"}</p>
-            <p>Último sucesso: {scoreSyncSettings.lastSuccessfulSyncAt ? formatMatchDate(scoreSyncSettings.lastSuccessfulSyncAt) : "nunca"}</p>
+            <p>Última tentativa: {scoreSyncSettings.lastSyncFinishedAt ? formatDateTime(scoreSyncSettings.lastSyncFinishedAt) : "nunca"}</p>
+            <p>Último sucesso: {scoreSyncSettings.lastSuccessfulSyncAt ? formatDateTime(scoreSyncSettings.lastSuccessfulSyncAt) : "nunca"}</p>
             <p>Fonte: ESPN Scoreboard</p>
           </div>
           {scoreSyncSettings.lastSyncSummary || scoreSyncSettings.lastSyncError ? (
