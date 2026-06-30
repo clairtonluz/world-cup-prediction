@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { RankingRow } from "@/lib/ranking";
 import { getPodiumRowClassName, RankingPosition } from "@/components/ranking/ranking-position";
+import { PlayerScoreLink } from "@/components/shared/player-score-link";
 
 const rankingMetrics = [
   {
@@ -44,12 +45,11 @@ export function RankingTable({
               <RankingPosition position={row.position} className="shrink-0" />
 
               <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 overflow-hidden">
-                <span
+                <PlayerScoreLink
+                  playerId={row.id}
+                  name={row.name}
                   className="line-clamp-2 min-w-0 flex-1 break-words font-medium leading-snug text-slate-950"
-                  title={row.name}
-                >
-                  {row.name}
-                </span>
+                />
                 {row.isCurrentUser ? <CurrentUserBadge /> : null}
               </div>
 
@@ -130,9 +130,11 @@ export function RankingTable({
                     )}
                   >
                     <span className="flex min-w-0 items-center gap-2 overflow-hidden">
-                      <span className="min-w-0 flex-1 truncate" title={row.name}>
-                        {row.name}
-                      </span>
+                      <PlayerScoreLink
+                        playerId={row.id}
+                        name={row.name}
+                        className="min-w-0 flex-1 truncate text-slate-950"
+                      />
                       {row.isCurrentUser ? <CurrentUserBadge /> : null}
                     </span>
                   </th>

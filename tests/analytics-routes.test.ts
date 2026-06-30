@@ -8,6 +8,7 @@ describe("resolveAnalyticsPage", () => {
       "/login",
       "/matches",
       "/matches/42",
+      "/jogadores/42",
       "/apostas",
       "/ranking",
       "/pontuacao",
@@ -42,6 +43,10 @@ describe("resolveAnalyticsPage", () => {
     expect(resolveAnalyticsPage("/matches/42")).toEqual({
       path: "/matches/[id]",
       title: "Detalhes do jogo",
+    });
+    expect(resolveAnalyticsPage("/jogadores/42")).toEqual({
+      path: "/jogadores/[id]",
+      title: "Pontuação do jogador",
     });
     expect(resolveAnalyticsPage("/grupos-de-amigos/convite/private-token-value")).toEqual({
       path: "/grupos-de-amigos/convite/[token]",

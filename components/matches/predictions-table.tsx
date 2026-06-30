@@ -1,3 +1,5 @@
+import { PlayerScoreLink } from "@/components/shared/player-score-link";
+
 export function PredictionsTable({
   predictionGroups,
   provisional = false,
@@ -70,7 +72,13 @@ function PredictionGroupTable({
         <tbody>
           {predictions.map((prediction) => (
             <tr key={prediction.id} className="border-b border-slate-100">
-              <td className="py-3 font-medium text-slate-900">{prediction.user.name}</td>
+              <td className="py-3">
+                <PlayerScoreLink
+                  playerId={prediction.user.id}
+                  name={prediction.user.name}
+                  className="text-slate-900"
+                />
+              </td>
               <td className="py-3">
                 <p>{prediction.teamAScore} x {prediction.teamBScore}</p>
                 {prediction.predictedAdvancingTeam ? (

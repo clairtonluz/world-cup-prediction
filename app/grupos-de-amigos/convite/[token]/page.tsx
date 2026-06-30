@@ -3,6 +3,7 @@ import { signIn, auth } from "@/auth";
 import { joinFriendGroupAction } from "@/actions/friend-group-actions";
 import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { PlayerScoreLink } from "@/components/shared/player-score-link";
 import { TournamentAccentBars, TournamentPublicPage } from "@/components/shared/tournament-theme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -75,7 +76,12 @@ export default async function FriendGroupInvitePage({
             Convite para {friendGroup.name}
           </h1>
           <p className="text-sm text-slate-600">
-            Grupo de Amigos privado criado por {friendGroup.ownerName}.
+            Grupo de Amigos privado criado por{" "}
+            <PlayerScoreLink
+              playerId={friendGroup.ownerId}
+              name={friendGroup.ownerName}
+              className="text-slate-700"
+            />{"."}
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

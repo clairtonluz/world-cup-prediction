@@ -11,6 +11,7 @@ import { RankingTable } from "@/components/ranking/ranking-table";
 import { AppShell } from "@/components/shared/app-shell";
 import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { PlayerScoreLink } from "@/components/shared/player-score-link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getFriendGroupDetail } from "@/lib/data/friend-groups";
@@ -77,7 +78,14 @@ export default async function FriendGroupDetailPage({
             <CardContent className="space-y-3">
               {friendGroup.members.map((member) => (
                 <div key={member.id} className="flex items-center justify-between gap-3 rounded-md border p-3 text-sm">
-                  <span>{member.name}{member.isOwner ? " (criador)" : ""}</span>
+                  <span className="min-w-0">
+                    <PlayerScoreLink
+                      playerId={member.id}
+                      name={member.name}
+                      className="text-slate-950"
+                    />
+                    {member.isOwner ? " (criador)" : ""}
+                  </span>
                   {!member.isOwner ? (
                     <ConfirmationForm
                       action={removeFriendGroupMemberAction.bind(null, friendGroup.id, member.id)}

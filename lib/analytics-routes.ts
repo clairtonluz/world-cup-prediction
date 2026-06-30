@@ -32,6 +32,10 @@ const dynamicPages: ReadonlyArray<{
     page: { path: "/matches/[id]", title: "Detalhes do jogo" },
   },
   {
+    pattern: /^\/jogadores\/[^/]+$/,
+    page: { path: "/jogadores/[id]", title: "Pontuação do jogador" },
+  },
+  {
     pattern: /^\/grupos-de-amigos\/convite\/[^/]+$/,
     page: { path: "/grupos-de-amigos/convite/[token]", title: "Convite para grupo" },
   },

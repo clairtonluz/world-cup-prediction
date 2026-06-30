@@ -33,6 +33,7 @@ export async function listMyFriendGroups() {
   return memberships.map(({ friendGroup, joinedAt }) => ({
     id: friendGroup.id,
     name: friendGroup.name,
+    ownerId: friendGroup.ownerId,
     ownerName: friendGroup.owner.name,
     memberCount: friendGroup._count.members,
     isOwner: friendGroup.ownerId === user.id,
@@ -60,6 +61,7 @@ export async function listAdminFriendGroups() {
   return friendGroups.map((friendGroup) => ({
     id: friendGroup.id,
     name: friendGroup.name,
+    ownerId: friendGroup.ownerId,
     ownerName: friendGroup.owner.name,
     memberCount: friendGroup._count.members,
     isOwner: false,
@@ -139,6 +141,7 @@ export async function getInvitePreview(token: string) {
     select: {
       id: true,
       name: true,
+      ownerId: true,
       owner: { select: { name: true } },
       members: {
         where: { userId: user.id },
@@ -152,6 +155,7 @@ export async function getInvitePreview(token: string) {
     ? {
         id: friendGroup.id,
         name: friendGroup.name,
+        ownerId: friendGroup.ownerId,
         ownerName: friendGroup.owner.name,
         isMember: friendGroup.members.length > 0,
       }

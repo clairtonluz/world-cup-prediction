@@ -131,6 +131,7 @@ describe("administrative friend group listing", () => {
       {
         id: FRIEND_GROUP_ID,
         name: "Grupo da Copa",
+        ownerId: OWNER_ID,
         ownerName: "Criador",
         memberCount: 2,
         isOwner: false,

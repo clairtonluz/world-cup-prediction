@@ -5,6 +5,7 @@ import { MatchSchedule } from "@/components/matches/match-schedule";
 import { MatchTimelineFocus } from "@/components/matches/match-timeline-focus";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { PlayerScoreLink } from "@/components/shared/player-score-link";
 import { TeamLabel } from "@/components/shared/team-label";
 import { getPodiumRowClassName, RankingPosition } from "@/components/ranking/ranking-position";
 import { StatCard } from "@/components/stats/stat-card";
@@ -135,7 +136,11 @@ export default async function MatchesPage({
                 >
                   <span className="flex min-w-0 items-center gap-2">
                     <RankingPosition position={row.position} className="shrink-0" />
-                    <span className="truncate">{row.name}</span>
+                    <PlayerScoreLink
+                      playerId={row.id}
+                      name={row.name}
+                      className="truncate text-slate-950"
+                    />
                   </span>
                   <strong className="shrink-0">{row.totalPoints} pts</strong>
                 </div>
