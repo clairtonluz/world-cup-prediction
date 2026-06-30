@@ -17,6 +17,18 @@ export function formatStatus(status: MatchStatusValue) {
 
 export function formatMatchDate(date: Date) {
   return new Intl.DateTimeFormat("pt-BR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: BRAZIL_TIME_ZONE,
+  }).format(date);
+}
+
+export function formatDateTime(date: Date) {
+  return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: BRAZIL_TIME_ZONE,
