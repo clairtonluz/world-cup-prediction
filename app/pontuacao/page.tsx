@@ -2,7 +2,7 @@ import { AppShell } from "@/components/shared/app-shell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MATCH_STAGES, STAGE_LABELS } from "@/lib/constants";
 import {
-  pointsForDrawAdvancingTeamBonus,
+  pointsForAdvancingTeamBonus,
   pointsForScoringCategory,
   type ScoringCategory,
 } from "@/lib/scoring";
@@ -95,14 +95,13 @@ export default function ScoringPage() {
               <div className="flex items-start justify-between gap-4 border-b border-slate-100 pb-4 last:border-0 last:pb-0">
                 <div>
                   <p className="font-medium text-slate-950">
-                    Bônus de empate no mata-mata
+                    Bônus de classificado no mata-mata
                   </p>
                   <p className="text-sm text-slate-600">
-                    Da segunda fase até a semifinal, se o placar previsto e o
-                    oficial forem empate após a prorrogação, quando houver,
-                    acertar a equipe que avança soma 10% dos pontos da fase. Na
-                    segunda fase, isso vale{" "}
-                    {pointsForDrawAdvancingTeamBonus("ROUND_OF_32")} pontos.
+                    Da segunda fase até a semifinal, acertar a equipe que avança
+                    para a próxima fase soma 10% dos pontos da fase. Na segunda
+                    fase, isso vale{" "}
+                    {pointsForAdvancingTeamBonus("ROUND_OF_32")} pontos.
                   </p>
                 </div>
                 <span className="inline-flex shrink-0 items-center justify-center rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-800">

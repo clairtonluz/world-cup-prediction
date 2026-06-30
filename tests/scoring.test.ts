@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculatePredictionPoints,
   isCorrectResult,
-  pointsForDrawAdvancingTeamBonus,
+  pointsForAdvancingTeamBonus,
   pointsForScoringCategory,
   predictionAchievements,
   STAGE_POINTS,
@@ -92,7 +92,7 @@ describe("calculatePredictionPoints", () => {
     ).toEqual(scoringResult("CORRECT_WINNER_ONLY", 30));
   });
 
-  it("adds a knockout draw bonus for exact draws with the correct advancing team", () => {
+  it("adds a knockout advancing-team bonus for exact scores with the correct advancing team", () => {
     expect(
       calculatePredictionPoints(
         {
@@ -108,9 +108,25 @@ describe("calculatePredictionPoints", () => {
         },
       ),
     ).toEqual(scoringResult("EXACT_SCORE", 22, 2));
+
+    expect(
+      calculatePredictionPoints(
+        {
+          teamAScore: 2,
+          teamBScore: 1,
+          predictedAdvancingTeam: "Brasil",
+        },
+        {
+          teamAScore: 2,
+          teamBScore: 1,
+          stage: "SEMI_FINALS",
+          advancingTeam: "Brasil",
+        },
+      ),
+    ).toEqual(scoringResult("EXACT_SCORE", 55, 5));
   });
 
-  it("adds a knockout draw bonus for non-exact draws with the correct advancing team", () => {
+  it("adds a knockout advancing-team bonus for non-exact draws with the correct advancing team", () => {
     expect(
       calculatePredictionPoints(
         {
@@ -128,7 +144,25 @@ describe("calculatePredictionPoints", () => {
     ).toEqual(scoringResult("CORRECT_RESULT_EXACT_GOAL_DIFFERENCE", 8, 2));
   });
 
-  it("does not add the draw bonus when the advancing team is wrong", () => {
+  it("adds a knockout advancing-team bonus when only the advancing team is correct", () => {
+    expect(
+      calculatePredictionPoints(
+        {
+          teamAScore: 2,
+          teamBScore: 1,
+          predictedAdvancingTeam: "Brasil",
+        },
+        {
+          teamAScore: 1,
+          teamBScore: 1,
+          stage: "ROUND_OF_16",
+          advancingTeam: "Brasil",
+        },
+      ),
+    ).toEqual(scoringResult("WRONG_PREDICTION", 2, 2));
+  });
+
+  it("does not add the advancing-team bonus when the advancing team is wrong", () => {
     expect(
       calculatePredictionPoints(
         {
@@ -146,11 +180,11 @@ describe("calculatePredictionPoints", () => {
     ).toEqual(scoringResult("EXACT_SCORE", 20));
   });
 
-  it("does not add the draw bonus to matches decided by the predicted score", () => {
+  it("adds the advancing-team bonus to non-exact knockout wins", () => {
     expect(
       calculatePredictionPoints(
         {
-          teamAScore: 2,
+          teamAScore: 3,
           teamBScore: 1,
           predictedAdvancingTeam: "Brasil",
         },
@@ -161,7 +195,7 @@ describe("calculatePredictionPoints", () => {
           advancingTeam: "Brasil",
         },
       ),
-    ).toEqual(scoringResult("EXACT_SCORE", 50));
+    ).toEqual(scoringResult("CORRECT_WINNER_EXACT_LOSER_SCORE", 30, 5));
   });
 
   it("awards zero for a wrong outcome", () => {
@@ -205,7 +239,7 @@ describe("calculatePredictionPoints", () => {
         "CORRECT_RESULT_EXACT_GOAL_DIFFERENCE",
       ),
     ).toBe(6);
-    expect(pointsForDrawAdvancingTeamBonus("ROUND_OF_32")).toBe(2);
+    expect(pointsForAdvancingTeamBonus("ROUND_OF_32")).toBe(2);
   });
 });
 

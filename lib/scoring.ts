@@ -28,7 +28,7 @@ const SCORING_RATES: Record<ScoringCategory, number> = {
   WRONG_PREDICTION: 0,
 };
 
-const DRAW_ADVANCING_TEAM_BONUS_RATE = 0.1;
+const ADVANCING_TEAM_BONUS_RATE = 0.1;
 
 type Score = {
   teamAScore: number;
@@ -71,8 +71,8 @@ export function pointsForScoringCategory(
   return Math.round(STAGE_POINTS[stage] * SCORING_RATES[category]);
 }
 
-export function pointsForDrawAdvancingTeamBonus(stage: MatchStageValue) {
-  return Math.round(STAGE_POINTS[stage] * DRAW_ADVANCING_TEAM_BONUS_RATE);
+export function pointsForAdvancingTeamBonus(stage: MatchStageValue) {
+  return Math.round(STAGE_POINTS[stage] * ADVANCING_TEAM_BONUS_RATE);
 }
 
 export function calculatePredictionPoints(
@@ -81,12 +81,7 @@ export function calculatePredictionPoints(
 ): ScoringResult {
   const predictedOutcome = scoreOutcome(prediction);
   const actualOutcome = scoreOutcome(match);
-  const bonusPoints = drawAdvancingTeamBonusPoints(
-    prediction,
-    match,
-    predictedOutcome,
-    actualOutcome,
-  );
+  const bonusPoints = advancingTeamBonusPoints(prediction, match);
 
   if (
     prediction.teamAScore === match.teamAScore &&
@@ -166,21 +161,15 @@ function scoringResult(
   };
 }
 
-function drawAdvancingTeamBonusPoints(
+function advancingTeamBonusPoints(
   prediction: PredictionScore,
   match: FinishedMatch,
-  predictedOutcome: Outcome,
-  actualOutcome: Outcome,
 ) {
-  if (predictedOutcome !== "DRAW" || actualOutcome !== "DRAW") {
-    return 0;
-  }
-
   return isCorrectAdvancingTeamPrediction(
     match.stage,
     prediction.predictedAdvancingTeam ?? null,
     match.advancingTeam ?? null,
   )
-    ? pointsForDrawAdvancingTeamBonus(match.stage)
+    ? pointsForAdvancingTeamBonus(match.stage)
     : 0;
 }
