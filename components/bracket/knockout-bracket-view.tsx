@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Info } from "lucide-react";
+import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { TeamLabel } from "@/components/shared/team-label";
 import { StatusBadge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -235,6 +236,12 @@ function BracketMatchCard({ match }: { match: KnockoutBracketMatch }) {
           advancingTeam={match.advancingTeam}
         />
       </div>
+      <OfficialMatchOutcome
+        stage={match.stage}
+        advancingTeam={match.advancingTeam}
+        linkToTeamMatches
+        className="mt-3 rounded-md bg-emerald-50 px-2.5 py-2"
+      />
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {match.projected ? (

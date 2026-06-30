@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { PredictionForm } from "@/components/matches/prediction-form";
+import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { TeamLabel } from "@/components/shared/team-label";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export type MatchCardMatch = {
   status: string;
   teamAScore: number | null;
   teamBScore: number | null;
+  advancingTeam: string | null;
   venue?: string;
   hostCity?: string;
   predictions?: {
@@ -102,6 +104,12 @@ export function MatchCard({
           <p className="text-sm text-slate-600">
             {formattedStage} - {formattedDate}
           </p>
+          <OfficialMatchOutcome
+            stage={stage}
+            advancingTeam={match.advancingTeam}
+            linkToTeamMatches
+            className="mt-2"
+          />
           {showDetails &&
           match.matchNumber !== undefined &&
           match.venue &&

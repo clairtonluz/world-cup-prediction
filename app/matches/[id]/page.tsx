@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
+import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { PredictionsTable } from "@/components/matches/predictions-table";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
@@ -59,6 +60,12 @@ export default async function MatchDetailPage({
               <p className="mt-1 text-sm text-slate-600">
                 {formatStage(match.stage as MatchStageValue)} - {formatMatchDate(match.startsAt)}
               </p>
+              <OfficialMatchOutcome
+                stage={match.stage as MatchStageValue}
+                advancingTeam={match.advancingTeam}
+                linkToTeamMatches
+                className="mt-2"
+              />
             </div>
             <MatchStatusIndicator
               status={match.status as MatchStatusValue}

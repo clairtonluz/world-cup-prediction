@@ -9,6 +9,7 @@ import { recalculateAllPointsAction } from "@/actions/admin-match-actions";
 import { AppShell } from "@/components/shared/app-shell";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
+import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { Button } from "@/components/ui/button";
@@ -182,6 +183,12 @@ export default async function AdminMatchesPage({
                           teamAScore={match.teamAScore}
                           teamBScore={match.teamBScore}
                           size="compact"
+                        />
+                        <OfficialMatchOutcome
+                          stage={match.stage as MatchStageValue}
+                          advancingTeam={match.advancingTeam}
+                          linkToTeamMatches
+                          className="mt-2"
                         />
                       </td>
                       <td className="text-right"><Link className="text-emerald-700 hover:underline" href={`/admin/matches/${match.id}/edit`}>Atualizar</Link></td>

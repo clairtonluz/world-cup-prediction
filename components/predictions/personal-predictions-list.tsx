@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
+import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -116,6 +117,12 @@ function PredictionCard({ prediction }: { prediction: PersonalPrediction }) {
             <p className="font-semibold text-slate-950">
               {hasScoredResult ? `${prediction.points} pts` : "-"}
             </p>
+            <OfficialMatchOutcome
+              stage={stage}
+              advancingTeam={match.advancingTeam}
+              linkToTeamMatches
+              className="mt-2"
+            />
           </div>
         </div>
 

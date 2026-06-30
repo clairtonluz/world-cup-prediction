@@ -20,6 +20,7 @@ type ScheduleMatch = {
   status: string;
   teamAScore: number | null;
   teamBScore: number | null;
+  advancingTeam: string | null;
   predictions?: {
     teamAScore: number;
     teamBScore: number;
