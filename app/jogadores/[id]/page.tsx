@@ -3,12 +3,13 @@ import { AppShell } from "@/components/shared/app-shell";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { TeamLabel } from "@/components/shared/team-label";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { StatCard } from "@/components/stats/stat-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getPlayerScorePageData, type PlayerScorePageData } from "@/lib/data/player-score";
-import { formatMatchDate, formatStage, formatStatus } from "@/lib/display";
+import { formatStage, formatStatus } from "@/lib/display";
 
 export const dynamic = "force-dynamic";
 
@@ -144,7 +145,9 @@ function PlayerScoreMatchListItem({ match }: { match: PlayerScoreMatch }) {
           className="font-semibold"
         />
 
-        <p className="text-xs text-slate-600">{formatMatchDate(match.startsAt)}</p>
+        <p className="text-xs text-slate-600">
+          <BrowserDateTime value={match.startsAt} format="matchDate" />
+        </p>
         {!hasOfficialScore ? (
           <p className="text-xs text-slate-500">Placar ainda não disponível</p>
         ) : null}
@@ -219,7 +222,7 @@ function PlayerScoreMatchRow({ match }: { match: PlayerScoreMatch }) {
           <p className="flex flex-wrap items-center gap-2 text-xs font-normal text-slate-600">
             <span>#{match.matchNumber}</span>
             <span>{formatStage(stage)}</span>
-            <span>{formatMatchDate(match.startsAt)}</span>
+            <BrowserDateTime value={match.startsAt} format="matchDate" />
             <StatusBadge status={status}>{formatStatus(status)}</StatusBadge>
           </p>
           {!hasOfficialScore ? (

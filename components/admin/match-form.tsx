@@ -1,5 +1,6 @@
 import { MATCH_STATUSES, STATUS_LABELS, type MatchStageValue } from "@/lib/constants";
-import { formatMatchDate, formatStage } from "@/lib/display";
+import { formatStage } from "@/lib/display";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { TeamLabel } from "@/components/shared/team-label";
 import { Button } from "@/components/ui/button";
@@ -50,7 +51,8 @@ export function MatchForm({
         <div>
           <dt className="text-slate-500">Fase e horário</dt>
           <dd className="font-medium text-slate-950">
-            {formatStage(match.stage as MatchStageValue)} - {formatMatchDate(match.startsAt)}
+            {formatStage(match.stage as MatchStageValue)} -{" "}
+            <BrowserDateTime value={match.startsAt} format="matchDate" />
           </dd>
         </div>
         <div className="sm:col-span-2">

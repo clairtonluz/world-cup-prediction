@@ -3,13 +3,14 @@ import { AppShell } from "@/components/shared/app-shell";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { PredictionsTable } from "@/components/matches/predictions-table";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getMatchDetail } from "@/lib/data/matches";
-import { formatMatchDate, formatStage } from "@/lib/display";
+import { formatStage } from "@/lib/display";
 import { hasEffectivelyStarted } from "@/lib/match-rules";
 
 export const dynamic = "force-dynamic";
@@ -58,7 +59,8 @@ export default async function MatchDetailPage({
                 />
               </CardTitle>
               <p className="mt-1 text-sm text-slate-600">
-                {formatStage(match.stage as MatchStageValue)} - {formatMatchDate(match.startsAt)}
+                {formatStage(match.stage as MatchStageValue)} -{" "}
+                <BrowserDateTime value={match.startsAt} format="matchDate" />
               </p>
               <OfficialMatchOutcome
                 stage={match.stage as MatchStageValue}

@@ -18,12 +18,13 @@ export type MatchAgendaView = "focus" | "all";
 export function selectFocusedMatches<T extends ScheduledMatch>(
   matches: readonly T[],
   now = new Date(),
+  timeZone?: string,
 ): MatchFocusWindow<T> {
   const orderedMatches = orderMatchesChronologically(matches);
-  const todayKey = matchDayKey(now);
+  const todayKey = matchDayKey(now, timeZone);
   const matchesWithDay = orderedMatches.map((match) => ({
     match,
-    dayKey: matchDayKey(match.startsAt),
+    dayKey: matchDayKey(match.startsAt, timeZone),
   }));
   const today = matchesWithDay
     .filter(({ dayKey }) => dayKey === todayKey)

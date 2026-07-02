@@ -12,13 +12,14 @@ import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/ui/badge";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getScoreSyncSettings } from "@/lib/score-sync/sync";
 import { listAdminMatches } from "@/lib/data/matches";
-import { formatDateTime, formatMatchDate, formatStage, formatStatus } from "@/lib/display";
+import { formatStage, formatStatus } from "@/lib/display";
 import { AdminTabs } from "@/components/admin/admin-tabs";
 
 export const dynamic = "force-dynamic";
@@ -80,8 +81,28 @@ export default async function AdminMatchesPage({
             </Button>
           </form>
           <div className="grid gap-3 text-sm text-slate-600 md:grid-cols-3">
-            <p>Última tentativa: {scoreSyncSettings.lastSyncFinishedAt ? formatDateTime(scoreSyncSettings.lastSyncFinishedAt) : "nunca"}</p>
-            <p>Último sucesso: {scoreSyncSettings.lastSuccessfulSyncAt ? formatDateTime(scoreSyncSettings.lastSuccessfulSyncAt) : "nunca"}</p>
+            <p>
+              Última tentativa:{" "}
+              {scoreSyncSettings.lastSyncFinishedAt ? (
+                <BrowserDateTime
+                  value={scoreSyncSettings.lastSyncFinishedAt}
+                  format="dateTime"
+                />
+              ) : (
+                "nunca"
+              )}
+            </p>
+            <p>
+              Último sucesso:{" "}
+              {scoreSyncSettings.lastSuccessfulSyncAt ? (
+                <BrowserDateTime
+                  value={scoreSyncSettings.lastSuccessfulSyncAt}
+                  format="dateTime"
+                />
+              ) : (
+                "nunca"
+              )}
+            </p>
             <p>Fonte: ESPN Scoreboard</p>
           </div>
           {scoreSyncSettings.lastSyncSummary || scoreSyncSettings.lastSyncError ? (
@@ -171,7 +192,16 @@ export default async function AdminMatchesPage({
                           linkToTeamMatches
                         />
                       </td>
-                      <td>{formatStage(match.stage as MatchStageValue)}<br /><span className="text-slate-500">{formatMatchDate(match.startsAt)}</span></td>
+                      <td>
+                        {formatStage(match.stage as MatchStageValue)}
+                        <br />
+                        <span className="text-slate-500">
+                          <BrowserDateTime
+                            value={match.startsAt}
+                            format="matchDate"
+                          />
+                        </span>
+                      </td>
                       <td><StatusBadge status={match.status as MatchStatusValue}>{formatStatus(match.status as MatchStatusValue)}</StatusBadge></td>
                       <td className="min-w-64">
                         <MatchScoreboard

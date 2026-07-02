@@ -1,8 +1,8 @@
 import { updatePredictedChampionAction } from "@/actions/profile-actions";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { formatMatchDate } from "@/lib/display";
 import { CHAMPION_BONUS_POINTS } from "@/lib/tournament-predictions";
 
 type ChampionPredictionFormData = {
@@ -33,9 +33,18 @@ export function ChampionPredictionCard({
         <CardTitle>Palpite do campeão</CardTitle>
         <p className="text-sm text-slate-600">
           Acertar o campeão da Copa vale <strong>{CHAMPION_BONUS_POINTS} pontos</strong>.
-          {championPrediction.closesAt
-            ? ` O palpite pode ser alterado durante a fase de grupos, antes do início do mata-mata em ${formatMatchDate(championPrediction.closesAt)}.`
-            : ""}
+          {championPrediction.closesAt ? (
+            <>
+              {" "}
+              O palpite pode ser alterado durante a fase de grupos, antes do
+              início do mata-mata em{" "}
+              <BrowserDateTime
+                value={championPrediction.closesAt}
+                format="matchDate"
+              />
+              .
+            </>
+          ) : null}
         </p>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">

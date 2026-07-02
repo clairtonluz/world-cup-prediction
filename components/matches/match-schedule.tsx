@@ -1,8 +1,11 @@
+"use client";
+
 import { MatchCard } from "@/components/matches/match-card";
 import {
-  formatMatchDay,
-  matchDayKey,
-} from "@/lib/display";
+  BrowserDateTime,
+  useBrowserTimeZone,
+} from "@/components/shared/browser-date-time";
+import { matchDayKey } from "@/lib/display";
 import { cn } from "@/lib/utils";
 
 type ScheduleMatch = {
@@ -40,18 +43,22 @@ export function MatchSchedule({
   focusedMatchId = null,
   focusedMatchElementId = "focused-match",
 }: MatchScheduleProps) {
+  const timeZone = useBrowserTimeZone();
   const grouped = new Map<string, ScheduleMatch[]>();
   for (const match of matches) {
-    const key = matchDayKey(match.startsAt);
+    const key = matchDayKey(match.startsAt, timeZone);
     grouped.set(key, [...(grouped.get(key) ?? []), match]);
   }
 
   return (
     <div className="space-y-6">
       {[...grouped.values()].map((dailyMatches) => (
-        <section key={matchDayKey(dailyMatches[0].startsAt)}>
+        <section key={matchDayKey(dailyMatches[0].startsAt, timeZone)}>
           <h3 className="mb-2 text-sm font-semibold capitalize text-slate-700">
-            {formatMatchDay(dailyMatches[0].startsAt)}
+            <BrowserDateTime
+              value={dailyMatches[0].startsAt}
+              format="matchDay"
+            />
           </h3>
           <div className="space-y-3">
             {dailyMatches.map((match) => {

@@ -3,12 +3,13 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Info } from "lucide-react";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { TeamLabel } from "@/components/shared/team-label";
 import { StatusBadge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Tooltip } from "@/components/ui/tooltip";
-import { formatMatchDate, formatStatus } from "@/lib/display";
+import { formatStatus } from "@/lib/display";
 import {
   filterKnockoutStagesFrom,
   toggleKnockoutStageFilter,
@@ -53,7 +54,7 @@ export function KnockoutBracketView({ bracket }: { bracket: KnockoutBracket }) {
             Chaveamento
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Caminho oficial da segunda fase até a decisão, em horário de Brasília.
+            Caminho oficial da segunda fase até a decisão, no horário do seu navegador.
           </p>
         </div>
         {bracket.hasProjectedParticipants ? (
@@ -208,7 +209,7 @@ function BracketMatchCard({ match }: { match: KnockoutBracketMatch }) {
             Jogo #{match.matchNumber}
           </p>
           <p className="mt-0.5 text-xs text-slate-600">
-            {formatMatchDate(match.startsAt)}
+            <BrowserDateTime value={match.startsAt} format="matchDate" />
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">

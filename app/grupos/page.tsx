@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/shared/app-shell";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { TeamLabel } from "@/components/shared/team-label";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
@@ -7,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip } from "@/components/ui/tooltip";
 import type { MatchStatusValue } from "@/lib/constants";
 import { listGroupMatches } from "@/lib/data/matches";
-import { formatMatchDate } from "@/lib/display";
 import {
   GROUP_CODES,
   calculateGroupStandings,
@@ -37,7 +37,7 @@ export default async function GroupsPage() {
       <section>
         <h1 className="text-3xl font-semibold text-slate-950">Grupos</h1>
         <p className="mt-1 text-slate-600">
-          Classificação e jogos da primeira fase em horário de Brasília.
+          Classificação e jogos da primeira fase no horário do seu navegador.
         </p>
       </section>
       <div className="space-y-6">
@@ -139,7 +139,12 @@ export default async function GroupsPage() {
                                 />
                               </div>
                               <div className="mt-2 text-xs text-slate-600">
-                                <p>{formatMatchDate(match.startsAt)}</p>
+                                <p>
+                                  <BrowserDateTime
+                                    value={match.startsAt}
+                                    format="matchDate"
+                                  />
+                                </p>
                               </div>
                               <Link
                                 href={`/matches/${match.id}`}

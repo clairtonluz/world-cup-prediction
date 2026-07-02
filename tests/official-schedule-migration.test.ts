@@ -29,12 +29,23 @@ const futureKnockoutScheduleMigration = readFileSync(
   ),
   "utf8",
 );
+const reassertFutureKnockoutScheduleMigration = readFileSync(
+  new URL(
+    "../prisma/migrations/20260702120000_reassert_future_knockout_schedule/migration.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const normalizeStartTimesUtcMigration = readFileSync(
+  new URL(
+    "../prisma/migrations/20260702130000_normalize_match_start_times_utc/migration.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const fixtureRows = migration
   .split("\n")
   .filter((line) => line.trimStart().startsWith("('c2026match"));
-const futureKnockoutRows = futureKnockoutScheduleMigration
-  .split("\n")
-  .filter((line) => /^\s+\(\d+, '400021/.test(line));
 
 describe("official 2026 fixture migration", () => {
   it("inserts the complete 104-match FIFA schedule by stage", () => {
@@ -116,34 +127,111 @@ describe("match start time correction migration", () => {
 });
 
 describe("future knockout schedule correction migration", () => {
-  it("updates every future knockout match from 83 through 104", () => {
+  it.each([
+    ["initial correction", futureKnockoutScheduleMigration],
+    ["production reassertion", reassertFutureKnockoutScheduleMigration],
+  ])("%s updates every future knockout match from 83 through 104", (_, migrationSql) => {
+    const futureKnockoutRows = correctedFutureKnockoutRows(migrationSql);
+
     expect(futureKnockoutRows).toHaveLength(22);
-    expect(
-      futureKnockoutRows.map((line) => Number(line.match(/^\s+\((\d+),/)?.[1])),
-    ).toEqual(Array.from({ length: 22 }, (_, index) => index + 83));
+    expect(futureKnockoutRows.map(matchNumberFromCorrectedRow)).toEqual(
+      Array.from({ length: 22 }, (_, index) => index + 83),
+    );
   });
 
-  it("keeps the correction scoped to match schedule fields", () => {
+  it.each([
+    ["initial correction", futureKnockoutScheduleMigration],
+    ["production reassertion", reassertFutureKnockoutScheduleMigration],
+  ])("%s keeps the correction scoped to match schedule fields", (_, migrationSql) => {
     const updatedTables = [
-      ...futureKnockoutScheduleMigration.matchAll(/UPDATE "([^"]+)"/g),
+      ...migrationSql.matchAll(/UPDATE "([^"]+)"/g),
     ].map((match) => match[1]);
 
     expect(updatedTables).toEqual(["Match", "Match"]);
-    expect(futureKnockoutScheduleMigration).not.toContain('"Prediction"');
-    expect(futureKnockoutScheduleMigration).not.toContain('"User"');
-    expect(futureKnockoutScheduleMigration).not.toContain('"teamAScore"');
-    expect(futureKnockoutScheduleMigration).not.toContain('"teamBScore"');
-    expect(futureKnockoutScheduleMigration).not.toContain('"advancingTeam"');
-    expect(futureKnockoutScheduleMigration).not.toMatch(/SET\s+"status"/);
+    expect(migrationSql).not.toContain('"Prediction"');
+    expect(migrationSql).not.toContain('"User"');
+    expect(migrationSql).not.toContain('"teamAScore"');
+    expect(migrationSql).not.toContain('"teamBScore"');
+    expect(migrationSql).not.toContain('"advancingTeam"');
+    expect(migrationSql).not.toMatch(/SET\s+"status"/);
   });
 
-  it("contains the critical Brazil versus Norway correction", () => {
-    expect(futureKnockoutScheduleMigration).toContain(
+  it.each([
+    ["initial correction", futureKnockoutScheduleMigration],
+    ["production reassertion", reassertFutureKnockoutScheduleMigration],
+  ])("%s contains the critical Brazil versus Norway correction", (_, migrationSql) => {
+    expect(migrationSql).toContain(
       "(91, '400021532', '760504', 'Brasil', 'Noruega', 'W74', 'W77', true, '2026-07-05T17:00:00-03:00'::TIMESTAMPTZ",
+    );
+  });
+});
+
+describe("UTC match start time normalization migration", () => {
+  it("contains an explicit UTC kickoff for every official match", () => {
+    const rows = normalizedUtcRows(normalizeStartTimesUtcMigration);
+
+    expect(rows).toHaveLength(104);
+    expect(rows.map(matchNumberFromCorrectedRow)).toEqual(
+      Array.from({ length: 104 }, (_, index) => index + 1),
+    );
+    for (const row of rows) {
+      expect(row).toMatch(/'2026-[^']+Z'::TIMESTAMPTZ/);
+    }
+  });
+
+  it("keeps the UTC normalization scoped to match start timestamps", () => {
+    const updatedTables = [
+      ...normalizeStartTimesUtcMigration.matchAll(/UPDATE "([^"]+)"/g),
+    ].map((match) => match[1]);
+
+    expect(updatedTables).toEqual(["Match"]);
+    expect(normalizeStartTimesUtcMigration).not.toContain("+ INTERVAL");
+    expect(normalizeStartTimesUtcMigration).not.toContain("- INTERVAL");
+    expect(normalizeStartTimesUtcMigration).not.toContain('"Prediction"');
+    expect(normalizeStartTimesUtcMigration).not.toContain('"User"');
+    expect(normalizeStartTimesUtcMigration).not.toContain('"teamAScore"');
+    expect(normalizeStartTimesUtcMigration).not.toContain('"teamBScore"');
+    expect(normalizeStartTimesUtcMigration).not.toContain('"advancingTeam"');
+    expect(normalizeStartTimesUtcMigration).not.toMatch(/SET\s+"status"/);
+  });
+
+  it("contains the critical UTC kickoff corrections", () => {
+    expect(normalizeStartTimesUtcMigration).toContain(
+      "(1, '2026-06-11T19:00:00Z'::TIMESTAMPTZ)",
+    );
+    expect(normalizeStartTimesUtcMigration).toContain(
+      "(82, '2026-07-02T00:00:00Z'::TIMESTAMPTZ)",
+    );
+    expect(normalizeStartTimesUtcMigration).toContain(
+      "(91, '2026-07-05T20:00:00Z'::TIMESTAMPTZ)",
     );
   });
 });
 
 function countStage(stage: string) {
   return fixtureRows.filter((line) => line.includes(`'${stage}'`)).length;
+}
+
+function correctedFutureKnockoutRows(migrationSql: string) {
+  return migrationSql
+    .split("\n")
+    .filter((line) => /^\s+\(\d+, '400021/.test(line));
+}
+
+function matchNumberFromCorrectedRow(row: string) {
+  return Number(row.match(/^\s+\((\d+),/)?.[1]);
+}
+
+function normalizedUtcRows(migrationSql: string) {
+  const valuesTable = migrationSql.match(
+    /FROM \(\n  VALUES\n(?<rows>[\s\S]*?)\n\) AS corrected_matches/,
+  )?.groups?.rows;
+
+  if (!valuesTable) {
+    return [];
+  }
+
+  return valuesTable
+    .split("\n")
+    .filter((line) => /^\s+\(\d+, '2026-/.test(line));
 }

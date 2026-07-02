@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { MatchCard, type MatchCardMatch } from "@/components/matches/match-card";
+import { useBrowserTimeZone } from "@/components/shared/browser-date-time";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { selectFocusedMatches } from "@/lib/match-focus";
@@ -13,6 +16,7 @@ type FocusedMatchesProps = {
     label: string;
     scroll?: boolean;
   };
+  referenceTime: Date;
 };
 
 export function FocusedMatches({
@@ -20,8 +24,10 @@ export function FocusedMatches({
   title = "Jogos em foco",
   description = "Acompanhe os jogos de hoje e os próximos confrontos sem percorrer a agenda completa.",
   scheduleLink,
+  referenceTime,
 }: FocusedMatchesProps) {
-  const focusedMatches = selectFocusedMatches(matches);
+  const timeZone = useBrowserTimeZone();
+  const focusedMatches = selectFocusedMatches(matches, referenceTime, timeZone);
 
   return (
     <section className="space-y-5" aria-labelledby="focused-matches-title">
@@ -48,7 +54,7 @@ export function FocusedMatches({
           Jogos de hoje
         </h3>
         <p className="mt-1 text-sm text-emerald-900/80">
-          Partidas do dia atual em horário de Brasília.
+          Partidas do dia atual no horário do seu navegador.
         </p>
         <div className="mt-4">
           {focusedMatches.today.length > 0 ? (

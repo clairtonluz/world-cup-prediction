@@ -3,11 +3,12 @@ import Link from "next/link";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { TeamLabel } from "@/components/shared/team-label";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
-import { formatMatchDate, formatStage, teamText } from "@/lib/display";
+import { formatStage, teamText } from "@/lib/display";
 import { mayEditPrediction } from "@/lib/match-rules";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +55,6 @@ export function MatchCard({
   const status = match.status as MatchStatusValue;
   const stage = match.stage as MatchStageValue;
   const formattedStage = formatStage(stage);
-  const formattedDate = formatMatchDate(match.startsAt);
   const editable = mayEditPrediction({
     startsAt: match.startsAt,
     status,
@@ -102,7 +102,8 @@ export function MatchCard({
       <CardContent className="flex flex-wrap items-end justify-between gap-3 pt-0">
         <div className="space-y-1">
           <p className="text-sm text-slate-600">
-            {formattedStage} - {formattedDate}
+            {formattedStage} -{" "}
+            <BrowserDateTime value={match.startsAt} format="matchDate" />
           </p>
           <OfficialMatchOutcome
             stage={stage}

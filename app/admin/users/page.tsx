@@ -3,10 +3,10 @@ import { AppShell } from "@/components/shared/app-shell";
 import { AdminTabs } from "@/components/admin/admin-tabs";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { PlayerScoreLink } from "@/components/shared/player-score-link";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { formatDateTime } from "@/lib/display";
 import { getAdminUsersPageData } from "@/lib/data/users";
 
 export const dynamic = "force-dynamic";
@@ -87,7 +87,12 @@ export default async function AdminUsersPage({
                         />
                       </td>
                       <td>{user.email}</td>
-                      <td className="text-slate-600">{formatDateTime(user.createdAt)}</td>
+                      <td className="text-slate-600">
+                        <BrowserDateTime
+                          value={user.createdAt}
+                          format="dateTime"
+                        />
+                      </td>
                       <td>
                         {user.hiddenFromGlobalRanking ? (
                           <span className="text-red-600 font-medium">Oculto</span>

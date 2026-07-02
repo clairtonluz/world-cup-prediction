@@ -43,6 +43,7 @@ export default async function PersonalPredictionsPage({
 
       <FocusedMatches
         matches={matches}
+        referenceTime={new Date()}
         title="Jogos em foco para apostar"
         description="Veja rapidamente os jogos de hoje e as próximas apostas disponíveis."
         scheduleLink={{

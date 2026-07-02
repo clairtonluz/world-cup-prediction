@@ -17,6 +17,7 @@ describe("selectFocusedMatches", () => {
         match("same-day-third", "2026-06-11T21:00:00-03:00"),
       ],
       new Date("2026-05-27T12:00:00-03:00"),
+      "America/Fortaleza",
     );
 
     expect(focused.today).toEqual([]);
@@ -34,6 +35,7 @@ describe("selectFocusedMatches", () => {
         match("next-day-first", "2026-06-12T16:00:00-03:00"),
       ],
       new Date("2026-06-11T20:00:00-03:00"),
+      "America/Fortaleza",
     );
 
     expect(ids(focused.today)).toEqual(["today-first", "today-second"]);
@@ -50,6 +52,7 @@ describe("selectFocusedMatches", () => {
         match("later", "2026-07-14T16:00:00-03:00"),
       ],
       new Date("2026-07-08T12:00:00-03:00"),
+      "America/Fortaleza",
     );
 
     expect(focused.today).toEqual([]);
@@ -64,6 +67,7 @@ describe("selectFocusedMatches", () => {
         match("round-next", "2026-06-29T14:00:00-03:00", "ROUND_OF_32"),
       ],
       new Date("2026-06-28T10:00:00-03:00"),
+      "America/Fortaleza",
     );
 
     expect(focused.today[0].stage).toBe("ROUND_OF_32");
@@ -79,13 +83,14 @@ describe("selectFocusedMatches", () => {
         match("final", "2026-07-19T16:00:00-03:00"),
       ],
       new Date("2026-07-20T12:00:00-03:00"),
+      "America/Fortaleza",
     );
 
     expect(focused.today).toEqual([]);
     expect(focused.nextDay).toEqual([]);
   });
 
-  it("groups midnight fixtures by the Brasilia calendar day", () => {
+  it("groups midnight fixtures by the injected browser calendar day", () => {
     const focused = selectFocusedMatches(
       [
         match("previous", "2026-06-11T02:59:00Z"),
@@ -94,6 +99,7 @@ describe("selectFocusedMatches", () => {
         match("upcoming", "2026-06-12T03:00:00Z"),
       ],
       new Date("2026-06-11T12:00:00-03:00"),
+      "America/Fortaleza",
     );
 
     expect(ids(focused.today)).toEqual(["today-opening", "today-closing"]);

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { PredictionForm } from "@/components/matches/prediction-form";
 import { MatchStatusIndicator } from "@/components/matches/match-status-indicator";
+import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { MatchScoreboard } from "@/components/shared/match-scoreboard";
 import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,7 @@ import {
   type MatchStatusValue,
 } from "@/lib/constants";
 import type { PersonalPrediction } from "@/lib/data/predictions";
-import { formatMatchDate, formatStage } from "@/lib/display";
+import { formatStage } from "@/lib/display";
 import { mayEditPrediction } from "@/lib/match-rules";
 
 export function PersonalPredictionsList({
@@ -90,7 +91,8 @@ function PredictionCard({ prediction }: { prediction: PersonalPrediction }) {
             />
           </CardTitle>
           <p className="mt-1 text-sm text-slate-600">
-            Jogo #{match.matchNumber} - {formatMatchDate(match.startsAt)}
+            Jogo #{match.matchNumber} -{" "}
+            <BrowserDateTime value={match.startsAt} format="matchDate" />
           </p>
         </div>
         <MatchStatusIndicator status={status} startsAt={match.startsAt} />

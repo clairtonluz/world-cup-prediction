@@ -5,7 +5,9 @@ import {
   type MatchStatusValue,
 } from "@/lib/constants";
 
-export const BRAZIL_TIME_ZONE = "America/Sao_Paulo";
+type DateDisplayOptions = {
+  timeZone?: string;
+};
 
 export function formatStage(stage: MatchStageValue) {
   return STAGE_LABELS[stage];
@@ -15,7 +17,7 @@ export function formatStatus(status: MatchStatusValue) {
   return STATUS_LABELS[status];
 }
 
-export function formatMatchDate(date: Date) {
+export function formatMatchDate(date: Date, options: DateDisplayOptions = {}) {
   return new Intl.DateTimeFormat("pt-BR", {
     weekday: "short",
     day: "numeric",
@@ -23,40 +25,44 @@ export function formatMatchDate(date: Date) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: BRAZIL_TIME_ZONE,
+    ...timeZoneOption(options.timeZone),
   }).format(date);
 }
 
-export function formatDateTime(date: Date) {
+export function formatDateTime(date: Date, options: DateDisplayOptions = {}) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "medium",
     timeStyle: "short",
-    timeZone: BRAZIL_TIME_ZONE,
+    ...timeZoneOption(options.timeZone),
   }).format(date);
 }
 
-export function formatMatchDay(date: Date) {
+export function formatMatchDay(date: Date, options: DateDisplayOptions = {}) {
   return new Intl.DateTimeFormat("pt-BR", {
     dateStyle: "full",
-    timeZone: BRAZIL_TIME_ZONE,
+    ...timeZoneOption(options.timeZone),
   }).format(date);
 }
 
-export function formatMatchTime(date: Date) {
+export function formatMatchTime(date: Date, options: DateDisplayOptions = {}) {
   return new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: BRAZIL_TIME_ZONE,
+    ...timeZoneOption(options.timeZone),
   }).format(date);
 }
 
-export function matchDayKey(date: Date) {
+export function matchDayKey(date: Date, timeZone?: string) {
   return new Intl.DateTimeFormat("sv-SE", {
     dateStyle: "short",
-    timeZone: BRAZIL_TIME_ZONE,
+    ...timeZoneOption(timeZone),
   }).format(date);
 }
 
 export function teamText(team: string | null, slot: string | null) {
   return team ?? slot ?? "A definir";
+}
+
+function timeZoneOption(timeZone: string | undefined) {
+  return timeZone ? { timeZone } : {};
 }

@@ -72,7 +72,7 @@ export default async function MatchesPage({
       <section>
         <h1 className="text-3xl font-semibold text-slate-950">Jogos da Copa do Mundo 2026</h1>
         <p className="mt-1 text-slate-600">
-          Jogos em horário de Brasília. Aposte antes do início dos jogos.
+          Jogos no horário do seu navegador. Aposte antes do início dos jogos.
         </p>
       </section>
       <section className="grid gap-4 sm:grid-cols-3">
@@ -91,6 +91,7 @@ export default async function MatchesPage({
       </section>
       <FocusedMatches
         matches={matches}
+        referenceTime={new Date()}
         scheduleLink={{
           href: showingCompleteAgenda ? "/matches" : "/matches?view=all",
           label: showingCompleteAgenda
