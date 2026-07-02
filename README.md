@@ -110,6 +110,17 @@ CONFIRM_RESTORE=yes pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHM
 docker compose up -d app sync-worker
 ```
 
+Create a fresh production backup, copy it to `backups/`, and restore it into the
+local Docker Compose database:
+
+```bash
+./ci/restore-remote-database-local.sh
+```
+
+The remote restore helper asks for confirmation before replacing local data. It
+stops the local `app` and `sync-worker` services before restoring and leaves them
+stopped afterward.
+
 For production, run the same scripts on the server with the production Compose files so `compose.override.yaml` is not loaded:
 
 ```bash
@@ -159,7 +170,7 @@ ESPN's endpoint is public but not a contracted API, so keep the manual admin res
 3. From a machine configured with the `oracle-luz` SSH host, deploy the application:
 
    ```bash
-   ./ci/deploy.sh
+   ./ci/deploy-remote.sh
    ```
 
 The script connects with `ssh oracle-luz`, enters `/home/opc/world-cup-prediction`, refuses non-ignored local changes, fast-forwards the production checkout to `origin/main`, and executes `docker compose -f compose.yaml -f compose.production.yaml --env-file .env up -d --build --remove-orphans` on the server. Ignored production files such as `.env` and `data/` remain available. It prints the deployed Git revision and application container status so the running release can be checked from the deploy log. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
