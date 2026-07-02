@@ -11,7 +11,7 @@ describe("resolveDatabaseUrl", () => {
         POSTGRES_PORT: "5544",
       }),
     ).toBe(
-      "postgresql://world%40cup:p%40ss%3Aword%2F%23%25%3F@localhost:5544/cup%2Fpredictions?schema=public",
+      "postgresql://world%40cup:p%40ss%3Aword%2F%23%25%3F@localhost:5544/cup%2Fpredictions?schema=public&options=-c%20TimeZone%3DUTC",
     );
   });
 
@@ -22,13 +22,26 @@ describe("resolveDatabaseUrl", () => {
         POSTGRES_HOST: "database",
         POSTGRES_PORT: "5432",
       }),
-    ).toBe("postgresql://world_cup:password@database:5432/world_cup_predictor?schema=public");
+    ).toBe(
+      "postgresql://world_cup:password@database:5432/world_cup_predictor?schema=public&options=-c%20TimeZone%3DUTC",
+    );
   });
 
-  it("allows an explicit connection URL override", () => {
+  it("normalizes an explicit connection URL override to use UTC sessions", () => {
     const connectionUrl = "postgresql://external.example/database?schema=private";
 
-    expect(resolveDatabaseUrl({ DATABASE_URL: connectionUrl })).toBe(connectionUrl);
+    expect(resolveDatabaseUrl({ DATABASE_URL: connectionUrl })).toBe(
+      "postgresql://external.example/database?schema=private&options=-c+TimeZone%3DUTC",
+    );
+  });
+
+  it("appends UTC after existing explicit connection URL session timezone options", () => {
+    const connectionUrl =
+      "postgresql://external.example/database?schema=private&options=-c+TimeZone%3DAmerica%2FFortaleza";
+
+    expect(resolveDatabaseUrl({ DATABASE_URL: connectionUrl })).toBe(
+      "postgresql://external.example/database?schema=private&options=-c+TimeZone%3DAmerica%2FFortaleza+-c+TimeZone%3DUTC",
+    );
   });
 
   it("rejects malformed derived network configuration", () => {

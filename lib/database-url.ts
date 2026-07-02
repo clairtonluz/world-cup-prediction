@@ -3,10 +3,12 @@ const DEFAULT_DATABASE_PORT = "5432";
 const DEFAULT_DATABASE_NAME = "world_cup_predictor";
 const DEFAULT_DATABASE_USER = "world_cup";
 const DATABASE_HOST_PATTERN = /^[a-zA-Z0-9.-]+$/;
+// Prisma's pg adapter normalizes TIMESTAMPTZ text as UTC, so keep sessions in UTC.
+const UTC_SESSION_TIME_ZONE_OPTION = "-c TimeZone=UTC";
 
 export function resolveDatabaseUrl(environment: NodeJS.ProcessEnv = process.env) {
   if (environment.DATABASE_URL) {
-    return environment.DATABASE_URL;
+    return withUtcSessionTimeZone(environment.DATABASE_URL);
   }
 
   const password = environment.POSTGRES_PASSWORD;
@@ -39,7 +41,7 @@ export function resolveDatabaseUrl(environment: NodeJS.ProcessEnv = process.env)
     "/",
     encodeURIComponent(database),
     "?schema=public",
-  ].join("");
+  ].join("") + `&options=${encodeURIComponent(UTC_SESSION_TIME_ZONE_OPTION)}`;
 }
 
 function isValidPort(port: string) {
@@ -49,4 +51,22 @@ function isValidPort(port: string) {
 
   const numericPort = Number(port);
   return numericPort >= 1 && numericPort <= 65535;
+}
+
+function withUtcSessionTimeZone(databaseUrl: string) {
+  const url = new URL(databaseUrl);
+  const existingOptions = url.searchParams.get("options");
+
+  if (existingOptions?.toLowerCase().includes("timezone=utc")) {
+    return url.toString();
+  }
+
+  url.searchParams.set(
+    "options",
+    existingOptions
+      ? `${existingOptions} ${UTC_SESSION_TIME_ZONE_OPTION}`
+      : UTC_SESSION_TIME_ZONE_OPTION,
+  );
+
+  return url.toString();
 }
