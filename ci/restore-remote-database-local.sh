@@ -44,7 +44,7 @@ confirm_restore() {
 }
 
 printf 'Creating remote database backup on %s...\n' "$REMOTE_HOST"
-ssh "$REMOTE_HOST" "cd '$REMOTE_DIR' && COMPOSE_FILE=compose.yaml:compose.production.yaml pnpm db:backup -- '$remote_backup_path'"
+ssh "$REMOTE_HOST" "cd '$REMOTE_DIR' && COMPOSE_FILE=compose.yaml:compose.production.yaml sh scripts/database/backup.sh -- '$remote_backup_path'"
 
 temp_file="$(mktemp "$BACKUP_DIR/.remote-database-backup.XXXXXX")"
 
@@ -67,7 +67,7 @@ printf 'Stopping local app and sync-worker services...\n'
 docker compose stop app sync-worker
 
 printf 'Restoring local database from %s...\n' "$local_backup_path"
-CONFIRM_RESTORE=yes pnpm db:restore -- "$local_backup_path"
+CONFIRM_RESTORE=yes sh scripts/database/restore.sh -- "$local_backup_path"
 
 printf 'Local database restored from %s\n' "$local_backup_path"
 printf 'Local app and sync-worker services remain stopped. Start them with: docker compose up -d app sync-worker\n'

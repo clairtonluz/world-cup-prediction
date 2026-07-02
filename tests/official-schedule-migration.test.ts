@@ -22,9 +22,19 @@ const undoShiftStartTimesMigration = readFileSync(
   ),
   "utf8",
 );
+const futureKnockoutScheduleMigration = readFileSync(
+  new URL(
+    "../prisma/migrations/20260702103000_fix_future_knockout_schedule/migration.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
 const fixtureRows = migration
   .split("\n")
   .filter((line) => line.trimStart().startsWith("('c2026match"));
+const futureKnockoutRows = futureKnockoutScheduleMigration
+  .split("\n")
+  .filter((line) => /^\s+\(\d+, '400021/.test(line));
 
 describe("official 2026 fixture migration", () => {
   it("inserts the complete 104-match FIFA schedule by stage", () => {
@@ -102,6 +112,35 @@ describe("match start time correction migration", () => {
     expect(undoShiftStartTimesMigration).not.toContain('"venue"');
     expect(undoShiftStartTimesMigration).not.toContain('"hostCity"');
     expect(undoShiftStartTimesMigration).not.toContain('"Prediction"');
+  });
+});
+
+describe("future knockout schedule correction migration", () => {
+  it("updates every future knockout match from 83 through 104", () => {
+    expect(futureKnockoutRows).toHaveLength(22);
+    expect(
+      futureKnockoutRows.map((line) => Number(line.match(/^\s+\((\d+),/)?.[1])),
+    ).toEqual(Array.from({ length: 22 }, (_, index) => index + 83));
+  });
+
+  it("keeps the correction scoped to match schedule fields", () => {
+    const updatedTables = [
+      ...futureKnockoutScheduleMigration.matchAll(/UPDATE "([^"]+)"/g),
+    ].map((match) => match[1]);
+
+    expect(updatedTables).toEqual(["Match", "Match"]);
+    expect(futureKnockoutScheduleMigration).not.toContain('"Prediction"');
+    expect(futureKnockoutScheduleMigration).not.toContain('"User"');
+    expect(futureKnockoutScheduleMigration).not.toContain('"teamAScore"');
+    expect(futureKnockoutScheduleMigration).not.toContain('"teamBScore"');
+    expect(futureKnockoutScheduleMigration).not.toContain('"advancingTeam"');
+    expect(futureKnockoutScheduleMigration).not.toMatch(/SET\s+"status"/);
+  });
+
+  it("contains the critical Brazil versus Norway correction", () => {
+    expect(futureKnockoutScheduleMigration).toContain(
+      "(91, '400021532', '760504', 'Brasil', 'Noruega', 'W74', 'W77', true, '2026-07-05T17:00:00-03:00'::TIMESTAMPTZ",
+    );
   });
 });
 
