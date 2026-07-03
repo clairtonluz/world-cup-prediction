@@ -27,7 +27,7 @@ fi
 
 confirm_restore() {
   printf '\nThis will replace your local database with a backup from %s.\n' "$REMOTE_HOST"
-  printf 'Local app and sync-worker services will be stopped and left stopped.\n'
+  printf 'Local app, sync-worker, and backup-worker services will be stopped and left stopped.\n'
   printf 'Remote backup: %s:%s/%s\n' "$REMOTE_HOST" "$REMOTE_DIR" "$remote_backup_path"
   printf 'Local backup: %s/%s\n' "$PROJECT_ROOT" "$local_backup_path"
   printf 'Type "yes" to continue: '
@@ -63,11 +63,11 @@ printf 'Remote backup copied to %s\n' "$local_backup_path"
 
 confirm_restore
 
-printf 'Stopping local app and sync-worker services...\n'
-docker compose stop app sync-worker
+printf 'Stopping local app, sync-worker, and backup-worker services...\n'
+docker compose stop app sync-worker backup-worker
 
 printf 'Restoring local database from %s...\n' "$local_backup_path"
 CONFIRM_RESTORE=yes sh scripts/database/restore.sh -- "$local_backup_path"
 
 printf 'Local database restored from %s\n' "$local_backup_path"
-printf 'Local app and sync-worker services remain stopped. Start them with: docker compose up -d app sync-worker\n'
+printf 'Local app, sync-worker, and backup-worker services remain stopped. Start them with: docker compose up -d app sync-worker backup-worker\n'

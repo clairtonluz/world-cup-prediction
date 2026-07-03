@@ -35,6 +35,8 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+mkdir -p backups
+
 compose() {
   docker compose \
     -f compose.yaml \
@@ -50,5 +52,5 @@ if ! compose up -d --build --remove-orphans; then
   exit 1
 fi
 
-compose ps app
+compose ps app sync-worker backup-worker
 printf 'Successfully deployed revision %s\n' "$DEPLOY_REVISION"

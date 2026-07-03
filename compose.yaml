@@ -69,3 +69,23 @@ services:
       app:
         condition: service_started
     restart: unless-stopped
+
+  backup-worker:
+    image: postgres:17-alpine
+    environment:
+      <<: *postgres-credentials
+      POSTGRES_HOST: database
+      POSTGRES_PORT: "5432"
+      BACKUP_DIR: /backups
+      MATCH_START_BACKUP_RETENTION: ${MATCH_START_BACKUP_RETENTION:-10}
+      MATCH_START_BACKUP_POLL_INTERVAL_SECONDS: ${MATCH_START_BACKUP_POLL_INTERVAL_SECONDS:-60}
+    volumes:
+      - ./scripts/database/match-start-backup-worker.sh:/usr/local/bin/match-start-backup-worker.sh:ro
+      - ./backups:/backups
+    command:
+      - sh
+      - /usr/local/bin/match-start-backup-worker.sh
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped

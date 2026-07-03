@@ -105,9 +105,9 @@ pnpm db:backup
 Restore a local backup:
 
 ```bash
-docker compose stop app sync-worker
+docker compose stop app sync-worker backup-worker
 CONFIRM_RESTORE=yes pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump
-docker compose up -d app sync-worker
+docker compose up -d app sync-worker backup-worker
 ```
 
 Create a fresh production backup, copy it to `backups/`, and restore it into the
@@ -118,16 +118,35 @@ local Docker Compose database:
 ```
 
 The remote restore helper asks for confirmation before replacing local data. It
-stops the local `app` and `sync-worker` services before restoring and leaves them
-stopped afterward.
+stops the local `app`, `sync-worker`, and `backup-worker` services before
+restoring and leaves them stopped afterward.
 
 For production, run the same scripts on the server with the production Compose files so `compose.override.yaml` is not loaded:
 
 ```bash
 COMPOSE_FILE=compose.yaml:compose.production.yaml pnpm db:backup
-docker compose -f compose.yaml -f compose.production.yaml stop app sync-worker
+docker compose -f compose.yaml -f compose.production.yaml stop app sync-worker backup-worker
 CONFIRM_RESTORE=yes COMPOSE_FILE=compose.yaml:compose.production.yaml pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump
-docker compose -f compose.yaml -f compose.production.yaml up -d app sync-worker
+docker compose -f compose.yaml -f compose.production.yaml up -d app sync-worker backup-worker
+```
+
+### Automatic Match-Start Backups
+
+The Docker `backup-worker` creates a PostgreSQL dump after a match reaches its
+official `startsAt` time. It ignores matches already marked `FINISHED` without a
+previous start backup, retries failed attempts while the match is not finished,
+and records completed backups in `MatchStartBackup` so retention can delete old
+files without causing duplicate backups later.
+
+Automatic backup files are written to `backups/` with names like
+`world-cup-prediction-match-start-001-YYYYMMDD-HHMMSS.dump`. The worker keeps the
+latest 10 automatic files by default and only prunes files with that automatic
+prefix, so manual backups are preserved. Configure the retention or polling
+frequency with:
+
+```dotenv
+MATCH_START_BACKUP_RETENTION="10"
+MATCH_START_BACKUP_POLL_INTERVAL_SECONDS="60"
 ```
 
 ### Score Sync
@@ -158,11 +177,11 @@ ESPN's endpoint is public but not a contracted API, so keep the manual admin res
 
    No connection URL needs to be stored for the Docker deployment. The application and migration containers use the `database` service internally and build their URL from `POSTGRES_*`.
 
-2. On the production server, ensure Traefik is already running on the shared `proxy` network, and create the database data directory:
+2. On the production server, ensure Traefik is already running on the shared `proxy` network, and create the database and backup directories:
 
    ```bash
    docker network create proxy
-   mkdir -p ./data
+   mkdir -p ./data ./backups
    ```
 
    Create the `proxy` network only once; omit that command when the network already exists.
@@ -173,7 +192,7 @@ ESPN's endpoint is public but not a contracted API, so keep the manual admin res
    ./ci/deploy-remote.sh
    ```
 
-The script connects with `ssh oracle-luz`, enters `/home/opc/world-cup-prediction`, refuses non-ignored local changes, fast-forwards the production checkout to `origin/main`, and executes `docker compose -f compose.yaml -f compose.production.yaml --env-file .env up -d --build --remove-orphans` on the server. Ignored production files such as `.env` and `data/` remain available. It prints the deployed Git revision and application container status so the running release can be checked from the deploy log. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application is started.
+The script connects with `ssh oracle-luz`, enters `/home/opc/world-cup-prediction`, refuses non-ignored local changes, fast-forwards the production checkout to `origin/main`, and executes `docker compose -f compose.yaml -f compose.production.yaml --env-file .env up -d --build --remove-orphans` on the server. Ignored production files such as `.env`, `data/`, and `backups/` remain available. It prints the deployed Git revision and key container statuses so the running release can be checked from the deploy log. Traefik serves `https://${WORLD_CUP_HOST}` and forwards requests to the internal application port. PostgreSQL remains on the internal application network; it is not exposed on the host in production. The migration job completes before the application and workers are started.
 
 ## Keycloak Setup
 
@@ -250,6 +269,7 @@ pnpm build
 pnpm db:deploy
 pnpm db:backup
 CONFIRM_RESTORE=yes pnpm db:restore -- backups/world-cup-prediction-YYYYMMDD-HHMMSS.dump
+sh -n scripts/database/match-start-backup-worker.sh
 pnpm exec prisma validate
 ```
 
