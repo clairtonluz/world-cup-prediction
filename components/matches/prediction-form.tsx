@@ -4,6 +4,7 @@ import {
   type ChangeEvent,
   type FormEvent,
   useActionState,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -90,6 +91,8 @@ export function PredictionForm({
   const [selectedAdvancingTeam, setSelectedAdvancingTeam] =
     useState(initialPrediction.predictedAdvancingTeam);
   const [hiddenFeedbackSubmittedAt, setHiddenFeedbackSubmittedAt] = useState(0);
+  const draftPredictionRef = useRef(initialPrediction);
+  const submittedInlineDraftRef = useRef<PredictionFormValues | null>(null);
   const requestsAdvancingTeam = requiresAdvancingTeamPrediction(stage);
   const teamAScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamAScore` : "teamAScore";
   const teamBScoreId = fieldIdPrefix ? `${fieldIdPrefix}-teamBScore` : "teamBScore";
@@ -125,7 +128,7 @@ export function PredictionForm({
     teamAScore !== savedPrediction.teamAScore ||
     teamBScore !== savedPrediction.teamBScore ||
     submittedAdvancingTeam !== initialSubmittedAdvancingTeam;
-  const showActions = !isInline || hasPredictionChanged;
+  const showActions = !isInline || hasPredictionChanged || inlinePending;
   const showInlineFeedback =
     isInline &&
     inlineActionState.status !== "idle" &&
@@ -147,6 +150,38 @@ export function PredictionForm({
       : "O placar previsto define automaticamente quem avança.";
   const teamAScoreLabel = `Palpite de ${teamText(teamA, teamASlot ?? null)}`;
   const teamBScoreLabel = `Palpite de ${teamText(teamB, teamBSlot ?? null)}`;
+  const preventInlineEditing = isInline && inlinePending;
+
+  const restorePredictionInputValues = useCallback(
+    (nextPrediction: PredictionFormValues) => {
+      const form = formRef.current;
+      if (!form) {
+        return;
+      }
+
+      const teamAScoreInput = form.elements.namedItem("teamAScore");
+      const teamBScoreInput = form.elements.namedItem("teamBScore");
+      const advancingTeamSelect = form.elements.namedItem(
+        "predictedAdvancingTeam",
+      );
+
+      if (teamAScoreInput instanceof HTMLInputElement) {
+        teamAScoreInput.value = nextPrediction.teamAScore;
+      }
+      if (teamBScoreInput instanceof HTMLInputElement) {
+        teamBScoreInput.value = nextPrediction.teamBScore;
+      }
+      if (advancingTeamSelect instanceof HTMLSelectElement) {
+        advancingTeamSelect.value = nextPrediction.predictedAdvancingTeam;
+      }
+    },
+    [],
+  );
+
+  const currentSubmittedInlineDraft = useCallback(
+    () => submittedInlineDraftRef.current ?? draftPredictionRef.current,
+    [],
+  );
 
   useEffect(() => {
     if (
@@ -157,8 +192,22 @@ export function PredictionForm({
       return;
     }
 
+    let draftRestoreTimeoutId: number | undefined;
     const autoAdvanceInput = autoAdvanceInputRef.current;
     autoAdvanceInputRef.current = null;
+
+    if (inlineActionState.status === "success" && inlineActionState.prediction) {
+      submittedInlineDraftRef.current = null;
+      draftPredictionRef.current = inlineActionState.prediction;
+      restorePredictionInputValues(inlineActionState.prediction);
+    } else if (inlineActionState.status === "error") {
+      const submittedDraft = currentSubmittedInlineDraft();
+      draftPredictionRef.current = submittedDraft;
+      restorePredictionInputValues(submittedDraft);
+      draftRestoreTimeoutId = window.setTimeout(() => {
+        restorePredictionInputValues(submittedDraft);
+      }, 0);
+    }
 
     if (autoAdvanceInput && inlineActionState.status === "success") {
       focusNextPredictionScoreInput(autoAdvanceInput);
@@ -174,8 +223,18 @@ export function PredictionForm({
       );
     }, 2500);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [inlineActionState, isInline]);
+    return () => {
+      if (draftRestoreTimeoutId !== undefined) {
+        window.clearTimeout(draftRestoreTimeoutId);
+      }
+      window.clearTimeout(timeoutId);
+    };
+  }, [
+    currentSubmittedInlineDraft,
+    inlineActionState,
+    isInline,
+    restorePredictionInputValues,
+  ]);
 
   useEffect(() => {
     if (
@@ -206,6 +265,7 @@ export function PredictionForm({
       return;
     }
 
+    submittedInlineDraftRef.current = { ...draftPredictionRef.current };
     formRef.current?.requestSubmit();
   }, [
     autoAdvanceRequestId,
@@ -217,20 +277,47 @@ export function PredictionForm({
     requestsAdvancingTeam,
   ]);
 
+  function applyDraftPrediction(nextPrediction: PredictionFormValues) {
+    draftPredictionRef.current = nextPrediction;
+    setTeamAScore(nextPrediction.teamAScore);
+    setTeamBScore(nextPrediction.teamBScore);
+    setSelectedAdvancingTeam(nextPrediction.predictedAdvancingTeam);
+    restorePredictionInputValues(nextPrediction);
+  }
+
   function resetPrediction() {
-    setTeamAScore(savedPrediction.teamAScore);
-    setTeamBScore(savedPrediction.teamBScore);
-    setSelectedAdvancingTeam(savedPrediction.predictedAdvancingTeam);
+    applyDraftPrediction(savedPrediction);
   }
 
   function preventUnchangedInlineSubmit(event: FormEvent<HTMLFormElement>) {
-    if (isInline && !hasPredictionChanged) {
-      event.preventDefault();
+    if (!isInline) {
+      return;
     }
+
+    if (!hasPredictionChanged) {
+      event.preventDefault();
+      return;
+    }
+
+    submittedInlineDraftRef.current = { ...draftPredictionRef.current };
+  }
+
+  function preserveInlineDraftAfterFormReset(event: FormEvent<HTMLFormElement>) {
+    if (!isInline) {
+      return;
+    }
+
+    event.preventDefault();
+    applyDraftPrediction(currentSubmittedInlineDraft());
   }
 
   function handleTeamAScoreChange(event: ChangeEvent<HTMLInputElement>) {
+    if (preventInlineEditing) {
+      return;
+    }
+
     const score = event.currentTarget.value;
+    updateDraftPrediction({ teamAScore: score });
     setTeamAScore(score);
 
     if (scoreFromField(score) !== null) {
@@ -239,10 +326,18 @@ export function PredictionForm({
   }
 
   function handleTeamBScoreChange(event: ChangeEvent<HTMLInputElement>) {
+    if (preventInlineEditing) {
+      return;
+    }
+
     const score = event.currentTarget.value;
+    const draftPrediction = updateDraftPrediction({ teamBScore: score });
     setTeamBScore(score);
 
-    if (scoreFromField(teamAScore) === null || scoreFromField(score) === null) {
+    if (
+      scoreFromField(draftPrediction.teamAScore) === null ||
+      scoreFromField(score) === null
+    ) {
       return;
     }
 
@@ -250,6 +345,25 @@ export function PredictionForm({
       autoAdvanceInputRef.current = event.currentTarget;
       setAutoAdvanceRequestId((requestId) => requestId + 1);
     }
+  }
+
+  function handleAdvancingTeamChange(event: ChangeEvent<HTMLSelectElement>) {
+    if (preventInlineEditing) {
+      return;
+    }
+
+    const predictedAdvancingTeam = event.target.value;
+    updateDraftPrediction({ predictedAdvancingTeam });
+    setSelectedAdvancingTeam(predictedAdvancingTeam);
+  }
+
+  function updateDraftPrediction(nextValues: Partial<PredictionFormValues>) {
+    const nextPrediction = {
+      ...draftPredictionRef.current,
+      ...nextValues,
+    };
+    draftPredictionRef.current = nextPrediction;
+    return nextPrediction;
   }
 
   if (disabled) {
@@ -304,6 +418,8 @@ export function PredictionForm({
       aria-label={isInline ? "Aposta do jogo" : undefined}
       className={formClassName}
       onSubmit={preventUnchangedInlineSubmit}
+      onReset={preserveInlineDraftAfterFormReset}
+      aria-busy={isInline ? inlinePending : undefined}
       tabIndex={isInline ? -1 : undefined}
     >
       <input type="hidden" name="matchId" value={matchId} />
@@ -335,6 +451,7 @@ export function PredictionForm({
             onChange={handleTeamAScoreChange}
             className={teamAScoreInputClassName}
             data-prediction-score-input="true"
+            readOnly={preventInlineEditing}
             required
           />
         </div>
@@ -365,6 +482,7 @@ export function PredictionForm({
             onChange={handleTeamBScoreChange}
             className={teamBScoreInputClassName}
             data-prediction-score-input="true"
+            readOnly={preventInlineEditing}
             required
           />
         </div>
@@ -384,9 +502,9 @@ export function PredictionForm({
             id={advancingTeamId}
             name={isDrawPrediction ? "predictedAdvancingTeam" : undefined}
             value={displayedAdvancingTeam}
-            onChange={(event) => setSelectedAdvancingTeam(event.target.value)}
+            onChange={handleAdvancingTeamChange}
             required={isDrawPrediction}
-            disabled={!isDrawPrediction}
+            disabled={!isDrawPrediction || preventInlineEditing}
             className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-950 outline-none transition focus:border-[#0e74e1] focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-500"
           >
             <option value="" disabled>
