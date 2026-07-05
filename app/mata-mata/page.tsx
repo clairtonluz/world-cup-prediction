@@ -10,7 +10,7 @@ export default async function KnockoutPage() {
   const bracket = buildKnockoutBracket(matches);
 
   return (
-    <AppShell>
+    <AppShell width="wide">
       <section>
         <h1 className="text-3xl font-semibold text-slate-950">
           Mata-mata
