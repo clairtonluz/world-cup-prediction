@@ -7,7 +7,11 @@ import { applyMatchResult } from "@/lib/match-result-application";
 import { revalidateMatchResultViews } from "@/lib/match-result-revalidation";
 import { recalculateAllMatchPredictions } from "@/lib/match-results";
 import { isTransactionConflict, runSerializableTransaction } from "@/lib/transactions";
-import { matchIdSchema, matchResultSchema } from "@/lib/validation";
+import {
+  matchIdSchema,
+  matchResultSchema,
+  matchStartsAtSchema,
+} from "@/lib/validation";
 
 function parseResultForm(formData: FormData) {
   const status = formData.get("status") ?? "SCHEDULED";
@@ -16,6 +20,12 @@ function parseResultForm(formData: FormData) {
     teamAScore: status === "SCHEDULED" ? null : formData.get("teamAScore"),
     teamBScore: status === "SCHEDULED" ? null : formData.get("teamBScore"),
     advancingTeam: status === "FINISHED" ? formData.get("advancingTeam") : null,
+  });
+}
+
+function parseStartForm(formData: FormData) {
+  return matchStartsAtSchema.safeParse({
+    startsAt: formData.get("startsAt"),
   });
 }
 
@@ -51,6 +61,10 @@ export async function updateMatchAction(id: string, formData: FormData) {
   if (!parsed.success) {
     redirect(feedbackUrl(`/admin/matches/${matchId}/edit`, { error: "invalid_result" }));
   }
+  const parsedStart = parseStartForm(formData);
+  if (!parsedStart.success) {
+    redirect(feedbackUrl(`/admin/matches/${matchId}/edit`, { error: "invalid_match_start" }));
+  }
 
   let error: ErrorFeedbackCode | null = null;
   let feedback: "match_updated" | "match_updated_predictions_reset" | "match_updated_propagation_blocked" =
@@ -58,7 +72,10 @@ export async function updateMatchAction(id: string, formData: FormData) {
 
   try {
     const result = await runSerializableTransaction(async (tx) => {
-      return applyMatchResult(tx, matchId, parsed.data);
+      return applyMatchResult(tx, matchId, {
+        ...parsed.data,
+        startsAt: parsedStart.data.startsAt,
+      });
     });
 
     error = result.error;

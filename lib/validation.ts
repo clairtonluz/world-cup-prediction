@@ -37,6 +37,10 @@ const advancingTeam = z.preprocess(
   z.string().trim().min(1).max(80).nullable(),
 );
 
+export const matchStartsAtSchema = z.object({
+  startsAt: z.iso.datetime().transform((value) => new Date(value)),
+});
+
 export const matchResultSchema = z.discriminatedUnion("status", [
   z.object({
     status: z.literal(MATCH_STATUSES[0]),

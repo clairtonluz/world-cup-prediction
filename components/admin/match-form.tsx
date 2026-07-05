@@ -1,5 +1,6 @@
 import { MATCH_STATUSES, STATUS_LABELS, type MatchStageValue } from "@/lib/constants";
 import { formatStage } from "@/lib/display";
+import { MatchStartDateTimeInput } from "@/components/admin/match-start-date-time-input";
 import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { MatchTeams } from "@/components/shared/match-teams";
 import { TeamLabel } from "@/components/shared/team-label";
@@ -63,9 +64,10 @@ export function MatchForm({
         </div>
       </dl>
       <p className="text-sm text-slate-600">
-        A agenda, as equipes de origem, a fase, o horário e o local são fixos.
+        A fase, as equipes de origem e o local são fixos.
         Confrontos futuros são preenchidos automaticamente pelos resultados.
       </p>
+      <MatchStartDateTimeInput value={match.startsAt} />
       <div className="max-w-xs">
         <Label htmlFor="status">Status</Label>
         <select
@@ -131,7 +133,7 @@ export function MatchForm({
           </select>
         </div>
       ) : null}
-      <Button type="submit">Salvar resultado</Button>
+      <Button type="submit">Salvar alterações</Button>
     </form>
   );
 }

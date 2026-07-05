@@ -19,3 +19,13 @@ export function updatedMatchError(
 
   return null;
 }
+
+export function matchStartUpdateError(
+  current: MatchPolicyValue,
+): ErrorFeedbackCode | null {
+  if (current.status === "FINISHED") {
+    return "finished_match_locked";
+  }
+
+  return null;
+}

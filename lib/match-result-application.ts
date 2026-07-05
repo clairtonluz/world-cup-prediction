@@ -1,7 +1,10 @@
 import "server-only";
 
 import type { Prisma } from "@/generated/prisma/client";
-import { updatedMatchError } from "@/lib/admin-match-policy";
+import {
+  matchStartUpdateError,
+  updatedMatchError,
+} from "@/lib/admin-match-policy";
 import { propagateFutureParticipants, type PropagationResult } from "@/lib/bracket-propagation";
 import type { MatchStatusValue } from "@/lib/constants";
 import type { ErrorFeedbackCode } from "@/lib/feedback";
@@ -14,6 +17,10 @@ export type MatchResultUpdate = {
   advancingTeam: string | null;
 };
 
+type MatchUpdate = MatchResultUpdate & {
+  startsAt?: Date;
+};
+
 export type ApplyMatchResultResult = {
   error: ErrorFeedbackCode | null;
   propagation: PropagationResult | null;
@@ -22,7 +29,7 @@ export type ApplyMatchResultResult = {
 export async function applyMatchResult(
   tx: Prisma.TransactionClient,
   matchId: string,
-  result: MatchResultUpdate,
+  result: MatchUpdate,
 ): Promise<ApplyMatchResultResult> {
   const existing = await tx.match.findUnique({ where: { id: matchId } });
   if (!existing) {
@@ -32,6 +39,16 @@ export async function applyMatchResult(
   const policyError = updatedMatchError(existing, result);
   if (policyError) {
     return { error: policyError, propagation: null };
+  }
+
+  if (
+    result.startsAt &&
+    existing.startsAt.getTime() !== result.startsAt.getTime()
+  ) {
+    const startUpdateError = matchStartUpdateError(existing);
+    if (startUpdateError) {
+      return { error: startUpdateError, propagation: null };
+    }
   }
 
   if (result.status !== "SCHEDULED" && !existing.participantsConfirmed) {
@@ -46,6 +63,7 @@ export async function applyMatchResult(
   const match = await tx.match.update({
     where: { id: matchId },
     data: {
+      ...(result.startsAt ? { startsAt: result.startsAt } : {}),
       status: result.status,
       teamAScore: result.teamAScore,
       teamBScore: result.teamBScore,

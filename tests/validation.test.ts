@@ -7,6 +7,7 @@ import {
   friendGroupSchema,
   matchIdSchema,
   matchResultSchema,
+  matchStartsAtSchema,
   predictionSchema,
   scoreSyncSettingsSchema,
 } from "@/lib/validation";
@@ -94,6 +95,25 @@ describe("matchResultSchema", () => {
       }),
     ).toThrow();
   });
+});
+
+describe("matchStartsAtSchema", () => {
+  it("accepts an ISO start datetime from the admin form", () => {
+    expect(
+      matchStartsAtSchema.parse({
+        startsAt: "2026-06-11T19:30:00.000Z",
+      }),
+    ).toEqual({
+      startsAt: new Date("2026-06-11T19:30:00.000Z"),
+    });
+  });
+
+  it.each(["", "2026-06-11T19:30", "not-a-date"])(
+    "rejects invalid start datetime value %s",
+    (startsAt) => {
+      expect(() => matchStartsAtSchema.parse({ startsAt })).toThrow();
+    },
+  );
 });
 
 describe("scoreSyncSettingsSchema", () => {

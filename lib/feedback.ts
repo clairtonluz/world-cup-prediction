@@ -19,9 +19,11 @@ export const ERROR_MESSAGES = {
   owner_cannot_leave: "O criador deve excluir o Grupo de Amigos em vez de sair dele.",
   invalid_member: "Participante não encontrado neste Grupo de Amigos.",
   invalid_result: "Confira o status, o placar e a equipe classificada.",
+  invalid_match_start: "Informe um horário de início válido.",
   unresolved_match: "Este confronto ainda não tem duas equipes definidas.",
   knockout_qualifier_required: "Selecione a equipe classificada após um empate eliminatório.",
-  finished_match_locked: "Um jogo encerrado não pode voltar a um status anterior.",
+  finished_match_locked:
+    "Um jogo encerrado não pode voltar a um status anterior nem alterar o horário de início.",
   started_match_locked: "Um jogo ao vivo não pode voltar para agendado.",
   update_conflict: "Outra atualização ocorreu ao mesmo tempo. Tente novamente.",
   invalid_score_sync_settings: "Confira a configuração de sincronização de placares.",
