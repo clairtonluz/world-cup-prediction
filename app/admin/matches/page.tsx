@@ -6,34 +6,40 @@ import {
   updateScoreSyncSettingsAction,
 } from "@/actions/score-sync-actions";
 import { recalculateAllPointsAction } from "@/actions/admin-match-actions";
+import { AdminMatchTable } from "@/components/admin/admin-match-table";
+import { AdminTabs } from "@/components/admin/admin-tabs";
 import { AppShell } from "@/components/shared/app-shell";
-import { MatchTeams } from "@/components/shared/match-teams";
-import { MatchScoreboard } from "@/components/shared/match-scoreboard";
-import { OfficialMatchOutcome } from "@/components/shared/official-match-outcome";
 import { ConfirmationForm } from "@/components/shared/confirmation-form";
 import { MessageAlert } from "@/components/shared/message-alert";
 import { BrowserDateTime } from "@/components/shared/browser-date-time";
 import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { StatusBadge } from "@/components/ui/badge";
-import type { MatchStageValue, MatchStatusValue } from "@/lib/constants";
 import { getScoreSyncSettings } from "@/lib/score-sync/sync";
 import { listAdminMatches } from "@/lib/data/matches";
-import { formatStage, formatStatus } from "@/lib/display";
-import { AdminTabs } from "@/components/admin/admin-tabs";
+import { parseAdminMatchAgendaView } from "@/lib/admin-match-filter";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminMatchesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; success?: string }>;
+  searchParams: Promise<{ error?: string; success?: string; view?: string | string[] }>;
 }) {
   const [messages, matches] = await Promise.all([
     searchParams,
     listAdminMatches(),
   ]);
   const scoreSyncSettings = await getScoreSyncSettings();
+  const agendaView = parseAdminMatchAgendaView(messages.view);
+  const showingAllMatches = agendaView === "all";
+  const agendaToggleHref = showingAllMatches
+    ? "/admin/matches"
+    : "/admin/matches?view=all";
+  const agendaToggleLabel = showingAllMatches
+    ? "Ocultar jogos anteriores"
+    : "Ver todos os jogos";
+
   return (
     <AppShell>
       <div className="flex items-center justify-between gap-4">
@@ -169,65 +175,30 @@ export default async function AdminMatchesPage({
         </CardContent>
       </Card>
       <Card>
-        <CardHeader><CardTitle>Agenda oficial</CardTitle></CardHeader>
-        <CardContent>
-          {matches.length === 0 ? (
-            <p className="text-sm text-slate-600">Nenhum jogo cadastrado.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="border-b text-slate-500">
-                  <tr><th className="py-3">Jogo</th><th>Fase / horário</th><th>Status</th><th>Placar</th><th></th></tr>
-                </thead>
-                <tbody>
-                  {matches.map((match) => (
-                    <tr key={match.id} className="border-b border-slate-100">
-                      <td className="py-4 font-medium">
-                        <span className="mr-2 text-slate-500">#{match.matchNumber}</span>
-                        <MatchTeams
-                          teamA={match.teamA}
-                          teamB={match.teamB}
-                          teamASlot={match.teamASlot}
-                          teamBSlot={match.teamBSlot}
-                          linkToTeamMatches
-                        />
-                      </td>
-                      <td>
-                        {formatStage(match.stage as MatchStageValue)}
-                        <br />
-                        <span className="text-slate-500">
-                          <BrowserDateTime
-                            value={match.startsAt}
-                            format="matchDate"
-                          />
-                        </span>
-                      </td>
-                      <td><StatusBadge status={match.status as MatchStatusValue}>{formatStatus(match.status as MatchStatusValue)}</StatusBadge></td>
-                      <td className="min-w-64">
-                        <MatchScoreboard
-                          teamA={match.teamA}
-                          teamB={match.teamB}
-                          teamASlot={match.teamASlot}
-                          teamBSlot={match.teamBSlot}
-                          linkToTeamMatches
-                          teamAScore={match.teamAScore}
-                          teamBScore={match.teamBScore}
-                          size="compact"
-                        />
-                        <OfficialMatchOutcome
-                          stage={match.stage as MatchStageValue}
-                          advancingTeam={match.advancingTeam}
-                          linkToTeamMatches
-                          className="mt-2"
-                        />
-                      </td>
-                      <td className="text-right"><Link className="text-emerald-700 hover:underline" href={`/admin/matches/${match.id}/edit`}>Atualizar</Link></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <CardHeader>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>Agenda oficial</CardTitle>
+              <p className="mt-1 text-sm text-slate-600">
+                {showingAllMatches
+                  ? "Mostrando todos os jogos cadastrados."
+                  : "Mostrando jogos de hoje em diante no fuso do seu navegador."}
+              </p>
             </div>
-          )}
+            <Link
+              href={agendaToggleHref}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              {agendaToggleLabel}
+            </Link>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <AdminMatchTable
+            matches={matches}
+            view={agendaView}
+            referenceTime={new Date()}
+          />
         </CardContent>
       </Card>
     </AppShell>
